@@ -37,9 +37,9 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h2>Your Creations</h2>
-    <img v-if="addresses.length === 0 && !isLoading" class="emptyLogo" src="../assets/empty-up.png" alt="No creation" />
-    <div v-if="addresses.length === 0 && !isLoading">No items</div>
+    <h2>Tus Papers Tokenizados</h2>
+    <img v-if="addresses.length === 0 && !isLoading" class="emptyLogo" src="../assets/empty-up.png" alt="No hay ningún paper tokenizado" />
+    <div v-if="addresses.length === 0 && !isLoading">No existe ningún paper tokenizado hasta ahora</div>
     <div v-else class="grid">
       <CreationComponentVue :address="address" v-for="address in addresses" :key="address" />
     </div>

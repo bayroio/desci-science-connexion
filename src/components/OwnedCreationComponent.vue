@@ -90,7 +90,7 @@ const refreshToken = async () => {
 
       <div class="infos">{{ LSP4TokenName }} ({{ LSP4TokenSymbol }})</div>
     </div>
-    <button class="button" style="width: 200px" @click="showModal = !showModal">Send</button>
+    <button class="button" style="width: 200px" @click="showModal = !showModal">Enviar</button>
     <SendModalComponent @tokens-sent="handleTokensSent" :is-lsp7="true" :is-lsp8="false" v-if="showModal" :asset-address="props.address" :asset-name="LSP4TokenName" @close="handleModalClose" />
   </div>
 </template>

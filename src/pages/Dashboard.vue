@@ -9,8 +9,8 @@ import LSP5ReceivedAssets from '../components/LSP5ReceivedAssets.vue';
     <ProfileComponent />
 
     <div class="center">
-      <button @click="$router.push('/createToken')" style="width: 235px">Create a Token</button>
-      <button @click="$router.push('/createNFTCollection')" style="width: 235px">Create an NFT Collection</button>
+      <button @click="$router.push('/createToken')" style="width: 235px">Tokeniza un paper</button>
+      <button @click="$router.push('/createNFTCollection')" style="width: 350px">Crea una colección de papers tokenizados</button>
       <LSP12IssuedAssetsComponent style="margin-top: 60px" />
       <LSP5ReceivedAssets style="margin-top: 60px" />
     </div>

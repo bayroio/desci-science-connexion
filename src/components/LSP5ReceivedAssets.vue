@@ -100,9 +100,9 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h2>Portfolio</h2>
-    <img v-if="receivedAssets.length === 0 && !isLoading" class="emptyLogo" src="../assets/empty-up.png" alt="No creation" />
-    <div v-if="receivedAssets.length === 0 && !isLoading">No items</div>
+    <h2>Portafolio</h2>
+    <img v-if="receivedAssets.length === 0 && !isLoading" class="emptyLogo" src="../assets/empty-up.png" alt="No hay ningún paper tokenizado" />
+    <div v-if="receivedAssets.length === 0 && !isLoading">No existe ningún paper tokenizado hasta ahora</div>
     <div v-else class="grid">
       <div v-for="receivedToken in receivedTokens" :key="receivedToken.tokenId">
         <OwnedCreationComponent @remove-asset="handleRemoveAsset" v-if="receivedToken.isLSP7" :address="receivedToken.assetAddress" />

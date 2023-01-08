@@ -78,7 +78,7 @@ async function sendAsset() {
   let recipientBytecode = await web3.eth.getCode(assetRecipient.value);
 
   if (!isAddress(assetRecipient.value)) {
-    console.warn(`The address: ${assetRecipient.value} is not valid.`);
+    console.warn(`La dirección: ${assetRecipient.value} no es valida.`);
     return;
   }
   // If recipient is EOA, force is mandatory
@@ -89,7 +89,7 @@ async function sendAsset() {
 
   isRecepientEOA.value = false;
   txHash.value = '';
-  console.log('Sending asset to:', assetRecipient.value);
+  console.log('Enviando activo a:', assetRecipient.value);
 
   const accounts = await window.web3.eth.getAccounts();
   const account = accounts[0];
@@ -165,7 +165,7 @@ async function sendLSP8Token(accountAddress, assetAddress) {
   <div class="modal" @click="handleModalClose">
     <div class="modal-content" @click.stop="">
       <div class="container">
-        <h2 style="margin-bottom: 0px">Send {{ props.assetName }}</h2>
+        <h2 style="margin-bottom: 0px">Enviar {{ props.assetName }}</h2>
         <small v-if="isL14"
           ><a :href="`https://blockscout.com/lukso/l14/address/${props.assetAddress}`" target="_blank">{{ props.assetAddress }}</a></small
         >
@@ -178,11 +178,11 @@ async function sendLSP8Token(accountAddress, assetAddress) {
 
         <form @submit.prevent="sendAsset">
           <fieldset>
-            <label for="assetRecipient">Recipient:</label>
+            <label for="assetRecipient">Dirección receptora:</label>
             <input type="text" placeholder="0x..." v-model="assetRecipient" id="assetRecipient" required />
 
             <div v-if="isLsp7">
-              <label for="amount">Amount:</label>
+              <label for="amount">margin-bottom:</label>
               <input type="number" placeholder="0x..." v-model="amountToSend" id="amount" required />
             </div>
 
@@ -190,10 +190,10 @@ async function sendLSP8Token(accountAddress, assetAddress) {
               <span
                 title="Tokens and NFTs can only be sent to Universal Profiles or smart contracts that implement a Universal Receiver by default. To sent it to an EOA, you need to use the force parameter."
               >
-                <p class="warning" v-if="isRecepientEOA">Your recipient is an EOA, please allow transfer to EOA.</p>
+                <p class="warning" v-if="isRecepientEOA">Tu dirección receptora es una EOA, por favor permite la trasnferencia a la EOA.</p>
               </span>
               <p v-if="isWrongNetwork" class="warning">
-                Please switch your network to LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> or <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16</a> to send this
+                Por favor, cambia tu red a  LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16</a> para enviar este
                 token.
               </p>
               <p class="warning" v-if="error">
@@ -202,7 +202,7 @@ async function sendLSP8Token(accountAddress, assetAddress) {
             </div>
 
             <input style="position: absolute; margin: 5px 0px 0px -100px" type="checkbox" v-model="forceParameter" id="force" value="false" />
-            <label style="margin-left: 20px" for="force">Allow transfer to EOA</label>
+            <label style="margin-left: 20px" for="force">Permite la trasnferencia a la EOA</label>
 
             <br /><br />
 
