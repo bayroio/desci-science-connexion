@@ -108,9 +108,9 @@ onMounted(async () => {
       <fieldset>
         <p class="warning" v-if="isMinterEOA">Your address is an EOA, please allow transfer to EOA.</p>
         <p v-if="isWrongNetwork" class="warning">
-          Please switch your network to LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> or <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>to mint this asset.
+          Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para acuñar este activo digital.
         </p>
-        <label for="amount">Amount</label>
+        <label for="amount">Cantidad</label>
         <input type="number" v-model="mintAmount" placeholder="1" id="amount" required />
         <div>
           <span
@@ -126,10 +126,10 @@ onMounted(async () => {
       </fieldset>
     </form>
 
-    <p v-if="isLoading">Loading...</p>
+    <p v-if="isLoading">Cargando...</p>
 
     <p v-if="txHash">
-      ✅ Success: tx hash: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${txHash}`" target="_blank">{{ txHash }}</a>
+      ✅ Transacción exitosa: tx hash: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${txHash}`" target="_blank">{{ txHash }}</a>
     </p>
   </div>
 </template>

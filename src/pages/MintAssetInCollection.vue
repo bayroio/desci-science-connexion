@@ -159,29 +159,29 @@ onMounted(async () => {
   </p>
 
   <div class="center">
-    <h2>Mint a NFT in {{ LSP4TokenName }} ({{ LSP4TokenSymbol }}) collection</h2>
+    <h2>Acuña un NFT 2.0 en {{ LSP4TokenName }} ({{ LSP4TokenSymbol }}) colección</h2>
 
     <form v-if="!isLoading && mintEvents.length === 0" @submit.prevent="onSubmit" class="left">
       <fieldset>
-        <p class="warning" v-if="isMinterEOA">Your address is an EOA, please allow transfer to EOA.</p>
+        <p class="warning" v-if="isMinterEOA">Tu dirección es una EOA, por favor permite la trasnferencia a una EOA.</p>
         <p v-if="isWrongNetwork" class="warning">
-          Please switch your network to LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> or <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>to mint this asset in
-          a collection.
+          Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para acuñar este activo digital en
+          una colección.
         </p>
         <label for="tokenId">Token ID</label>
         <textarea placeholder="My Token" v-model="tokenId" id="tokenId" required maxlength="30"></textarea>
 
-        <label for="description">Description</label>
+        <label for="description">Descripción</label>
         <textarea placeholder="The Token that will change the world..." v-model="description" id="description" required></textarea>
 
-        <label for="icon">Token Icon</label>
+        <label for="icon">Ícono del Token</label>
         <input type="file" id="icon" accept="image/*" required />
         <div style="margin-top: 10px">
           <span
             title="Tokens and NFTs can only be sent to Universal Profiles or smart contracts that implement a Universal Receiver by default. To sent it to an EOA, you need to use the force parameter."
           >
             <input style="position: absolute; margin: 5px 0px 0px 0px" type="checkbox" v-model="forceParameter" id="force" value="false" />
-            <label style="margin-left: 20px" for="force">Allow transfer to EOA</label>
+            <label style="margin-left: 20px" for="force">Permite la trasnferencia a una EOA</label>
           </span>
         </div>
         <br />
@@ -195,14 +195,14 @@ onMounted(async () => {
   <div v-for="(event, index) in mintEvents" :key="index" style="padding-top: 60px">
     <h4>{{ event.stepName }}</h4>
     <span v-if="event.receipt">
-      Function called: {{ event.functionName }}()<br />
-      Transaction hash: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${event.receipt.transactionHash}`" target="_blank">{{ event.receipt.transactionHash }}</a>
+      Función llamada: {{ event.functionName }}()<br />
+      Transaction Hash de la transacción: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${event.receipt.transactionHash}`" target="_blank">{{ event.receipt.transactionHash }}</a>
     </span>
   </div>
 
-  <p v-if="isLoading">Loading...</p>
+  <p v-if="isLoading">Cargando...</p>
 
   <div v-if="isSuccess" style="padding-top: 60px">
-    <h4>🎉 Successful mint !</h4>
+    <h4>🎉 El activo digitla se acuño exitosamente !</h4>
   </div>
 </template>

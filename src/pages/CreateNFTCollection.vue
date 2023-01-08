@@ -185,7 +185,7 @@ async function onSubmit(e) {
 
     <div v-if="isEOA" class="warning">The NFT Collection has been deployed and configured correctly, but because of MetaMask, the asset can only be stored in the browser's local storage.</div>
     <p v-if="isWrongNetwork" class="warning">
-      Please switch your network to LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> or <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>to create this NFT
+      Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este NFT
       collection.
     </p>
     <br />
@@ -193,16 +193,16 @@ async function onSubmit(e) {
 
     <form v-if="!deploying" @submit.prevent="onSubmit" class="left">
       <fieldset>
-        <label for="name">Name</label>
+        <label for="name">Nombre</label>
         <input type="text" placeholder="MyToken" v-model="tokenName" id="name" required />
 
-        <label for="symbol">Token Symbol</label>
+        <label for="symbol">Simbolo del Token</label>
         <input type="text" placeholder="MYTOK" id="symbol" v-model="tokenSymbol" required />
 
-        <label for="description">Description</label>
+        <label for="description">Descripción</label>
         <textarea placeholder="The Token that will change the world..." id="description" required></textarea>
 
-        <label for="icon">Token Icon</label>
+        <label for="icon">Ícono de lToken</label>
         <input type="file" id="icon" accept="image/*" required />
 
         <!-- <label for="icon">Token Icon</label>
