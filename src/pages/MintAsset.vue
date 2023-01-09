@@ -102,22 +102,22 @@ onMounted(async () => {
   </p>
 
   <div class="center">
-    <h2>Mint some of {{ LSP4TokenName }} ({{ LSP4TokenSymbol }})</h2>
+    <h2>Acuña algunos tokens {{ LSP4TokenName }} ({{ LSP4TokenSymbol }})</h2>
 
     <form @submit.prevent="onSubmit" class="left">
       <fieldset>
-        <p class="warning" v-if="isMinterEOA">Your address is an EOA, please allow transfer to EOA.</p>
+        <p class="warning" v-if="isMinterEOA">Tu cuenta es una EOA, por favor permite la transferencia de tokens a otra cuenta EOA.</p>
         <p v-if="isWrongNetwork" class="warning">
           Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para acuñar este activo digital.
         </p>
-        <label for="amount">Cantidad</label>
+        <label for="amount">Cantidad a acuñar</label>
         <input type="number" v-model="mintAmount" placeholder="1" id="amount" required />
         <div>
           <span
             title="Tokens and NFTs can only be sent to Universal Profiles or smart contracts that implement a Universal Receiver by default. To sent it to an EOA, you need to use the force parameter."
           >
             <input style="position: absolute; margin: 5px 0px 0px 0px" type="checkbox" v-model="forceParameter" id="force" value="false" />
-            <label style="margin-left: 20px" for="force">Allow transfer to EOA</label>
+            <label style="margin-left: 20px" for="force">permite la transferencia de tokens a una cuenta EOA</label>
           </span>
         </div>
         <br /><br />

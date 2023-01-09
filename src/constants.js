@@ -5,7 +5,7 @@ export const BLOCKCHAIN_EXPLORER_BASE_URL = 'https://blockscout.com/lukso/l14';
 
 // https://docs.lukso.tech/standards/smart-contracts/interface-ids
 export const INTERFACE_IDS = {
-  LSP7DigitalAsset: '0xe33f65c3',
+  LSP7DigitalAsset: '0x01ffc9a7', //'0xe33f65c3',
   LSP8IdentifiableDigitalAsset: '0x49399145',
 };
 

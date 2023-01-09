@@ -6,7 +6,8 @@ import LSP4DigitalAssetSchema from '@erc725/erc725.js/schemas/LSP4DigitalAsset.j
 
 import LSP7DigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP7DigitalAsset.json';
 
-import { IPFS_GATEWAY_BASE_URL, COMMON_ABIS, INTERFACE_IDS } from '../constants';
+// eslint-disable-next-line no-unused-vars
+import { IPFS_GATEWAY_BASE_URL, IPFS_GATEWAY_API_BASE_URL, COMMON_ABIS, INTERFACE_IDS } from '../constants';
 
 const props = defineProps({ address: String });
 
@@ -26,10 +27,16 @@ onMounted(async () => {
   // CHECK contract's interface
   const supportsInterfaceContract = new window.web3.eth.Contract([COMMON_ABIS.supportsInterface], props.address);
 
+  console.log("props.address: ", props.address);
+  console.log("supportsInterfaceContract: ", supportsInterfaceContract);
+
   const [isLSP7, isLSP8] = await Promise.all([
     await supportsInterfaceContract.methods.supportsInterface(INTERFACE_IDS.LSP7DigitalAsset).call(),
     await supportsInterfaceContract.methods.supportsInterface(INTERFACE_IDS.LSP8IdentifiableDigitalAsset).call(),
   ]);
+
+  console.log("INTERFACE_IDS.LSP7DigitalAsset: ", INTERFACE_IDS.LSP7DigitalAsset);
+  console.log("isLSP7: ", isLSP7);
 
   try {
     if (isLSP7) {

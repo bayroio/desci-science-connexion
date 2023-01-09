@@ -36,21 +36,27 @@ export default {
 
   methods: {
     async onSubmit(e) {
+      console.log("Entrando a onsubmit...")
       // Check network
       try {
         this.isWrongNetwork = await isLuksoNetwork();
+        console.log("isWrongNetwork...", this.isWrongNetwork);
         if (this.isWrongNetwork) {
           return;
         }
       } catch (err) {
         console.warn(err);
         this.error = err.message;
+        console.log("Error...", this.error);
         return;
       }
 
       // GET the address from the browser extension
       const accounts = await web3.eth.getAccounts();
       const account = accounts[0];
+
+      console.log("accounts...", accounts);
+      console.log("account...", account);
 
       // CONSTRUCT the meta data
       const LSP4MetaData = {
@@ -75,8 +81,12 @@ export default {
       const chainId = await web3.eth.getChainId();
       const version = chainId === CHAIN_IDS.L14 ? LSP7Mintable_0_5_0.bytecode : null;
 
+      console.log("chainId...", chainId);
+      console.log("version...", version);
+
       // INITIATE the LSPFactory
       const factory = new LSPFactory(web3.currentProvider, { chainId });
+      console.log("web3.currentProvider...", web3.currentProvider);
 
       try {
         contracts = await factory.LSP7DigitalAsset.deploy(
@@ -84,9 +94,9 @@ export default {
             name: e.target.querySelector('input#name').value,
             symbol: e.target.querySelector('input#symbol').value,
             controllerAddress: account, // the "issuer" of the asset, that is allowed to change meta data
-            creators: [account], // Array of ERC725Account addresses that define the creators of the digital asset.
             isNFT: false, // Token decimals set to 18
             digitalAssetMetadata: LSP4MetaData,
+            creators: [account], // Array of ERC725Account addresses that define the creators of the digital asset.
           },
           {
             LSP7DigitalAsset: {
@@ -102,9 +112,13 @@ export default {
               error: (error) => {
                 this.deploying = false;
                 this.error = error.message;
+                console.log("Error in onDeployEvents...", error);
+                console.log("Error message in onDeployEvents...", this.error);
               },
               complete: async (contracts) => {
                 console.log('Deployment Complete');
+                console.log("Token address", contracts.LSP7DigitalAsset.address);
+              console.log("Token receipt", contracts.LSP7DigitalAsset.receipt);
                 console.log(contracts.LSP7DigitalAsset);
               },
             },
@@ -114,11 +128,13 @@ export default {
         console.warn(err.message);
         this.error = err.message;
         this.deploying = false;
+        console.log("LSP7DigitalAsset.deploy...", this.error);
         return;
       }
 
       if (!contracts && !contracts.LSP7DigitalAsset) {
         this.error = 'Error deploying LSP7DigitalAsset';
+        console.log(this.error);
         return;
       }
 
@@ -152,7 +168,7 @@ export default {
       }
 
       // https://docs.lukso.tech/standards/smart-contracts/interface-ids
-      const LSP7InterfaceId = '0xe33f65c3';
+      const LSP7InterfaceId = '0x5fcaac27'; //'0xe33f65c3';
 
       const encodedErc725Data = erc725LSP12IssuedAssets.encodeData([
         {
@@ -198,7 +214,7 @@ export default {
   </p>
 
   <div class="center">
-    <h2>Tokeniza uno de tus propios papers de investigación, basandote en <a href="https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset" target="_blank">LSP8</a></h2>
+    <h2>Tokeniza uno de tus papers de investigación, basandote en un <a href="https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset" target="_blank">NFT 2.0</a></h2>
 
     <br />
     <br />
@@ -212,16 +228,16 @@ export default {
 
     <form v-if="!deploying && deployEvents.length === 0" @submit.prevent="onSubmit" class="left">
       <fieldset>
-        <label for="name">Nombre</label>
-        <input type="text" placeholder="MyToken" id="name" required />
+        <label for="name">Nombre del Token (no el título de tu paper)</label>
+        <input type="text" placeholder="Mi Token" id="name" required />
 
-        <label for="symbol">S{imbolo del Token</label>
+        <label for="symbol">Símbolo del Token (entre 4 y 5 caracteres)</label>
         <input type="text" placeholder="MYTOK" id="symbol" required />
 
-        <label for="description">Descripción</label>
-        <textarea placeholder="The Token that will change the world..." id="description" required></textarea>
+        <label for="description">Descripción (puede ser un pequeño resumen de tu paper)</label>
+        <textarea placeholder="El Token que cambiará el mundo..." id="description" required></textarea>
 
-        <label for="icon">Ícono del Token</label>
+        <label for="icon">Ícono del Token (representación íconografica de tu paper)</label>
         <input type="file" id="icon" accept="image/*" required />
 
         <br /><br />
