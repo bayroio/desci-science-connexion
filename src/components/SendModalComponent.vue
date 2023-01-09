@@ -182,7 +182,7 @@ async function sendLSP8Token(accountAddress, assetAddress) {
             <input type="text" placeholder="0x..." v-model="assetRecipient" id="assetRecipient" required />
 
             <div v-if="isLsp7">
-              <label for="amount">margin-bottom:</label>
+              <label for="amount">Cantidad:</label>
               <input type="number" placeholder="0x..." v-model="amountToSend" id="amount" required />
             </div>
 
@@ -202,7 +202,7 @@ async function sendLSP8Token(accountAddress, assetAddress) {
             </div>
 
             <input style="position: absolute; margin: 5px 0px 0px -100px" type="checkbox" v-model="forceParameter" id="force" value="false" />
-            <label style="margin-left: 20px" for="force">Permite la trasnferencia a la EOA</label>
+            <label style="margin-left: 90px" for="force">Permite la trasnferencia a la EOA</label>
 
             <br /><br />
 
