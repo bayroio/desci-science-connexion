@@ -55,7 +55,7 @@ async function onSubmit(e) {
     icon: e.target.querySelector('input#icon').files[0],
     links: [],
     images: [],
-    assets: [],
+    assets: [e.target.querySelector('input#pdf').files[0]],
   };
 
   const chainId = await web3.eth.getChainId();
@@ -178,12 +178,12 @@ async function onSubmit(e) {
   </p>
 
   <div class="center">
-    <h2>Create your own <a href="https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset" target="_blank">LSP8 Identifiable Digital Asset</a> collection</h2>
+    <h2>Tokeniza uno de tus papers de investigación, basandote en un <a href="https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset" target="_blank">NFT 2.0</a> collection</h2>
 
     <br />
     <br />
 
-    <div v-if="isEOA" class="warning">The NFT Collection has been deployed and configured correctly, but because of MetaMask, the asset can only be stored in the browser's local storage.</div>
+    <div v-if="isEOA" class="warning">Tu paper ha sido tokenizado a través de un NFT 2.0 , configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
     <p v-if="isWrongNetwork" class="warning">
       Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este NFT
       collection.
@@ -191,22 +191,22 @@ async function onSubmit(e) {
     <br />
     <br />
 
-    <form v-if="!deploying" @submit.prevent="onSubmit" class="left">
+    <form v-if="!deploying && deployEvents.length === 0" @submit.prevent="onSubmit" class="left">
       <fieldset>
-        <label for="name">Nombre</label>
-        <input type="text" placeholder="MyToken" v-model="tokenName" id="name" required />
+        <label for="name">Nombre del Token (no el título de tu paper)</label>
+        <input type="text" placeholder="Mi Token" v-model="tokenName" id="name" required />
 
-        <label for="symbol">Simbolo del Token</label>
+        <label for="symbol">Símbolo del Token (entre 4 y 5 caracteres)</label>
         <input type="text" placeholder="MYTOK" id="symbol" v-model="tokenSymbol" required />
 
-        <label for="description">Descripción</label>
-        <textarea placeholder="The Token that will change the world..." id="description" required></textarea>
+        <label for="description">Descripción (puede ser un pequeño resumen de tu paper)</label>
+        <textarea placeholder="El Token que cambiará el mundo..." id="description" required></textarea>
 
-        <label for="icon">Ícono de lToken</label>
+        <label for="icon">Ícono del Token (representación íconografica de tu paper)</label>
         <input type="file" id="icon" accept="image/*" required />
 
-        <!-- <label for="icon">Token Icon</label>
-        <input type="file" id="icon" accept="image/*" required /> -->
+        <label for="pdf">Paper en PDF</label>
+        <input type="file" id="pdf" accept="application/pdf" required />
 
         <br /><br />
 
@@ -217,27 +217,27 @@ async function onSubmit(e) {
 
   <div class="events">
     <span v-if="deploying">
-      Deploying Smart Contracts...<br />
-      <strong>Please confirm all transactions in your browser extension, and wait until they are added to the Blockchain.</strong>
+      Desplegando el Smart Contract en Blockchain...<br />
+      <strong>Confirme todas las transacciones en la extensión de su navegador y espere hasta que se agreguen a Blockchain.</strong>
     </span>
 
     <br /><br />
 
     <div v-for="(event, index) in deployEvents" :key="index">
       <span v-if="event.type === 'PROXY_DEPLOYMENT'">
-        Contract deployed: {{ event.contractName }} ({{ event.type }}): <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/address/${event.contractAddress}`" target="_blank">{{ event.contractAddress }}</a
+        Smart Contract desplegado: {{ event.contractName }} ({{ event.type }}): <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/address/${event.contractAddress}`" target="_blank">{{ event.contractAddress }}</a
         ><br />
-        Transaction hash: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${event.receipt.transactionHash}`" target="_blank">{{ event.receipt.transactionHash }}</a>
+        Hash de la transacción: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${event.receipt.transactionHash}`" target="_blank">{{ event.receipt.transactionHash }}</a>
       </span>
       <br />
       <span v-if="event.type === 'TRANSACTION'">
-        Function called: {{ event.functionName }}()<br />
-        Transaction hash: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${event.receipt.transactionHash}`" target="_blank">{{ event.receipt.transactionHash }}</a>
+        Se llamó a la función: {{ event.functionName }}()<br />
+        Hash de la transacción: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${event.receipt.transactionHash}`" target="_blank">{{ event.receipt.transactionHash }}</a>
       </span>
     </div>
 
     <div v-if="isSuccess" style="padding-top: 60px">
-      <h4>🎉 Success !</h4>
+      <h4>🎉 Éxito !</h4>
     </div>
   </div>
 </template>

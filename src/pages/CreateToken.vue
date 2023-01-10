@@ -214,7 +214,7 @@ export default {
   </p>
 
   <div class="center">
-    <h2>Tokeniza uno de tus papers de investigación, basandote en un <a href="https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset" target="_blank">NFT 2.0</a></h2>
+    <h2>Tokeniza uno de tus papers de investigación, basandote en un <a href="https://docs.lukso.tech/standards/nft-2.0/LSP7-Digital-Asset" target="_blank">LSP7 Digital Asset</a></h2>
 
     <br />
     <br />
