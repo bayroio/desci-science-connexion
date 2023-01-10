@@ -116,8 +116,9 @@ onMounted(async () => {
           <span
             title="Tokens and NFTs can only be sent to Universal Profiles or smart contracts that implement a Universal Receiver by default. To sent it to an EOA, you need to use the force parameter."
           >
-            <input style="position: absolute; margin: 5px 0px 0px 0px" type="checkbox" v-model="forceParameter" id="force" value="false" />
+            <!-- <input style="position: absolute; margin: 5px 0px 0px 0px" type="checkbox" v-model="forceParameter" id="force" value="false" />
             <label style="margin-left: 20px" for="force">permite la transferencia de tokens a una cuenta EOA</label>
+          -->
           </span>
         </div>
         <br /><br />
