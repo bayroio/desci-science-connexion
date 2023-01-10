@@ -1,17 +1,14 @@
 <script setup>
-import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json'; // TODO change to LSP0ERC725Account
-
 // https://docs.lukso.tech/tools/lsp-factoryjs/getting-started
 import { LSPFactory } from '@lukso/lsp-factory.js';
-
 // https://docs.lukso.tech/tools/erc725js/getting-started
 import ERC725js from '@erc725/erc725.js';
 import LSP12IssuedAssetsSchema from '@erc725/erc725.js/schemas/LSP12IssuedAssets.json'; // https://docs.lukso.tech/tools/erc725js/schemas
-
-import LSP7Mintable_0_5_0 from '../contracts/LSP7Mintable_0_5_0.json';
-
+import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json'; // TODO change to LSP0ERC725Account
 import { IPFS_GATEWAY_BASE_URL, IPFS_GATEWAY_API_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../constants';
 import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../network';
+
+import LSP7Mintable_0_5_0 from '../contracts/LSP7Mintable_0_5_0.json';
 </script>
 
 <script>
@@ -32,6 +29,7 @@ export default {
     document.getElementById('symbol').value = '';
     document.getElementById('description').value = '';
     document.getElementById('icon').value = null;
+    document.getElementById('pdf').value = null;
   },
 
   methods: {
@@ -64,7 +62,7 @@ export default {
         icon: e.target.querySelector('input#icon').files[0],
         links: [],
         images: [],
-        assets: [],
+        assets: [e.target.querySelector('input#pdf').files[0]],
       };
 
       // show the deploying status...
@@ -72,8 +70,8 @@ export default {
       this.deploying = true;
       this.isSuccess = false;
 
-      // DEPLOY the LSP7 token
-      // https://docs.lukso.tech/tools/lsp-factoryjs/classes/lsp7-digital-asset
+      // DEPLOY the LSP8 token
+      // https://docs.lukso.tech/tools/lsp-factoryjs/classes/lsp8-identifiable-digital-asset
 
       let contracts;
 
@@ -89,17 +87,16 @@ export default {
       console.log("web3.currentProvider...", web3.currentProvider);
 
       try {
-        contracts = await factory.LSP7DigitalAsset.deploy(
+        contracts = await factory.LSP8IdentifiableDigitalAsset.deploy(
           {
             name: e.target.querySelector('input#name').value,
             symbol: e.target.querySelector('input#symbol').value,
             controllerAddress: account, // the "issuer" of the asset, that is allowed to change meta data
-            isNFT: false, // Token decimals set to 18
-            digitalAssetMetadata: LSP4MetaData,
             creators: [account], // Array of ERC725Account addresses that define the creators of the digital asset.
+            digitalAssetMetadata: LSP4MetaData,
           },
           {
-            LSP7DigitalAsset: {
+            LSP8IdentifiableDigitalAsset: {
               version,
             },
             ipfsGateway: IPFS_GATEWAY_API_BASE_URL,
@@ -117,9 +114,9 @@ export default {
               },
               complete: async (contracts) => {
                 console.log('Deployment Complete');
-                console.log("Token address", contracts.LSP7DigitalAsset.address);
-              console.log("Token receipt", contracts.LSP7DigitalAsset.receipt);
-                console.log(contracts.LSP7DigitalAsset);
+                console.log("Token address", contracts.LSP8IdentifiableDigitalAsset.address);
+              console.log("Token receipt", contracts.LSP8IdentifiableDigitalAsset.receipt);
+                console.log(contracts.LSP8IdentifiableDigitalAsset);
               },
             },
           }
@@ -128,17 +125,17 @@ export default {
         console.warn(err.message);
         this.error = err.message;
         this.deploying = false;
-        console.log("LSP7DigitalAsset.deploy...", this.error);
+        console.log("LSP8IdentifiableDigitalAsset.deploy...", this.error);
         return;
       }
 
       if (!contracts && !contracts.LSP7DigitalAsset) {
-        this.error = 'Error deploying LSP7DigitalAsset';
+        this.error = 'Error deploying LSP8 Identifiable DigitalAsset';
         console.log(this.error);
         return;
       }
 
-      const deployedLSP7DigitalAssetContract = contracts.LSP7DigitalAsset;
+      const deployedLSP8IdentifiableDigitalAssetContract = contracts.LSP8IdentifiableDigitalAsset;
 
       // ADD creations to UP
       const options = {
@@ -158,7 +155,7 @@ export default {
       }
 
       // add new asset
-      LSP12IssuedAssets.value.push(deployedLSP7DigitalAssetContract.address);
+      LSP12IssuedAssets.value.push(deployedLSP8IdentifiableDigitalAssetContract.address);
 
       // if EOA, also add new asset list to localStorage
       let bytecode = await web3.eth.getCode(account);
@@ -168,7 +165,8 @@ export default {
       }
 
       // https://docs.lukso.tech/standards/smart-contracts/interface-ids
-      const LSP7InterfaceId = '0x5fcaac27'; //'0xe33f65c3';
+      //const LSP7InterfaceId = '0x5fcaac27'; //'0xe33f65c3';
+      const LSP8InterfaceId = '0x49399145'; 
 
       const encodedErc725Data = erc725LSP12IssuedAssets.encodeData([
         {
@@ -177,8 +175,8 @@ export default {
         },
         {
           keyName: 'LSP12IssuedAssetsMap:<address>',
-          dynamicKeyParts: deployedLSP7DigitalAssetContract.address,
-          value: [LSP7InterfaceId, LSP12IssuedAssets.length - 1], // LSP7 interface ID + index position of asset
+          dynamicKeyParts: deployedLSP8IdentifiableDigitalAssetContract.address,
+          value: [LSP8InterfaceId, LSP12IssuedAssets.length - 1], // LSP8 interface ID + index position of asset
         },
       ]);
 
@@ -239,6 +237,9 @@ export default {
 
         <label for="icon">Ícono del Token (representación íconografica de tu paper)</label>
         <input type="file" id="icon" accept="image/*" required />
+
+        <label for="pdf">Paper en PDF</label>
+        <input type="file" id="pdf" accept="application/pdf" required />
 
         <br /><br />
 
