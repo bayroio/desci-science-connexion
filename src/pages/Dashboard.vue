@@ -42,13 +42,13 @@
 
 
       <!--Transfer-->
-      <div class="tabby-tab">
+      <!-- <div class="tabby-tab">
         <input type="radio" id="tab-4" name="tabby-tabs">
         <label for="tab-4">Transferir</label>
         <div class="tabby-content">
             <p>Throwup on your pillow wake up human for food at 4am and hide when guests come over, yet inspect anything brought into the house.</p>
         </div>
-      </div>
+      </div> -->
 
     </div>
 
