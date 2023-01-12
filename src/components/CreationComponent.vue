@@ -54,7 +54,7 @@
           creationType.value = 'LSP7';
         }
         else {
-          console.error(`El contrato: ${props.address} no soporta la interface LSP7 o LSP8.`);
+          console.error(`El contrato: ${props.address} no soporta la interface NFT.`);
           return;
         }
       }

@@ -199,7 +199,7 @@ import { isContractAddressInBloom } from 'web3-utils';
         </div>
 
         <div v-if="isSuccess" style="padding-top: 60px">
-            <h4>El activo digital se acuño exitosamente !</h4>
+            <h4>El NFT 2.0 se acuño exitosamente !</h4>
         </div>
 
         <div v-if="isSuccess" class="right">

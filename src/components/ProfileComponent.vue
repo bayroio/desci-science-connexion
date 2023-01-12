@@ -107,8 +107,8 @@
 
           <br/>
           <span v-if="profileData.name === false" class="warning" id="extension">
-            You can use MetaMask with this dApp, but <br />
-            we recommend trying it with the <br /><a href="https://docs.lukso.tech/guides/universal-profile/browser-extension/install-browser-extension">Universal Profile Browser Extension</a>.
+            Se esta utilizando MetaMask con esta dApp, <br />
+            se recomienda intentar con <br /><a href="https://docs.lukso.tech/guides/universal-profile/browser-extension/install-browser-extension">Extensión Universal</a>.
           </span>
 
         </div>
