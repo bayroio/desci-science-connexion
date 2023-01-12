@@ -1,10 +1,186 @@
-body {
-  background-color: #f6f3f3;
+*{
+  margin: 0;
+  padding: 0;
 }
 
+body {
+  background-color: #FFFFFF;
+}
+
+.header_title {
+  margin-top: 0;
+  background-color: #205A41;
+  color: #FFFFFF;
+  height:50px;
+  display: flex;
+  justify-content: space-around;
+  align-items: revert;
+}
+
+.header_title > img {
+  height: 45px;
+  width: auto
+}
+
+.title {
+  color: #205A6B;
+  margin: 0, 0, 0, 50px;
+}
+
+//-----------------------PROFILE INFO-----------------------\\
+.profile {
+  min-height: 260px;
+  max-width: 400px;
+  margin: auto;
+
+  .username {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.2em;
+  }
+
+  .description {
+    margin-top: 10px;
+    font-size: 1em;
+  }
+
+  .profileImage {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    //background-color: rgb(196, 196, 196);
+    //border-radius: 50%;
+    margin: auto;
+    margin-bottom: 20px;
+
+    .image,
+    .identicon {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      background-size: cover;
+      border-radius: 50%;
+      overflow: hidden;
+    }
+
+    .image {
+      position: absolute;
+      top: 0px;
+      margin: 0px;
+      width: 200px;
+      height: 200px;
+      //background-color: rgba(196, 196, 196, 0.5);
+    }
+  }
+}
+
+
+//-----------------------TABS-----------------------\\
+.tabs {
+  position: relative;
+  display: flex;
+  min-height: 650px;
+  max-height: auto;
+  overflow-y: scroll;
+  border-radius: 8px 8px 0 0;
+  background: #D4F2DD;  //overflow: hidden;
+}
+
+.tabby-tab {
+  flex: 1;
+}
+
+.tabby-tab label {
+  display: block;
+  box-sizing: border-box;
+  height: 40px;
+  padding: 10px;
+  text-align: center;
+  background: #82c5a4;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: background 0.5s ease;
+}
+
+.tabby-tab label:hover {
+  background: #246145;
+}
+
+.tabby-content {
+  position: absolute;
+  left: 0; bottom: 0; right: 0;
+  top: 40px; 
+  padding: 20px;
+  border-radius: 0 0 8px 8px;
+  background: #D4F2DD;
+  transition: 
+    opacity 0.8s ease,
+    transform 0.8s ease;  
+    opacity: 0;
+    transform: scale(0.1);
+    transform-origin: top left;
+}
+
+.tabby-content-img {
+  float: left;
+  margin-right: 20px;
+  border-radius: 8px;
+}
+
+.tabby-tab [type=radio] { display: none; }
+[type=radio]:checked ~ label {
+  background: #246145;
+  z-index: 2;
+}
+
+[type=radio]:checked ~ label ~ .tabby-content {
+  z-index: 1;  
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media screen and (max-width: 767px) {
+  .tabs { min-height: 400px;}
+}
+
+@media screen and (max-width: 480px) {
+  .tabs { min-height: 580px; }
+  .tabby-tab label { 
+    height: 60px;
+  }
+  .tabby-content { top: 60px; }
+  .tabby-content img {
+    float: none;
+    margin-right: 0;
+    margin-bottom: 20px;
+  }
+}
+//-----------------------END TABS-----------------------\\
+
+
+
+//----------------------- BUTTON -----------------------\\
+button, .button {
+  margin: 10px 10px;
+  background-color: #246145;
+  border-color: #246145;
+}
+
+button:hover, .button :hover {
+  background-color: #6FA088;
+}
+
+button:focus, .button:focus{
+  background-color: #6FA088
+}
+//----------------------- END BUTTON -----------------------\\
+
+
+
 .app.container {
-  margin-top: 5em;
-  margin-bottom: 5em;
+  margin-top: 1.5em;
+  margin-bottom: 1em;
   min-height: 90vh;
   display: flex;
   flex-direction: column;
@@ -20,15 +196,27 @@ body {
   text-align: left;
 }
 
-button,
-.button {
-  margin: 10px 10px;
+.right {
+  display: flex;
+  justify-content: flex-end;
 }
 
 form {
   margin: auto;
-  max-width: 500px;
 }
+
+.formfields{
+  display: flex;
+  flex-direction:row;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.item-flex{      
+  flex: 0 1 50%;
+  margin: 5px;
+}
+
 
 .back {
   position: absolute;
@@ -83,53 +271,6 @@ form {
 
   background-color: #fbf5f0;
   border-color: #db6334;
-}
-
-.profile {
-  min-height: 260px;
-  max-width: 400px;
-  margin: auto;
-
-  .username {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1.2em;
-  }
-
-  .description {
-    margin-top: 10px;
-    font-size: 1em;
-  }
-
-  .profileImage {
-    position: relative;
-    width: 120px;
-    height: 120px;
-    background-color: rgb(196, 196, 196);
-    border-radius: 50%;
-    margin: auto;
-    margin-bottom: 20px;
-
-    .image,
-    .identicon {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      position: relative;
-      background-size: cover;
-      border-radius: 50%;
-      overflow: hidden;
-    }
-
-    .image {
-      position: absolute;
-      top: 6px;
-      margin: 0 6px;
-      width: 108px;
-      height: 108px;
-      background-color: rgba(196, 196, 196, 0.5);
-    }
-  }
 }
 
 .grid {

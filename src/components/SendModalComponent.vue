@@ -164,32 +164,27 @@ async function sendLSP8Token(accountAddress, assetAddress) {
 <template>
   <div class="modal" @click="handleModalClose">
     <div class="modal-content" @click.stop="">
-      <div class="container">
+
+      <div class="container center">
         <h2 style="margin-bottom: 0px">Enviar {{ props.assetName }}</h2>
-        <small v-if="isL14"
-          ><a :href="`https://blockscout.com/lukso/l14/address/${props.assetAddress}`" target="_blank">{{ props.assetAddress }}</a></small
-        >
-        <small v-else-if="isL16"
-          ><a :href="`https://explorer.execution.l16.lukso.network/address/${props.assetAddress}`" target="_blank">{{ props.assetAddress }}</a></small
-        >
+        <small v-if="isL14"><a :href="`https://blockscout.com/lukso/l14/address/${props.assetAddress}`" target="_blank">{{ props.assetAddress }}</a></small>
+        <small v-else-if="isL16"><a :href="`https://explorer.execution.l16.lukso.network/address/${props.assetAddress}`" target="_blank">{{ props.assetAddress }}</a></small>
         <small v-else>{{ props.assetAddress }}</small>
 
         <h2></h2>
 
         <form @submit.prevent="sendAsset">
           <fieldset>
-            <label for="assetRecipient">Dirección receptora:</label>
+            <span><strong>Dirección receptora: </strong></span><br/>
             <input type="text" placeholder="0x..." v-model="assetRecipient" id="assetRecipient" required />
 
             <div v-if="isLsp7">
-              <label for="amount">Cantidad:</label>
+              <span><strong>Cantidad: </strong></span><br/>
               <input type="number" placeholder="0x..." v-model="amountToSend" id="amount" required />
             </div>
 
             <div>
-              <span
-                title="Tokens and NFTs can only be sent to Universal Profiles or smart contracts that implement a Universal Receiver by default. To sent it to an EOA, you need to use the force parameter."
-              >
+              <span title="Los tokens y NFT solo se pueden enviar a perfiles universales o contratos inteligentes que implementan un receptor universal de forma predeterminada. Para enviarlo a un EOA, debe usar el parámetro de fuerza.">
                 <p class="warning" v-if="isRecepientEOA">Tu dirección receptora es una EOA, por favor permite la trasnferencia a la EOA.</p>
               </span>
               <p v-if="isWrongNetwork" class="warning">
@@ -201,26 +196,26 @@ async function sendLSP8Token(accountAddress, assetAddress) {
               </p>
             </div>
 
-            <input style="position: absolute; margin: 5px 0px 0px -100px" type="checkbox" v-model="forceParameter" id="force" value="false" />
-            <label style="margin-left: 90px" for="force">Permite la trasnferencia a la EOA</label>
+            <div style="margin-top: 10px">
+              <input style="margin: 5px 0px 0px -50px" type="checkbox" v-model="forceParameter" id="force" value="false" />
+              <span style="margin-left: 20px"><strong>Permite la transferencia de tokens a una cuenta EOA </strong></span><br/>
+            </div>
 
             <br /><br />
 
-            <input class="button-primary" type="submit" value="Send" />
+            <button type="submit">Enviar</button>
           </fieldset>
         </form>
 
         <ProfilePreviewComponent v-if="assetRecipient" :account="assetRecipient" />
 
-        <p v-if="isLoading">Sending asset...</p>
+        <p v-if="isLoading">Enviando activo</p>
         <p v-if="txHash">
-          ✅ Success: Transaction Hash:
+          Transacción exitosa: Hash:
           <small v-if="isL14"
             ><a :href="`https://blockscout.com/lukso/l14/tx/${txHash}`" target="_blank">{{ txHash }}</a></small
           >
-          <small v-else-if="isL16"
-            ><a :href="`https://explorer.execution.l16.lukso.network/tx/${txHash}`" target="_blank">{{ txHash }}</a></small
-          >
+          <small v-else-if="isL16"><a :href="`https://explorer.execution.l16.lukso.network/tx/${txHash}`" target="_blank">{{ txHash }}</a></small>
           <small v-else>{{ txHash }}</small>
           <br /><br />
           <input class="button-primary" type="button" value="Close" @click="handleModalClose" />

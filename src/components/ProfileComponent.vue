@@ -1,90 +1,124 @@
 <script>
-import _ from 'underscore';
-import ERC725js from '@erc725/erc725.js';
-import LSP3UniversalProfileMetaDataSchema from '@erc725/erc725.js/schemas/LSP3UniversalProfileMetadata.json';
-import identicon from 'ethereum-blockies-base64';
-import { IPFS_GATEWAY_BASE_URL } from '../constants';
+  import _ from 'underscore';
+  import ERC725js from '@erc725/erc725.js';
+  import LSP3UniversalProfileMetaDataSchema from '@erc725/erc725.js/schemas/LSP3UniversalProfileMetadata.json';
+  import identicon from 'ethereum-blockies-base64';
+  import { IPFS_GATEWAY_BASE_URL } from '../constants';
 
-export default {
-  data() {
-    return {
-      profileData: {
-        profileImage: {
-          url: '',
+  export default {
+    data() {
+      return {
+        profileData: {
+          profileImage: {
+            url: '',
+          },
         },
-      },
-      address: '',
-      error: false,
-    };
-  },
+        address: '',
+        error: false,
+      };
+    },
 
-  // Executed when the profile component is rendered
-  // Here we LOAD the Universal Profile data
-  async mounted() {
-    // GET the UNIVERSAL PROFILE DATA
-    const accounts = await web3.eth.getAccounts();
+    async mounted() {
+      // Get the Universal Profile Data
+      const accounts = await web3.eth.getAccounts();
+      const account = accounts[0]; 
+      
+      //Get the address values
+      this.address = account;
+      this.profileData.address = account;
 
-    // TODO: make sure accounts is not empty!
-    const account = accounts[0]; // set the first address as the Universal Profile address
-    this.address = account;
-    // set the address, wether Universal Profile or EOA (MetaMask)
-    this.profileData.address = account;
+      //Get the image
+      this.profileData.identicon = identicon(account);
+      
+      //Get the Profile
+      const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
+        ipfsGateway: IPFS_GATEWAY_BASE_URL,
+      });
 
-    // generate identicon
-    this.profileData.identicon = identicon(account); // generates a "data:image/png;base64,..."
+      //Get the metadata
+      let metaData;
+      try {
+        metaData = await profile.fetchData('LSP3Profile');
+        console.log(metaData);
+      } 
+      catch (e) {
+        this.profileData.name = false;
+        return;
+      }
+      
 
-    // INSTANTIATE erc725.js
-    // window.web3 was set in App.vue
-    const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
-      ipfsGateway: IPFS_GATEWAY_BASE_URL, // todo the gateway should be without /ipfs/
-    });
+      this.profileData = {
+        // merge profileData with fetched profile data
+        ...this.profileData,
+        ...metaData.value.LSP3Profile,
+      };
 
-    let metaData;
-    try {
-      metaData = await profile.fetchData('LSP3Profile');
-    } catch (e) {
-      // IF it fails its likely NO Universal Profile, or a simple EOA (MetaMask)
-
-      this.profileData.name = false;
-      return;
-    }
-
-    this.profileData = {
-      // merge profileData with fetched profile data
-      ...this.profileData,
-      ...metaData.value.LSP3Profile,
-    };
-
-    // GET the right image size for the profile image from the profile images array
-    this.profileData.profileImage = _.find(this.profileData.profileImage, (image) => {
-      if (image.width >= 200 && image.width <= 500) return image;
-    });
-
-    // If there is no image of the preferred size, take the default one
-    if (!this.profileData.profileImage && metaData.value.LSP3Profile.profileImage) {
-      this.profileData.profileImage = metaData.value.LSP3Profile.profileImage[0];
-      // change the IPFS path to a provider of our choice
-    }
-    this.profileData.profileImage.url = this.profileData.profileImage.url.replace('ipfs://', profile.options.ipfsGateway);
-  },
-};
+      // GET the right image size for the profile image from the profile images array
+      this.profileData.profileImage = _.find(this.profileData.profileImage, (image) => {
+        if (image.width >= 200 && image.width <= 500) return image;
+      });
+      
+      // If there is no image of the preferred size, take the default one
+      if (!this.profileData.profileImage && metaData.value.LSP3Profile.profileImage) {
+        this.profileData.profileImage = metaData.value.LSP3Profile.profileImage[0];
+        // change the IPFS path to a provider of our choice
+      }
+      this.profileData.profileImage.url = this.profileData.profileImage.url.replace('ipfs://', profile.options.ipfsGateway);
+    },
+  };
 </script>
 
 <template>
-  <div class="center profile">
-    <div class="profileImage">
-      <div class="identicon" v-bind:style="{ backgroundImage: 'url(' + profileData.identicon + ')' }"></div>
-      <div class="image" v-bind:style="{ backgroundImage: 'url(' + profileData.profileImage?.url + ')' }"></div>
-    </div>
-    <span class="username" v-if="profileData.name"> @{{ profileData.name }} </span>
-    <p class="addressField" style="font-family: 'Courier New', Courier, monospace">{{ address }}</p>
-    <p v-if="profileData.name === false" class="warning" id="extension">
-      You can use MetaMask with this dApp, but <br />
-      we recommend trying it with the <br /><a href="https://docs.lukso.tech/guides/universal-profile/browser-extension/install-browser-extension">Universal Profile Browser Extension</a>.
-    </p>
-
-    <p class="description">
-      {{ profileData.description }}
-    </p>
+  <div>
+    <h4 class="center"><strong>Datos Generales</strong></h4>
   </div>
+
+  <table style="border: none">
+    <tr>
+      <!--Images-->
+      <td width="30%" valign="Top">
+        <div class="center profile">
+          <div class="profileImage">
+            <div class="identicon" v-bind:style="{ backgroundImage: 'url(' + profileData.identicon + ')' }" ></div>
+            <div class="image" v-bind:style="{ backgroundImage: 'url(' + profileData.profileImage?.url + ')' }"></div>
+          </div>
+        </div>
+      </td>
+
+      <!--Data-->
+      <td width="70%" valign="top">
+        <div>
+          <span><strong>Address: </strong></span><br/>
+          <span class="username">{{ address }}</span><br/>
+
+          <br/>
+          <span><strong>Nombre: </strong></span><br/>
+          <span class="username" v-if="profileData.name"> {{ profileData.name }} </span><br/>
+
+          <br/>
+          <span><strong>Tags: </strong></span><br/>
+          <span class="username" v-if="profileData.tags"> {{ profileData.tags }} </span><br/>
+
+          <br/>
+          <span><strong>Descripción: </strong></span><br/>
+          <span class="description">
+            {{ profileData.description }}
+          </span><br/>
+
+          <br/>
+          <span v-if="profileData.name === false" class="warning" id="extension">
+            You can use MetaMask with this dApp, but <br />
+            we recommend trying it with the <br /><a href="https://docs.lukso.tech/guides/universal-profile/browser-extension/install-browser-extension">Universal Profile Browser Extension</a>.
+          </span>
+
+        </div>
+      </td>    
+    </tr>
+    <!-- <tr>
+      <td colspan="2" align="right">
+        <button @click="login">Actualizar</button>
+      </td>
+    </tr> -->
+  </table>
+
 </template>
