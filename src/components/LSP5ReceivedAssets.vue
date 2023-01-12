@@ -109,7 +109,7 @@
     <div v-if="receivedAssets.length === 0 && !isLoading">No existe ningún paper tokenizado hasta ahora</div>
     <div v-else class="grid">
       <div v-for="receivedToken in receivedTokens" :key="receivedToken.tokenId">
-        <OwnedCreationComponent @remove-asset="handleRemoveAsset" v-if="receivedToken.isLSP7" :address="receivedToken.assetAddress" />
+        <OwnedCreationComponent @remove-asset="handleRemoveAsset" v-if="receivedToken.isLSP7 && !receivedToken.isLSP8" :address="receivedToken.assetAddress" />
         <OwnedNFTComponent @remove-asset="handleRemoveAsset" v-if="receivedToken.isLSP8" :address="receivedToken.assetAddress" :token-id="receivedToken.tokenId" />
       </div>
     </div>
