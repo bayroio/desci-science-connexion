@@ -97,8 +97,10 @@
 
           <br/>
           <span><strong>Tags: </strong></span><br/>
-          <span class="username" v-if="profileData.tags"> {{ profileData.tags }} </span><br/>
-
+          <div v-if="profileData.tags">
+            <span class="username"  v-for="(item, index) in profileData.tags" v-bind:key="index"> "{{ item }}"; </span><br/>
+          </div>
+          
           <br/>
           <span><strong>Descripción: </strong></span><br/>
           <span class="description">
