@@ -65,7 +65,7 @@
 
 <template>
   <div class="asset-wrapper">
-    <div class="preview-card" @click="showModal = !showModal">
+    <div class="preview-card">
       <div class="image" :style="{ backgroundImage: `url(${iconUrl})` }"></div>
       <div class="infos">{{ LSP4TokenName }} ({{ LSP4TokenSymbol }})</div>
     </div>

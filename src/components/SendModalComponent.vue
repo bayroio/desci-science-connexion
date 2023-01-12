@@ -1,168 +1,167 @@
 <script setup>
-import { onMounted, defineProps, defineEmits, ref } from 'vue';
-import { isAddress } from 'web3-utils';
+  import { onMounted, defineProps, defineEmits, ref } from 'vue';
+  import { isAddress } from 'web3-utils';
+  import LSP7DigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP7DigitalAsset.json';
+  import ProfilePreviewComponent from './ProfilePreviewComponent.vue';
+  import LSP8IdentifiableDigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP8IdentifiableDigitalAsset.json';
+  import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../network';
+  import { CHAIN_IDS } from '@/constants';
 
-import LSP7DigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP7DigitalAsset.json';
-import ProfilePreviewComponent from './ProfilePreviewComponent.vue';
-import LSP8IdentifiableDigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP8IdentifiableDigitalAsset.json';
-import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../network';
-import { CHAIN_IDS } from '@/constants';
+  const props = defineProps({
+    assetAddress: String,
+    assetName: String,
+    isLsp7: Boolean,
+    isLsp8: Boolean,
+    tokenId: String,
+  });
 
-const props = defineProps({
-  assetAddress: String,
-  assetName: String,
-  isLsp7: Boolean,
-  isLsp8: Boolean,
-  tokenId: String,
-});
+  const emit = defineEmits(['close', 'tokens-sent']);
+  const assetRecipient = ref('');
+  const amountToSend = ref(1);
+  const isLoading = ref(false);
+  const isSuccess = ref(false);
+  const txHash = ref('');
+  const forceParameter = ref(false);
+  const isRecepientEOA = ref(false);
+  const isL16 = ref(false);
+  const isL14 = ref(false);
+  const wasAssetSent = ref(false);
+  const isWrongNetwork = ref(false);
+  const error = ref(false);
 
-const emit = defineEmits(['close', 'tokens-sent']);
+  const handleModalClose = () => {
+    emit('close', wasAssetSent.value);
+  };
 
-const assetRecipient = ref('');
-const amountToSend = ref(1);
-const isLoading = ref(false);
-const txHash = ref('');
-const forceParameter = ref(false);
-const isRecepientEOA = ref(false);
-const isL16 = ref(false);
-const isL14 = ref(false);
-const wasAssetSent = ref(false);
-const isWrongNetwork = ref(false);
-const error = ref(false);
-
-const handleModalClose = () => {
-  emit('close', wasAssetSent.value);
-};
-
-onMounted(async () => {
-  console.log('assetAddress', props.assetAddress);
-  try {
-    // Default links that show up
-    let chainId = await web3.eth.getChainId();
-    if (chainId === CHAIN_IDS.L14) {
-      isL14.value = true;
-    } else if (chainId === CHAIN_IDS.L16) {
-      isL16.value = true;
-    }
-  } catch (err) {
-    console.warn(err);
-  }
-});
-
-async function sendAsset() {
-  // Check network and update previous values
-
-  try {
-    let chainId = await web3.eth.getChainId();
-    switch (chainId) {
-      case CHAIN_IDS.L14:
-        isL14.value = true;
-        isL16.value = false;
-        break;
-      case CHAIN_IDS.L16:
-        isL16.value = true;
-        isL14.value = false;
-        break;
-      default:
-        isWrongNetwork.value = true;
-        isL14.value = false;
-        isL16.value = false;
-        return;
-    }
-  } catch (err) {
-    console.warn(err);
-    error.value = err.message;
-    return;
-  }
-
-  let recipientBytecode = await web3.eth.getCode(assetRecipient.value);
-
-  if (!isAddress(assetRecipient.value)) {
-    console.warn(`La dirección: ${assetRecipient.value} no es valida.`);
-    return;
-  }
-  // If recipient is EOA, force is mandatory
-  else if (recipientBytecode === '0x' && forceParameter.value === false) {
-    isRecepientEOA.value = true;
-    return;
-  }
-
-  isRecepientEOA.value = false;
-  txHash.value = '';
-  console.log('Enviando activo a:', assetRecipient.value);
-
-  const accounts = await window.web3.eth.getAccounts();
-  const account = accounts[0];
-
-  try {
-    if (props.isLsp7) {
-      await sendLSP7Token(account, props.assetAddress);
-    } else if (props.isLsp8) {
-      await sendLSP8Token(account, props.assetAddress);
-
-      if (localStorage.getItem('receivedAssets')) {
-        const LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
-
-        LSP5ReceivedAssets.value = LSP5ReceivedAssets.value.filter(function (assetAddress) {
-          return assetAddress !== props.assetAddress;
-        });
-
-        localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssets));
-      }
-    }
-
-    wasAssetSent.value = true;
-    emit('tokens-sent');
-  } catch (err) {
-    // It can fail if the recipient is not a UP (cf. force option)
+  onMounted(async () => {
     isLoading.value = false;
+    console.log('assetAddress', props.assetAddress);
+    try {
+      // Default links that show up
+      let chainId = await web3.eth.getChainId();
+      if (chainId === CHAIN_IDS.L14) {
+        isL14.value = true;
+      } else if (chainId === CHAIN_IDS.L16) {
+        isL16.value = true;
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  });
 
-    console.warn(err);
+  function CloseModal() {
+    window.location.reload();
   }
-}
 
-// https://docs.lukso.tech/standards/smart-contracts/lsp7-digital-asset#transfer
-async function sendLSP7Token(accountAddress, assetAddress) {
-  const from = accountAddress;
-  const to = assetRecipient.value;
-  const amount = web3.utils.toWei(amountToSend.value.toString());
-  const force = forceParameter.value; // When set to TRUE, to may be any address; when set to FALSE to must be a contract that supports LSP1 UniversalReceiver and not revert.
-  const data = '0x';
+  async function sendAsset() {
+    // Check network and update previous values
+    try {
+      let chainId = await web3.eth.getChainId();
+      switch (chainId) {
+        case CHAIN_IDS.L14:
+          isL14.value = true;
+          isL16.value = false;
+          break;
+        case CHAIN_IDS.L16:
+          isL16.value = true;
+          isL14.value = false;
+          break;
+        default:
+          isWrongNetwork.value = true;
+          isL14.value = false;
+          isL16.value = false;
+          return;
+      }
+    } 
+    catch (err) {
+      console.warn(err);
+      error.value = err.message;
+      return;
+    }
 
-  isLoading.value = true;
+    isLoading.value = true;
+    let recipientBytecode = await web3.eth.getCode(assetRecipient.value);
+    if (!isAddress(assetRecipient.value)) {
+      console.warn(`La dirección: ${assetRecipient.value} no es valida.`);
+      return;
+    }
+    // If recipient is EOA, force is mandatory
+    else if (recipientBytecode === '0x' && forceParameter.value === false) {
+      isRecepientEOA.value = true;
+      return;
+    }
 
-  const lsp7DigitalAssetContract = new window.web3.eth.Contract(LSP7DigitalAsset.abi, assetAddress);
-  const receipt = await lsp7DigitalAssetContract.methods.transfer(from, to, amount, force, data).send({ from: accountAddress });
-  isLoading.value = false;
+    isRecepientEOA.value = false;
+    txHash.value = '';
+    console.log('Enviando activo a:', assetRecipient.value);
 
-  console.info('Transaction receipt:', receipt);
+    const accounts = await window.web3.eth.getAccounts();
+    const account = accounts[0];
 
-  txHash.value = receipt.transactionHash;
-}
+    try {
+      if (props.isLsp7) {
+        await sendLSP7Token(account, props.assetAddress);
+      }
+      else if (props.isLsp8) {
+        await sendLSP8Token(account, props.assetAddress);
 
-async function sendLSP8Token(accountAddress, assetAddress) {
-  const lsp8IdentifiableDigitalAssetContract = new window.web3.eth.Contract(LSP8IdentifiableDigitalAsset.abi, assetAddress);
-  const tokenIds = await lsp8IdentifiableDigitalAssetContract.methods.tokenIdsOf(accountAddress).call();
+        if (localStorage.getItem('receivedAssets')) {
+          const LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
 
-  const from = accountAddress;
-  const to = assetRecipient.value;
-  const force = true; // When set to TRUE, to may be any address; when set to FALSE to must be a contract that supports LSP1 UniversalReceiver and not revert.
-  const data = '0x';
+          LSP5ReceivedAssets.value = LSP5ReceivedAssets.value.filter(function (assetAddress) {
+            return assetAddress !== props.assetAddress;
+          });
 
-  isLoading.value = true;
+          localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssets));
+        }
+      }
 
-  const receipt = await lsp8IdentifiableDigitalAssetContract.methods.transfer(from, to, props.tokenId, force, data).send({ from: accountAddress });
+      wasAssetSent.value = true;
+      emit('tokens-sent');
 
-  isLoading.value = false;
+      isLoading.value = true;
+      isSuccess.value = true;
+    }
+    catch (err) {
+      // It can fail if the recipient is not a UP (cf. force option)
+      isLoading.value = false;
 
-  console.info('Transaction receipt:', receipt);
+      console.warn(err);
+    }
+  }
 
-  txHash.value = receipt.transactionHash;
-}
+  // https://docs.lukso.tech/standards/smart-contracts/lsp7-digital-asset#transfer
+  async function sendLSP7Token(accountAddress, assetAddress) {
+    const from = accountAddress;
+    const to = assetRecipient.value;
+    const amount = web3.utils.toWei(amountToSend.value.toString());
+    const force = forceParameter.value; // When set to TRUE, to may be any address; when set to FALSE to must be a contract that supports LSP1 UniversalReceiver and not revert.
+    const data = '0x';
+    const lsp7DigitalAssetContract = new window.web3.eth.Contract(LSP7DigitalAsset.abi, assetAddress);
+    const receipt = await lsp7DigitalAssetContract.methods.transfer(from, to, amount, force, data).send({ from: accountAddress });
+    
+    console.info('Transaction receipt:', receipt);
+
+    txHash.value = receipt.transactionHash;
+  }
+
+  async function sendLSP8Token(accountAddress, assetAddress) {
+    const lsp8IdentifiableDigitalAssetContract = new window.web3.eth.Contract(LSP8IdentifiableDigitalAsset.abi, assetAddress);
+    const tokenIds = await lsp8IdentifiableDigitalAssetContract.methods.tokenIdsOf(accountAddress).call();
+    const from = accountAddress;
+    const to = assetRecipient.value;
+    const force = true; // When set to TRUE, to may be any address; when set to FALSE to must be a contract that supports LSP1 UniversalReceiver and not revert.
+    const data = '0x';
+
+    const receipt = await lsp8IdentifiableDigitalAssetContract.methods.transfer(from, to, props.tokenId, force, data).send({ from: accountAddress });
+    console.info('Transaction receipt:', receipt);
+    txHash.value = receipt.transactionHash;
+
+  }
 </script>
 
 <template>
-  <div class="modal" @click="handleModalClose">
+  <div class="modal">
     <div class="modal-content" @click.stop="">
 
       <div class="container center">
@@ -173,7 +172,7 @@ async function sendLSP8Token(accountAddress, assetAddress) {
 
         <h2></h2>
 
-        <form @submit.prevent="sendAsset">
+        <form v-if="!isLoading" @submit.prevent="sendAsset">
           <fieldset>
             <span><strong>Dirección receptora: </strong></span><br/>
             <input type="text" placeholder="0x..." v-model="assetRecipient" id="assetRecipient" required />
@@ -202,24 +201,38 @@ async function sendLSP8Token(accountAddress, assetAddress) {
             </div>
 
             <br /><br />
-
-            <button type="submit">Enviar</button>
-          </fieldset>
+            <div class="right">
+              <button type="submit">Enviar</button>
+              <button type="button" @click="handleModalClose">Cerrar</button>
+            </div>
+            </fieldset>
         </form>
 
         <ProfilePreviewComponent v-if="assetRecipient" :account="assetRecipient" />
 
-        <p v-if="isLoading">Enviando activo</p>
+        <p v-if="isLoading">Enviando activo...</p>
         <p v-if="txHash">
           Transacción exitosa: Hash:
-          <small v-if="isL14"
-            ><a :href="`https://blockscout.com/lukso/l14/tx/${txHash}`" target="_blank">{{ txHash }}</a></small
-          >
+          <small v-if="isL14"><a :href="`https://blockscout.com/lukso/l14/tx/${txHash}`" target="_blank">{{ txHash }}</a></small>
           <small v-else-if="isL16"><a :href="`https://explorer.execution.l16.lukso.network/tx/${txHash}`" target="_blank">{{ txHash }}</a></small>
           <small v-else>{{ txHash }}</small>
-          <br /><br />
-          <input class="button-primary" type="button" value="Close" @click="handleModalClose" />
         </p>
+
+        <div v-if="isSuccess">
+          <div v-if="props.isLsp8" style="padding-top: 60px">
+              <h4>El NFT 2.0 se ha enviado exitosamente !</h4>
+          </div>
+          <div v-else style="padding-top: 60px">
+              <h4>El NFT se ha enviado exitosamente !</h4>
+          </div>
+        </div>
+
+
+        <br /><br />
+        <div class="right" v-if="isSuccess" >
+            <button @click="CloseModal">Cerrar</button>
+        </div>
+
       </div>
     </div>
   </div>
