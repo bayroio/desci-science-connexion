@@ -98,9 +98,15 @@
           <br/>
           <span><strong>Tags: </strong></span><br/>
           <div v-if="profileData.tags">
-            <span class="username"  v-for="(item, index) in profileData.tags" v-bind:key="index"> "{{ item }}"; </span><br/>
+            <span class="username"  v-for="(item, index) in profileData.tags" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
           </div>
           
+          <br/>
+          <span><strong>Links: </strong></span><br/>
+          <div v-if="profileData.links">
+            <span class="username"  v-for="(item, index) in profileData.links" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
+          </div>
+                    
           <br/>
           <span><strong>Descripción: </strong></span><br/>
           <span class="description">
