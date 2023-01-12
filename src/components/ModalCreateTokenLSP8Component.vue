@@ -50,7 +50,7 @@
             icon: e.target.querySelector('input#icon').files[0],
             links: [],
             images: [],
-            assets: [],
+            assets: [e.target.querySelector('input#pdf').files[0]],
         };
 
         // Show the deploying status...
@@ -207,7 +207,7 @@
                     </div>
 
                     <div class="item-flex">
-                        <span><strong>Descripción (pequeño resumen del documentp)</strong></span><br/>
+                        <span><strong>Descripción (pequeño resumen del documento)</strong></span><br/>
                         <textarea placeholder="El Token que cambiará el mundo..." id="description" required></textarea>
                     </div>
 
@@ -216,6 +216,11 @@
                             <span><strong>Ícono del Token (representación íconografica)</strong></span><br/>
                             <input type="file" id="icon" accept="image/*" required /><br/>
                         </div>
+
+                        <div class="item-flex">
+                            <span><strong>Archivo en PDF (paper)</strong></span><br/>
+                            <input type="file" id="pdf" accept="application/pdf" required />
+                        </div>                        
                     </div>
 
                     <br />

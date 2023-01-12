@@ -70,7 +70,7 @@ import { isContractAddressInBloom } from 'web3-utils';
             console.log("paddedtokenid: ", paddedTokenId);
 
             const receipt = await lsp8IdentifiableDigitalAssetContract.methods.mint(to, paddedTokenId, force, data).send({ from: account });
-            mintEvents.value.push({ stepName: 'Acuñar el NFT en el smart contract LSP8', functionName: 'acuñar', receipt });
+            mintEvents.value.push({ stepName: 'Acuñar el NFT', functionName: 'acuñar', receipt });
         }
         catch (err) {
             error.value = err.message;
@@ -83,6 +83,7 @@ import { isContractAddressInBloom } from 'web3-utils';
         const metadata = await LSP4DigitalAssetMetadata.uploadMetadata({
                 description: description.value,
                 icon: e.target.querySelector('input#icon').files[0],
+                assets: [e.target.querySelector('input#pdf').files[0]],
             },
             {
                 ipfsGateway: IPFS_GATEWAY_API_BASE_URL,
@@ -117,7 +118,7 @@ import { isContractAddressInBloom } from 'web3-utils';
         //Send transaction
         try {
             const receipt = await lsp8IdentifiableDigitalAssetContract.methods['setData(bytes32[],bytes[])'](encodedErc725Data.keys, encodedErc725Data.values).send({ from: account });
-            mintEvents.value.push({ stepName: 'Actualizar el ERC725Y key/value (LSP8MetadataJSON:<bytes32>)', functionName: 'setData', receipt });
+            mintEvents.value.push({ stepName: 'Actualizar el Universal Profile', functionName: 'setData', receipt });
         } 
         catch (err) {
             isLoading.value = false;
@@ -170,9 +171,18 @@ import { isContractAddressInBloom } from 'web3-utils';
                     <span><strong>Descripción (pequeño resumen del documentp)</strong></span><br/>
                     <textarea placeholder="El token que cambiará el mundo..." v-model="description" id="description" required></textarea>
 
-                    <span><strong>Ícono del Token (representación íconografica)</strong></span><br/>
-                    <input type="file" id="icon" accept="image/*" required />
-                    
+                    <div class="formfields">
+                        <div class="item-flex">                    
+                            <span><strong>Ícono del Token (representación íconografica)</strong></span><br/>
+                            <input type="file" id="icon" accept="image/*" required />
+                        </div>   
+
+                        <div class="item-flex">
+                            <span><strong>Archivo en PDF (paper)</strong></span><br/>
+                            <input type="file" id="pdf" accept="application/pdf" required />
+                        </div>   
+                    </div>
+
                     <div style="margin-top: 10px">
                         <span title="Los tokens y NFT solo se pueden enviar a perfiles universales o contratos inteligentes que implementan un receptor universal de forma predeterminada. Para enviarlo a un EOA, debe usar el parámetro de fuerza">
                             <input style="position: absolute; margin: 5px 0px 0px 0px" type="checkbox" v-model="forceParameter" id="force" value="false" />
