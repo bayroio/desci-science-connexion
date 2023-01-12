@@ -20,9 +20,14 @@
     const txHash = ref('');
     const error = ref('');
     const isLoading = ref(false);
+    const isSuccess = ref(false);
     const forceParameter = ref(false);
     const isMinterEOA = ref(false);
     const isWrongNetwork = ref(false);
+
+    function CloseModal() {
+      window.location.reload();
+    }
 
     async function onSubmit() {
         console.log("Entrando a onsubmit...")
@@ -67,8 +72,8 @@
             const data = '0x';
 
             const receipt = await lsp7DigitalAssetContract.methods.mint(to, amount, force, data).send({ from: account });
-            isLoading.value = false;
             txHash.value = receipt.transactionHash;
+            isSuccess.value = true;
 
             // Check if account is EOA, also add new asset list to localStorage
             let bytecode = await web3.eth.getCode(account);
@@ -103,7 +108,7 @@
         <div class="center">
             <h4><strong>Acuñar tokens de {{ LSP4TokenName }} ({{ LSP4TokenSymbol }})</strong></h4>
 
-            <form @submit.prevent="onSubmit" class="left">
+            <form v-if="!isLoading" @submit.prevent="onSubmit" class="left">
                 <fieldset>
                     <p class="warning" v-if="isMinterEOA">Tu cuenta es una EOA, por favor permite la transferencia de tokens a otra cuenta EOA.</p>
                     <p v-if="isWrongNetwork" class="warning">
@@ -130,11 +135,16 @@
             <p v-if="isLoading">Cargando...</p>
 
             <p v-if="txHash">
-                Proceso completado con éxito: tx hash: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${txHash}`" target="_blank">{{ txHash }}</a>
+                Transacción exitosa: tx hash: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${txHash}`" target="_blank">{{ txHash }}</a>
             </p>
             
-            <div v-if="txHash" class="right">
-                <button type="button" @click="handleModalClose">Cerrar</button>
+            <div v-if="isSuccess" style="padding-top: 60px">
+                <h4>El NFT se acuño exitosamente !</h4>
+            </div>
+
+            <br /><br />
+            <div class="right" v-if="isSuccess" >
+                <button @click="CloseModal">Cerrar</button>
             </div>
         </div>
     </div>        

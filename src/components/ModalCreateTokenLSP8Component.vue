@@ -25,6 +25,10 @@
     const tokenSymbol = ref('');
     const description = ref('');
 
+    function CloseModal() {
+      window.location.reload();
+    }
+
     async function onSubmit(e) {
         console.log("Entrando a onsubmit...")
         // Check network
@@ -220,7 +224,7 @@
                         <div class="item-flex">
                             <span><strong>Archivo en PDF (paper)</strong></span><br/>
                             <input type="file" id="pdf" accept="application/pdf" required />
-                        </div>                        
+                        </div>
                     </div>
 
                     <br />
@@ -256,7 +260,12 @@
             <div v-if="isSuccess" style="padding-top: 60px">
                 <h4>Proceso completado con éxito !</h4>
             </div>
-        </div>     
+
+            <br /><br />
+            <div class="right" v-if="isSuccess" >
+                <button @click="CloseModal">Cerrar</button>
+            </div>
+        </div>
     </div>
   </div>
 </template>

@@ -52,7 +52,7 @@ onMounted(async () => {
   </div>
   
   <div class="center">
-    <!-- <button class="button" @click="showModalLSP7 = !showModalLSP7" style="width: 230px">Crear token con LSP7</button>
+    <!-- <button class="button" @click="showModalLSP7 = !showModalLSP7" style="width: 230px">Crear NFT</button>
     <ModalCreateTokenLSP7 @close="handleModalCloseLSP7" v-if="showModalLSP7" /> -->
 
     <button class="button" @click="showModalLSP8 = !showModalLSP8" style="width: 230px">Crear NFT 2.0</button>

@@ -28,6 +28,10 @@ import { isContractAddressInBloom } from 'web3-utils';
     const isMinterEOA = ref(false);
     const isWrongNetwork = ref(false);
 
+    function CloseModal() {
+      window.location.reload();
+    }
+
     async function onSubmit(e) {
         console.log("Entrando a onsubmit...")
         // Check network
@@ -212,10 +216,10 @@ import { isContractAddressInBloom } from 'web3-utils';
             <h4>El NFT 2.0 se acuño exitosamente !</h4>
         </div>
 
-        <div v-if="isSuccess" class="right">
-            <button type="button" @click="handleModalClose">Cerrar</button>
+        <br /><br />
+        <div class="right" v-if="isSuccess" >
+            <button @click="CloseModal">Cerrar</button>
         </div>
-
 
     </div>        
   </div>

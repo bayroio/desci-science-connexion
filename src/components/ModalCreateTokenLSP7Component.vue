@@ -25,6 +25,10 @@
     const tokenSymbol = ref('');
     const description = ref('');
 
+    function CloseModal() {
+      window.location.reload();
+    }
+
     async function onSubmit(e) {
         console.log("Entrando a onsubmit...")
         // Check network
@@ -186,7 +190,6 @@
         }
 
         isSuccess.value = true;
-        deploying.value = false;
     }
 </script>
 
@@ -199,11 +202,11 @@
         </p>
 
         <div class="center">
-            <h4><strong>Documentos de investigación</strong></h4>
-            <h6 style="margin-top: -25px;">basandote en: <a href="https://docs.lukso.tech/standards/nft-2.0/LSP7-Identifiable-Digital-Asset" target="_blank">LSP7 Identifiable Digital Asset</a></h6>
+            <h4><strong>Papers tokenizados</strong></h4>
+            <h6 style="margin-top: -25px;">basandote en: <a href="https://docs.lukso.tech/standards/nft-2.0/LSP7-Identifiable-Digital-Asset" target="_blank">NFT </a></h6>
 
             <br />
-            <div v-if="isEOA" class="warning">Token configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
+            <div v-if="isEOA" class="warning">Token NFT configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
             <p v-if="isWrongNetwork" class="warning">
                 Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este token.
             </p>
@@ -250,14 +253,14 @@
 
         <div class="events">
             <span v-if="deploying">
-                Desplegando el Smart Contract en Blockchain...<br />
+                Desplegando el NFT en Blockchain...<br />
                 <strong>Confirme todas las transacciones en la extensión de su navegador y espere hasta que se agreguen a Blockchain.</strong>
             </span>
 
             <br /><br />
             <div v-for="(event, index) in deployEvents" :key="index">
                 <span v-if="event.type === 'PROXY_DEPLOYMENT'">
-                    Smart Contract desplegado: {{ event.contractName }} ({{ event.type }}): <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/address/${event.contractAddress}`" target="_blank">{{ event.contractAddress }}</a>
+                    NFT desplegado: {{ event.contractName }} ({{ event.type }}): <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/address/${event.contractAddress}`" target="_blank">{{ event.contractAddress }}</a>
                     <br />
                     Hash de la transacción: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${event.receipt.transactionHash}`" target="_blank">{{ event.receipt.transactionHash }}</a>
                 </span>
@@ -271,6 +274,11 @@
 
             <div v-if="isSuccess" style="padding-top: 60px">
                 <h4>Proceso completado con éxito !</h4>
+            </div>
+
+            <br /><br />
+            <div class="right" v-if="isSuccess" >
+                <button @click="CloseModal">Cerrar</button>
             </div>
         </div>
     </div>
