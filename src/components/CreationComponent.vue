@@ -37,12 +37,13 @@ onMounted(async () => {
 
   console.log("INTERFACE_IDS.LSP7DigitalAsset: ", INTERFACE_IDS.LSP7DigitalAsset);
   console.log("isLSP7: ", isLSP7);
+  console.log("isLSP8: ", isLSP8);
 
   try {
-    if (isLSP7) {
+    if (isLSP7 && !isLSP8) {
       creationType.value = 'LSP7';
     } else {
-      if (isLSP8) {
+      if (isLSP7 && isLSP8) {
         creationType.value = 'LSP8';
       } else {
         console.error(`The contract: ${props.address} does not support LSP7 nor LSP8 interface id.`);
@@ -77,13 +78,13 @@ onMounted(async () => {
 <template>
   <div class="asset-wrapper">
     <div class="preview-card" :style="{ boxShadow: creationType === 'LSP7' ? 'none' : '' }" @click="$router.push(creationType === 'LSP8' ? `/collection/${address}/mint` : `/asset/${address}/mint`)">
-      <div class="image" :style="{ backgroundImage: `url(${iconUrl})`, borderRadius: creationType === 'LSP7' ? '50%' : '' }">
+      <div class="image" :style="{ backgroundImage: `url(${iconUrl})`, borderRadius: creationType === 'LSP7' ? '50%' : '50%' }">
         <small class="supply">{{ creationType === 'LSP7' ? 'LSP7' : 'NFT 2.0' }} - Cantidad: {{ totalSupply }}</small>
       </div>
 
       <div class="infos">{{ LSP4TokenName }} ({{ LSP4TokenSymbol }})</div>
     </div>
     <button v-if="creationType === 'LSP7'" class="button" style="width: 200px" @click="$router.push(`/asset/${address}/mint`)">Acuñar</button>
-    <button v-else-if="creationType === 'LSP8'" class="button" style="width: 200px" @click="$router.push(`/collection/${address}/mint`)">Mint in collection</button>
+    <button v-else-if="creationType === 'LSP8'" class="button" style="width: 200px" @click="$router.push(`/collection/${address}/mint`)">Acuñar</button>
   </div>
 </template>
