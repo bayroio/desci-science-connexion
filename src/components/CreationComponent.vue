@@ -47,11 +47,11 @@
 
     try {
       if (isLSP8) {
-        creationType.value = 'NFT 2.0';
+        creationType.value = 'NFT';
       }
       else {
         if (isLSP7) {
-          creationType.value = 'NFT';
+          creationType.value = 'NFT ';
         }
         else {
           console.error(`El contrato: ${props.address} no soporta la interface NFT.`);
@@ -84,15 +84,15 @@
 
 <template>
   <div class="asset-wrapper">
-    <div class="preview-card" :style="{ boxShadow: creationType === 'NFT' ? 'none' : '' }">
-      <div class="image" :style="{ backgroundImage: `url(${iconUrl})`, borderRadius: creationType === 'NFT' ? '50%' : '' }">
+    <div class="preview-card" :style="{ boxShadow: creationType === 'NFT ' ? 'none' : '' }">
+      <div class="image" :style="{ backgroundImage: `url(${iconUrl})`, borderRadius: creationType === 'NFT ' ? '50%' : '50%' }">
         <small class="supply">{{ creationType }} - Balance: {{ totalSupply }}</small>
       </div>
 
       <div class="infos">{{ LSP4TokenName }} ({{ LSP4TokenSymbol }})</div>
     </div>
-    <button v-if="creationType === 'NFT 2.0'" class="button" style="width: 200px" @click="showModalLSP8 = !showModalLSP8" >Acuñar</button>
-    <button v-else-if="creationType === 'NFT'" class="button" style="width: 200px" @click="showModalLSP7 = !showModalLSP7" >Acuñar</button>
+    <button v-if="creationType === 'NFT'" class="button" style="width: 200px" @click="showModalLSP8 = !showModalLSP8" >Acuñar</button>
+    <button v-else-if="creationType === 'NFT '" class="button" style="width: 200px" @click="showModalLSP7 = !showModalLSP7" >Acuñar</button>
     <ModalMintLSP7 @close="handleModalCloseLSP7" v-if="showModalLSP7" :address="props.address"/>
     <ModalMintLSP8 @close="handleModalCloseLSP8" v-if="showModalLSP8" :address="props.address"/>
 

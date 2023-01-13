@@ -48,14 +48,14 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h4 class="center"><strong>Tokenizar Archivos</strong></h4>
+    <h4 class="center"><strong>Tus papers tokenizados</strong></h4>
   </div>
   
   <div class="center">
     <!-- <button class="button" @click="showModalLSP7 = !showModalLSP7" style="width: 230px">Crear NFT</button>
     <ModalCreateTokenLSP7 @close="handleModalCloseLSP7" v-if="showModalLSP7" /> -->
 
-    <button class="button" @click="showModalLSP8 = !showModalLSP8" style="width: 230px">Crear NFT 2.0</button>
+    <button class="button" @click="showModalLSP8 = !showModalLSP8" style="width: 230px">Tokenizar un paper</button>
     <ModalCreateTokenLSP8 @close="handleModalCloseLSP8" v-if="showModalLSP8" />
   </div>
 

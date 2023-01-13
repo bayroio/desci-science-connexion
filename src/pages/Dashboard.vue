@@ -24,7 +24,7 @@
       <!--LSP12-->
       <div class="tabby-tab">
         <input type="radio" id="tab-2" name="tabby-tabs">
-        <label for="tab-2">Tokens Creados</label>
+        <label for="tab-2">Papers Tokenizados</label>
         <div class="tabby-content">
           <LSP12IssuedAssetsComponent style="margin-top: 60px" />
         </div>
@@ -33,7 +33,7 @@
       <!--LSP5-->
       <div class="tabby-tab">
         <input type="radio" id="tab-3" name="tabby-tabs">
-        <label for="tab-3">Envío/Recepción de Tokens</label>
+        <label for="tab-3">Portafolio</label>
         <div class="tabby-content">
           <LSP5ReceivedAssets style="margin-top: 60px" />
         </div>

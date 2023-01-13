@@ -92,7 +92,7 @@
           <span class="username">{{ address }}</span><br/>
 
           <br/>
-          <span><strong>Nombre: </strong></span><br/>
+          <span><strong>Username: </strong></span><br/>
           <span class="username" v-if="profileData.name"> {{ profileData.name }} </span><br/>
 
           <br/>
