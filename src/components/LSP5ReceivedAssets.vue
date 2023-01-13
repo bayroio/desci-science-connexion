@@ -100,7 +100,7 @@
 
 <template>
   <div>
-    <h4 class="center"><strong>Token de Archivos</strong></h4>
+    <h4 class="center"><strong>Portafolio</strong></h4>
   </div>
   
   <br />
