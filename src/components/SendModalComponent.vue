@@ -195,10 +195,10 @@
               </p>
             </div>
 
-            <div style="margin-top: 10px">
+            <!-- <div style="margin-top: 10px">
               <input style="margin: 5px 0px 0px -50px" type="checkbox" v-model="forceParameter" id="force" value="false" />
               <span style="margin-left: 20px"><strong>Permite la transferencia de tokens a una cuenta EOA </strong></span><br/>
-            </div>
+            </div> -->
 
             <br /><br />
             <div class="right">
