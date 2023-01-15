@@ -54,8 +54,15 @@
             icon: e.target.querySelector('input#icon').files[0],
             links: [],
             images: [],
-            assets: [e.target.querySelector('input#pdf').files[0]],
+            assets: [],
         };
+
+        //Add the pdf file
+        e.target.querySelector('input#pdf').files.forEach((value, index) => {
+            LSP4MetaData.assets.push(value);
+            console.log(value);
+            console.log(index);
+        });
 
         // Show the deploying status...
         deployEvents.value = [];
@@ -223,7 +230,7 @@
 
                         <div class="item-flex">
                             <span><strong>Archivo en PDF (paper)</strong></span><br/>
-                            <input type="file" id="pdf" accept="application/pdf" required />
+                            <input type="file" id="pdf" accept="application/pdf" required multiple/>
                         </div>
                     </div>
 
