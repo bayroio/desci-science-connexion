@@ -1,9 +1,13 @@
 <script>
+  import { ref } from 'vue';
   import _ from 'underscore';
   import ERC725js from '@erc725/erc725.js';
   import LSP3UniversalProfileMetaDataSchema from '@erc725/erc725.js/schemas/LSP3UniversalProfileMetadata.json';
   import identicon from 'ethereum-blockies-base64';
   import { IPFS_GATEWAY_BASE_URL } from '../constants';
+  import ModalUpdate from './ModalProfileComponentUpdate.vue';
+
+
 
   export default {
     data() {
@@ -68,6 +72,14 @@
   };
 </script>
 
+<script setup>
+  const showModal = ref(false);
+  const handleModalClose = () => {
+    showModal.value = false;
+  };
+</script>
+
+
 <template>
   <div>
     <h4 class="center"><strong>Datos Generales</strong></h4>
@@ -122,11 +134,12 @@
         </div>
       </td>    
     </tr>
-    <!-- <tr>
+    <tr>
       <td colspan="2" align="right">
-        <button @click="login">Actualizar</button>
+        <button class="button" @click="showModal=!showModal" style="width: 200px">Actualizar</button>
+        <ModalUpdate @close="handleModalClose" v-if="showModal" />
       </td>
-    </tr> -->
+    </tr>
   </table>
 
 </template>
