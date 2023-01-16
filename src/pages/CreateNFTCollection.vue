@@ -43,7 +43,7 @@
     icon: e.target.querySelector('input#icon').files[0],
     links: [],
     images: [],
-    assets: [],
+    assets: [e.target.querySelector('input#pdf').files[0]],
   };
 
   // Show the deploying status...
@@ -170,6 +170,7 @@
 
     <br />
     <div v-if="isEOA" class="warning">Token NFT 2.0 configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
+
     <p v-if="isWrongNetwork" class="warning">
       Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este token.
     </p>

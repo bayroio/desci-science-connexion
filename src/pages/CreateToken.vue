@@ -209,7 +209,7 @@
   <div class="center">
     <h4><strong>Documentos de investigación</strong></h4>
     <h6 style="margin-top: -25px;">basandote en: <a href="https://docs.lukso.tech/standards/nft-2.0/LSP7-Identifiable-Digital-Asset" target="_blank">LSP7 Identifiable Digital Asset</a></h6>
-
+    
     <br />
     <div v-if="isEOA" class="warning">Token NFT 2.0 configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
     <p v-if="isWrongNetwork" class="warning">
