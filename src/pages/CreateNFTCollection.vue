@@ -1,55 +1,43 @@
 <script setup>
-import { ref } from 'vue';
+  import { ref } from 'vue';
+  import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json'; // TODO change to LSP0ERC725Account
+  import { LSPFactory } from '@lukso/lsp-factory.js';
+  import ERC725js from '@erc725/erc725.js';
+  import LSP12IssuedAssetsSchema from '@erc725/erc725.js/schemas/LSP12IssuedAssets.json'; // https://docs.lukso.tech/tools/erc725js/schemas
+  import LSP8Mintable_0_5_0 from '../contracts/LSP8Mintable_0_5_0.json';
+  import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../constants';
+  import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../network';
 
-// LUKSO libs
-import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json'; // TODO change to LSP0ERC725Account
+  const deploying = ref(false);
+  const error = ref(false);
+  const isEOA = ref(false);
+  const deployEvents = ref([]);
+  const isSuccess = ref(false);
+  const isWrongNetwork = ref(false);
 
-// https://docs.lukso.tech/tools/lsp-factoryjs/getting-started
-import { LSPFactory } from '@lukso/lsp-factory.js';
+  // Form fields
+  const tokenName = ref('');
+  const tokenSymbol = ref('');
+  const description = ref('');
 
-// https://docs.lukso.tech/tools/erc725js/getting-started
-import ERC725js from '@erc725/erc725.js';
-import LSP12IssuedAssetsSchema from '@erc725/erc725.js/schemas/LSP12IssuedAssets.json'; // https://docs.lukso.tech/tools/erc725js/schemas
-
-import LSP8Mintable_0_5_0 from '../contracts/LSP8Mintable_0_5_0.json';
-
-import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../constants';
-import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../network';
-
-const deploying = ref(false);
-const error = ref(false);
-const isEOA = ref(false);
-const deployEvents = ref([]);
-const isSuccess = ref(false);
-const isWrongNetwork = ref(false);
-
-// Form fields
-const tokenName = ref('');
-const tokenSymbol = ref('');
-const description = ref('');
-
-async function onSubmit(e) {
-  // Check network
-  try {
-    isWrongNetwork.value = await isLuksoNetwork();
-    if (isWrongNetwork.value) {
+  async function onSubmit(e) {
+    // Check network
+    try {
+      isWrongNetwork.value = await isLuksoNetwork();
+      if (isWrongNetwork.value) {
+        return;
+      }
+    } catch (err) {
+      console.warn(err);
+      error.value = err.message;
       return;
     }
-  } catch (err) {
-    console.warn(err);
-    error.value = err.message;
-    return;
-  }
 
-  // show the deploying status...
-  deployEvents.value = [];
-  deploying.value = true;
-
-  // GET the address from the browser extension
+  // Get the address from the browser extension
   const accounts = await web3.eth.getAccounts();
   const account = accounts[0];
 
-  // CONSTRUCT the meta data
+  // Create the meta data
   const LSP4MetaData = {
     description: description.value,
     icon: e.target.querySelector('input#icon').files[0],
@@ -58,16 +46,18 @@ async function onSubmit(e) {
     assets: [e.target.querySelector('input#pdf').files[0]],
   };
 
-  const chainId = await web3.eth.getChainId();
+  // Show the deploying status...
+  deployEvents.value = [];
+  deploying.value = true;
 
   // l14 relayer uses smart contracts v0.5.0
+  const chainId = await web3.eth.getChainId();
   const version = chainId === CHAIN_IDS.L14 ? LSP8Mintable_0_5_0.bytecode : null;
 
-  // INITIATE the LSPFactory
+  // Inititate the LSPFactory
   const factory = new LSPFactory(web3.currentProvider, { chainId });
 
-  // DEPLOY the LSP8 contract
-  // https://docs.lukso.tech/tools/lsp-factoryjs/classes/lsp8-identifiable-digital-asset
+  // Deploy the LSP8 contract, https://docs.lukso.tech/tools/lsp-factoryjs/classes/lsp8-identifiable-digital-asset
   const contracts = await factory.LSP8IdentifiableDigitalAsset.deploy(
     {
       name: tokenName.value,
@@ -105,38 +95,34 @@ async function onSubmit(e) {
     return;
   }
 
+  //--- Add the smart contract to Universal Profile ---\\
   const deployedLSP8IdentifiableDigitalAssetContract = contracts.LSP8IdentifiableDigitalAsset;
-
-  // ADD creations to UP
   const options = {
     ipfsGateway: IPFS_GATEWAY_BASE_URL,
   };
-
   const erc725LSP12IssuedAssets = new ERC725js(LSP12IssuedAssetsSchema, accounts[0], window.web3.currentProvider, options);
 
-  // GET the current issued assets
+  // Get the current issued assets
   let LSP12IssuedAssets;
   try {
     LSP12IssuedAssets = await erc725LSP12IssuedAssets.getData('LSP12IssuedAssets[]');
-  } catch (err) {
-    // Is EOA
-    // Load all assets that were stored in local storage
+  }
+  catch (err) {
+    // Is EOA, Load all assets that were stored in local storage
     LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
   }
 
-  // add new asset
+  // Add new asset
   LSP12IssuedAssets.value.push(deployedLSP8IdentifiableDigitalAssetContract.address);
 
   // if EOA, also add new asset list to localStorage
   let bytecode = await web3.eth.getCode(accounts[0]);
-
   if (bytecode === '0x') {
     localStorage.setItem('issuedAssets', JSON.stringify(LSP12IssuedAssets));
   }
 
-  // https://docs.lukso.tech/standards/smart-contracts/interface-ids
+  //Encode the new LSP12
   const LSP8InterfaceId = '0x49399145';
-
   const encodedErc725Data = erc725LSP12IssuedAssets.encodeData([
     {
       keyName: 'LSP12IssuedAssets[]',
@@ -149,13 +135,14 @@ async function onSubmit(e) {
     },
   ]);
 
-  // SEND transaction
+  //Add the LSP12 to the universal profile
   try {
     const profileContract = new window.web3.eth.Contract(LSP0ERC725Account.abi, accounts[0]);
     const receipt = await profileContract.methods['setData(bytes32[],bytes[])'](encodedErc725Data.keys, encodedErc725Data.values).send({ from: accounts[0] });
 
     deployEvents.value.push({ receipt, type: 'TRANSACTION', functionName: 'setData' });
-  } catch (err) {
+  }
+  catch (err) {
     console.warn(err);
     error.value = err.message;
     return;
@@ -171,46 +158,53 @@ async function onSubmit(e) {
 </script>
 
 <template>
-  <a class="back" @click="$router.push('/')">&lt;</a>
+  <!-- <a class="back" @click="$router.push('/')">&lt;</a> -->
 
   <p class="warning" v-if="error">
     {{ error }}
   </p>
 
   <div class="center">
-    <h2>Tokeniza uno de tus papers de investigación, basandote en un <a href="https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset" target="_blank">NFT 2.0</a> collection</h2>
+    <h4><strong>Documentos de investigación</strong></h4>
+    <h6 style="margin-top: -25px;">basandote en: <a href="https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset" target="_blank">LSP8 Identifiable Digital Asset</a></h6>
 
     <br />
-    <br />
+    <div v-if="isEOA" class="warning">Token NFT 2.0 configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
 
-    <div v-if="isEOA" class="warning">Tu paper ha sido tokenizado a través de un NFT 2.0 , configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
     <p v-if="isWrongNetwork" class="warning">
-      Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este NFT
-      collection.
+      Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este token.
     </p>
-    <br />
-    <br />
 
-    <form v-if="!deploying && deployEvents.length === 0" @submit.prevent="onSubmit" class="left">
+    <br />
+    <form v-if="!deploying" @submit.prevent="onSubmit" class="left">
       <fieldset>
-        <label for="name">Nombre del Token (no el título de tu paper)</label>
-        <input type="text" placeholder="Mi Token" v-model="tokenName" id="name" required />
+        <div class="formfields">
+          <div class="item-flex">
+            <span><strong>Nombre del Token: </strong></span><br/>
+            <input type="text" placeholder="Mi Token" v-model="tokenName" id="name" required />
+          </div>
+          <div class="item-flex">
+            <span><strong>Símbolo del Token (entre 4 y 5 caracteres)</strong></span><br/>
+            <input type="text" placeholder="MYTOK" id="symbol" v-model="tokenSymbol" required />
+          </div>
+        </div>
 
-        <label for="symbol">Símbolo del Token (entre 4 y 5 caracteres)</label>
-        <input type="text" placeholder="MYTOK" id="symbol" v-model="tokenSymbol" required />
+        <div class="item-flex">
+          <span><strong>Descripción (pequeño resumen del documentp)</strong></span><br/>
+          <textarea placeholder="El Token que cambiará el mundo..." id="description" required></textarea>
+        </div>
 
-        <label for="description">Descripción (puede ser un pequeño resumen de tu paper)</label>
-        <textarea placeholder="El Token que cambiará el mundo..." id="description" required></textarea>
+        <div class="formfields">
+          <div class="item-flex">
+            <span><strong>Ícono del Token (representación íconografica)</strong></span><br/>
+            <input type="file" id="icon" accept="image/*" required />
+          </div>
+        </div>
 
-        <label for="icon">Ícono del Token (representación íconografica de tu paper)</label>
-        <input type="file" id="icon" accept="image/*" required />
-
-        <label for="pdf">Paper en PDF</label>
-        <input type="file" id="pdf" accept="application/pdf" required />
-
-        <br /><br />
-
-        <input class="button-primary" type="submit" value="Deploy NFT Collection" />
+        <br />
+        <div class="right">
+          <button type="submit">Despliega el Token</button>
+        </div>
       </fieldset>
     </form>
   </div>
@@ -231,13 +225,13 @@ async function onSubmit(e) {
       </span>
       <br />
       <span v-if="event.type === 'TRANSACTION'">
-        Se llamó a la función: {{ event.functionName }}()<br />
+        Función llamada: {{ event.functionName }}()<br />
         Hash de la transacción: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${event.receipt.transactionHash}`" target="_blank">{{ event.receipt.transactionHash }}</a>
       </span>
     </div>
 
     <div v-if="isSuccess" style="padding-top: 60px">
-      <h4>🎉 Éxito !</h4>
+      <h4>Proceso completado con éxito !</h4>
     </div>
   </div>
 </template>

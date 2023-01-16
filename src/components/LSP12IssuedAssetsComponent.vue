@@ -6,9 +6,20 @@ import { onMounted, ref } from 'vue';
 
 import { IPFS_GATEWAY_BASE_URL } from '../constants';
 import CreationComponentVue from './CreationComponent.vue';
+import ModalCreateTokenLSP7 from './ModalCreateTokenLSP7Component.vue';
+import ModalCreateTokenLSP8 from './ModalCreateTokenLSP8Component.vue';
 
 const addresses = ref([]);
 const isLoading = ref(false);
+
+const showModalLSP7 = ref(false);
+const handleModalCloseLSP7 = () => {
+  showModalLSP7.value = false;
+};
+const showModalLSP8 = ref(false);
+const handleModalCloseLSP8 = () => {
+  showModalLSP8.value = false;
+};
 
 onMounted(async () => {
   isLoading.value = true;
@@ -37,11 +48,27 @@ onMounted(async () => {
 
 <template>
   <div>
-    <h2>Tus Papers Tokenizados</h2>
-    <img v-if="addresses.length === 0 && !isLoading" class="emptyLogo" src="../assets/empty-up.png" alt="No hay ningún paper tokenizado" />
-    <div v-if="addresses.length === 0 && !isLoading">No existe ningún paper tokenizado hasta ahora</div>
+    <h4 class="center"><strong>Tus papers tokenizados</strong></h4>
+  </div>
+  
+  <div class="center">
+    <!-- <button class="button" @click="showModalLSP7 = !showModalLSP7" style="width: 230px">Crear NFT</button>
+    <ModalCreateTokenLSP7 @close="handleModalCloseLSP7" v-if="showModalLSP7" /> -->
+
+    <button class="button" @click="showModalLSP8 = !showModalLSP8" style="width: 230px">Tokenizar un paper</button>
+    <ModalCreateTokenLSP8 @close="handleModalCloseLSP8" v-if="showModalLSP8" />
+  </div>
+
+  <br />
+  <div class="center" v-if="addresses.length === 0 && !isLoading">No existe ningún NFT hasta ahora</div>
+
+  <br />
+  <div class="center" style="display: block">
+    <img v-if="addresses.length === 0 && !isLoading" class="emptyLogo center" src="../assets/empty-up.png" alt="No hay ningún paper tokenizado" />
     <div v-else class="grid">
       <CreationComponentVue :address="address" v-for="address in addresses" :key="address" />
     </div>
   </div>
+
 </template>
+
