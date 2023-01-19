@@ -74,10 +74,10 @@
 <template>
   <div class="asset-wrapper">
     <div class="preview-card">
-      <div class="image" :style="{ backgroundImage: `url(${iconUrl})` }"></div>
+      <div class="image" :style="{ backgroundImage: `url(${iconUrl})`, borderRadius: isLsp7 ? '50%' : '50%'  }"></div>
       <div class="infos">{{ LSP4TokenName }} ({{ LSP4TokenSymbol }})</div>
     </div>
-    <button class="button" @click="showModal = !showModal">Enviar</button>
+    <button class="button" style="width: 200px" @click="showModal = !showModal">Enviar</button>
     <ModalSendComponent @close="handleModalClose" :token-id="tokenId" :is-lsp7="false" :is-lsp8="true" v-if="showModal" :asset-address="props.address" :asset-name="LSP4TokenName" />
   </div>
 </template>

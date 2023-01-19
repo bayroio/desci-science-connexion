@@ -99,7 +99,7 @@
 <template>
   <div class="asset-wrapper">
     <div class="preview-card" :style="{ boxShadow: isLsp7 ? 'none' : '' }">
-      <div class="image" :style="{ backgroundImage: `url(${iconUrl})`, borderRadius: isLsp7 ? '50%' : '' }">
+      <div class="image" :style="{ backgroundImage: `url(${iconUrl})`, borderRadius: isLsp7 ? '50%' : '50%' }">
         <small class="supply"> Balance: {{ balanceOf }} </small>
       </div>
 
