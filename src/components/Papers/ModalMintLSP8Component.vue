@@ -178,6 +178,7 @@
         //Guardamos los valores en las variables globales de la página
         LSP4TokenName.value = LSP4DigitalAsset[0].value;
         LSP4TokenSymbol.value = LSP4DigitalAsset[1].value;
+        icon.value = '';
     });
 
 </script>
