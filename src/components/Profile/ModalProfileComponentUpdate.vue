@@ -47,9 +47,8 @@
             });
 
             //Validamos los tags
-            console.debug(this.tags);
             if (this.tags.length == 0)
-                this.tags = new string[0];
+                this.tags = [''];
 
             //Una vez que se ha cargado el perfil, filtramos solo la sección del perfil (LSP3Profile)
             let metaData;
@@ -78,11 +77,15 @@
 
                     //obtenemos el texto y quitamos los espacios al inicio y final del texto
                     var val = event.target.value.trim()
+
                     //Validamos si el texto es mayor a cero
                     if (val.length > 0) {
-                        console.debug(this.tags);
+
                         //Agregamos el texto a la variable tags
-                        this.tags.push(val);
+                        if (this.tags == undefined)
+                            this.tags = [val];
+                        else
+                            this.tags.push(val);
 
                         //Limpiamos el valor del campo de entrada
                         event.target.value = '';
@@ -199,7 +202,7 @@
   <div class="modal">
     <div class="modal-content" @click.stop="">
 
-        <p class="warning" v-if="error">
+        <p class="warning center" v-if="error">
             {{ error }}
         </p>
 
