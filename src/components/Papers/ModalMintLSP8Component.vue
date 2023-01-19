@@ -101,11 +101,19 @@
             return;
         }
 
+        //Agregamos los archivos PDF al JSON
+        const filespdf = [];
+        e.target.querySelector('input#pdf').files.forEach((value, index) => {
+            filespdf.push(value);
+            console.log(value);
+            console.log(index);
+        });
+
         //Creamos y actualizamos el token, con los datos proporcionados en el formulario por el usuario
         const metadata = await LSP4DigitalAssetMetadata.uploadMetadata({
                 description: description.value,                                     //Actualizamos la descripción
                 icon: e.target.querySelector('input#icon').files[0],                //Actualizamos el icono
-                assets: [e.target.querySelector('input#pdf').files[0]],             //Actualizamos los PDF
+                assets: filespdf,                                                   //Actualizamos los PDF
             },
             {
                 ipfsGateway: IPFS_GATEWAY_API_BASE_URL,
@@ -214,7 +222,7 @@
 
                         <div class="item-flex">
                             <span><strong>Archivo en PDF (paper)</strong></span><br/>
-                            <input type="file" id="pdf" accept="application/pdf" required />
+                            <input type="file" id="pdf" accept="application/pdf" required multiple/>
                         </div>   
                     </div>
 
