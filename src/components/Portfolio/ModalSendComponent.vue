@@ -4,7 +4,7 @@
   /* */ 
  -->
  
- <!-- Importamos las librerias para recuperar transferir los tokens -->
+ <!-- Importamos las librerías para recuperar transferir los tokens -->
  <script setup>
   import { onMounted, defineProps, defineEmits, ref } from 'vue';
   import { isAddress } from 'web3-utils';
@@ -20,12 +20,12 @@
     emit('close', wasAssetSent.value);
   };
 
-  //Definimos las variables recibidas como parametros
+  //Definimos las variables recibidas como parámetros
   const props = defineProps({
     assetAddress: String,                     //Variable que contiene la dirección del Token (NFT)//
     assetName: String,                        //Variable que contiene el nombre del Token (NFT)//
-    isLsp7: Boolean,                          //Bandera que determina si el token es compatible con el estandar LSP7//
-    isLsp8: Boolean,                          //Bandera que determina si el token es compatible con el estandar LSP8//
+    isLsp7: Boolean,                          //Bandera que determina si el token es compatible con el estándar LSP7//
+    isLsp8: Boolean,                          //Bandera que determina si el token es compatible con el estándar LSP8//
     tokenId: String,                          //Variable que contiene el id del Token (NFT)//
   });
 
@@ -40,7 +40,7 @@
   const isL14 = ref(false);                   //Bandera que determina si se utiliza L14//
   const wasAssetSent = ref(false);            //Bandera que determina si el token fue enviado//
   const assetRecipient = ref('');             //Variable que contiene la dirección del activo recibido
-  const amountToSend = ref(1);                //Variable que señala el numero de elementos a trnaferir, por default 1
+  const amountToSend = ref(1);                //Variable que señala el número de elementos a transferir, por default 1
   const txHash = ref('');                     //Variable que establece el hash de la transacción
 
   //Función que cierra el modal y hace un refresh de la página
@@ -71,7 +71,7 @@
     }
   });
 
-  //Función que envia el tokem 
+  //Función que envía el token
   async function sendAsset() {
 
     //Obtenemos el id de la cadena para determinar si se usa L14 o L16
@@ -111,7 +111,7 @@
       return;
     }
     
-    //Validamos si la cuenta recepetora es del tipo EOA
+    //Validamos si la cuenta receptora es del tipo EOA
     else if (recipientBytecode === '0x' && forceParameter.value === false) {
       isRecepientEOA.value = true;
       return;
@@ -122,14 +122,14 @@
     // Obtenemos las cuentas de la extensión
     const accounts = await web3.eth.getAccounts();
       
-    // Obtenemos la cuenta con la que se esta logueado, la guardamos en las varibles globales de la página
+    // Obtenemos la cuenta con la que se está autentificado, la guardamos en las variables globales de la página
     const account = accounts[0]; 
 
     //Comenzamos con el proceso de transferencia
     txHash.value = '';
     try {
 
-      //Validamos de que tipo de estandar se trata
+      //Validamos de que tipo de estándar se trata
       if (props.isLsp8) {
         
         //Llamamos a la función de transferir
@@ -152,7 +152,7 @@
         await sendLSP7Token(account, props.assetAddress);
       }
 
-      //Indicamos que se culminado el proceso de envio
+      //Indicamos que se culminado el proceso de envío
       wasAssetSent.value = true;
       emit('tokens-sent');
       isLoading.value = true;
@@ -167,7 +167,7 @@
     }
   }
 
-  //Función que envia token creados bajo el estandar LSP7
+  //Función que envía tokens creados bajo el estándar LSP7
   async function sendLSP7Token(accountAddress, assetAddress) {
 
     //Creamos el smart contract para transferir el token
@@ -175,7 +175,7 @@
 
     const from = accountAddress;                                                    //Cuenta que transfiere el token
     const to = assetRecipient.value;                                                //Cuenta que recibe el token
-    const amount = web3.utils.toWei(amountToSend.value.toString());                 //Cantidad que sera transferida, por default 1
+    const amount = web3.utils.toWei(amountToSend.value.toString());                 //Cantidad que será transferida, por default 1
     const force = forceParameter.value;                                             //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
     const data = '0x';
 
@@ -186,7 +186,7 @@
     txHash.value = receipt.transactionHash;
   }
 
-  //Función que envia token creados bajo el estandar LSP8
+  //Función que envía tokens creados bajo el estándar LSP8
   async function sendLSP8Token(accountAddress, assetAddress) {
 
     //Creamos el smart contract para transferir el token

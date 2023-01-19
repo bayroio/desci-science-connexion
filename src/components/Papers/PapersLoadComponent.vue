@@ -1,10 +1,10 @@
 <!-- 
   /* */ 
-  /* Pantalla que carga los papers del perfil, recibe como parametros las direcciones de los NFT */
+  /* Pantalla que carga los papers del perfil, recibe como parámetros las direcciones de los NFT */
   /* */ 
  -->
  
- <!-- Importamos las librerias para recuperar leer los papers y cargamos los componentes que permiten acuñar los NFT -->
+ <!-- Importamos las librerías para recuperar y leer los papers, así como también cargamos los componentes que permiten acuñar los NFT -->
  <script setup>
   import { onMounted, ref, defineProps } from 'vue';
   import ERC725js from '@erc725/erc725.js';
@@ -17,8 +17,8 @@
   //Definimos las variables que se utilizaran dentro de la página//
   const props = defineProps({ address: String });                           //Variable que recibe las direcciones de los NFT creados//
   const LSP4TokenName = ref('');                                            //Variable que almacena el nombre del Token//
-  const LSP4TokenSymbol = ref('');                                          //Variable que almacena el simbolo del Token//
-  const iconUrl = ref('');                                                  //Variable que almacena el icon del Token//
+  const LSP4TokenSymbol = ref('');                                          //Variable que almacena el símbolo del Token//
+  const iconUrl = ref('');                                                  //Variable que almacena el icono del Token//
   const LSP4Metadata = ref();                                               //Variable que almacena el detalle del Token//
   const totalSupply = ref();                                                //Variable que almacena el total de Token acuñados//
   const creationType = ref('unknown');                                      //Variable que almacena el tipo de Token (FT o NFT)//
@@ -68,13 +68,13 @@
       console.error(`No se puede encontrar la interface del contrato: ${props.address}`);
     }
 
-    //Obtenemos los datos del token, los parametros son el schema, la dirección del token, el provider de la extension y la ruta de IPFS definida 
+    //Obtenemos los datos del token, los parámetros son el esquema, la dirección del token, el provider de la extensión y la ruta de IPFS definida 
     //en el archivo de constants
     const erc725Asset = new ERC725js(LSP4DigitalAssetSchema, props.address, window.web3.currentProvider, {
         ipfsGateway: IPFS_GATEWAY_BASE_URL,
     });
     
-    //Filtramos unicamente los datos que nos interesan (Nombre, Simbolo y Metadata (solo el icono))
+    //Filtramos únicamente los datos que nos interesan (Nombre, Símbolo y Metadata (solo el icono))
     const LSP4DigitalAsset = await erc725Asset.fetchData(['LSP4TokenName', 'LSP4TokenSymbol', 'LSP4Metadata']);
     LSP4TokenName.value = LSP4DigitalAsset[0].value;
     LSP4TokenSymbol.value = LSP4DigitalAsset[1].value;

@@ -1,10 +1,10 @@
 <!-- 
   /* */ 
-  /* Pantalla que permite la transferencia del NFT bajo al estandar LSP7 */
+  /* Pantalla que permite la transferencia del NFT bajo al estándar LSP7 */
   /* */ 
  -->
 
- <!-- Importamos las librerias para transferir el NFT bajo el estandar LSP7, así como el componente de envio -->
+ <!-- Importamos las librerías para transferir el NFT bajo el estándar LSP7, así como el componente de envío -->
 <script setup>
   import { onMounted, ref, defineProps, defineEmits } from 'vue';
   import ERC725js from '@erc725/erc725.js';
@@ -18,7 +18,7 @@
   const handleModalClose = () => {
     showModal.value = false;
 
-    //Leemos el token id que se paso como parametro para descontarlo
+    //Leemos el token id que se recibió como parámetro para descontarlo
     if (!parseInt(balanceOf.value)) {
       emit('remove-asset', { assetAddress: props.address });
     }
@@ -33,8 +33,8 @@
   const LSP4Metadata = ref();                     //Variable que guarda el Metadata del Token//
   const iconUrl = ref('');                        //Variable que guarda la URL del Token//
   const balanceOf = ref();                        //Variable que guarda el saldo de la cuenta //
-  const isLsp7 = ref(false);                      //Bandera que determina si se trata de un token de estandar LSP7 (observación, los token NFT son LSP7 y LSP8)//
-  const isLsp8 = ref(false);                      //Bandera que determina si se trata de un token de estandar LSP8 (solo los NFT 2.0)//
+  const isLsp7 = ref(false);                      //Bandera que determina si se trata de un token de estándar LSP7 (observación, los token NFT son LSP7 y LSP8)//
+  const isLsp8 = ref(false);                      //Bandera que determina si se trata de un token de estándar LSP8 (solo los NFT 2.0)//
   const showModal = ref(false);                   //Bandera que determina si se muestra el modal de transferir//
 
   //Acciones que se realizan al cargar la página//
@@ -47,7 +47,7 @@
   async function handleTokensSent() {
     await refreshToken();
 
-    //Si se trata de un token EOA, actualizamos el numero total acuñado en el LocalStorage
+    //Si se trata de un token EOA, actualizamos el número total acuñado en el LocalStorage
     if (!parseInt(balanceOf.value) && localStorage.getItem('receivedAssets')) {
 
       //Leemos los datos del local storage
@@ -69,7 +69,7 @@
       ipfsGateway: IPFS_GATEWAY_BASE_URL,
     });
 
-    //Filtramos unicamente los datos que requerimos (Nombre, simbolo, metadata) 
+    //Filtramos únicamente los datos que requerimos (Nombre, símbolo, metadata) 
     const LSP4DigitalAsset = await erc725Asset.fetchData(['LSP4TokenName', 'LSP4TokenSymbol', 'LSP4Metadata']);
     LSP4TokenName.value = LSP4DigitalAsset[0].value;
     LSP4TokenSymbol.value = LSP4DigitalAsset[1].value;
@@ -79,10 +79,10 @@
     // Obtenemos las cuentas de la extensión
     const accounts = await web3.eth.getAccounts();
 
-    // Obtenemos la cuenta con la que se esta logueado
+    // Obtenemos la cuenta con la que se está autentificado
     const account = accounts[0]; 
 
-    //Creamos el contrato, para trasferir el nft
+    //Creamos el contrato, para trasferir el NFT
     const lsp4DigitalAssetContract = new window.web3.eth.Contract(LSP7DigitalAsset.abi, props.address);
 
     //Obtenemos el saldo de la cuenta

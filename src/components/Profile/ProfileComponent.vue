@@ -1,10 +1,10 @@
 <!-- 
   /* */ 
-  /* Pantalla principal del perfil, muestra la información genral del perfil */
+  /* Pantalla principal del perfil, muestra la información general del perfil */
   /* */ 
  -->
 
-<!-- Importamos las librerias para recuperar el perfil y cargamos el componente para actualizar el perfil -->
+<!-- Importamos las librerías para recuperar el perfil y cargamos el componente para actualizar el perfil -->
 <script>
   import { ref } from 'vue';
   import _ from 'underscore';
@@ -34,15 +34,15 @@
       // Obtenemos las cuentas de la extensión
       const accounts = await web3.eth.getAccounts();
       
-      // Obtenemos la cuenta con la que se esta logueado, la guardamos en las varibles globales de la página
+      // Obtenemos la cuenta con la que se está autentificado, la guardamos en las variables globales de la página
       const account = accounts[0]; 
       this.address = account;
       this.profileData.address = account;
 
-      //Obtenemos la imagen por default de la cuenta logueada
+      //Obtenemos la imagen (default) de la cuenta autentificada
       this.profileData.identicon = identicon(account);
       
-      //Obtenemos los datos del perfil, los parametros son el schema, la cuenta, el provider de la extension y la ruta de IPFS definida 
+      //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
       //en el archivo de constants
       const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
         ipfsGateway: IPFS_GATEWAY_BASE_URL,
@@ -66,7 +66,7 @@
         ...metaData.value.LSP3Profile,
       };
 
-      //Validamos si la imagen esta dentro del rango de 200 y 500 de largo (estandar definido), 
+      //Validamos si la imagen está dentro del rango de 200 y 500 de largo (estándar definido), 
       //si es así, colocamos la imagen como la imagen del perfil
       this.profileData.profileImage = _.find(this.profileData.profileImage, (image) => {
         if (image.width >= 200 && image.width <= 500) 

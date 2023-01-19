@@ -1,10 +1,10 @@
 <!-- 
   /* */ 
-  /* Pantalla que permite la creacion del NFT bajo al estandar LSP8 */
+  /* Pantalla que permite la creación del NFT bajo el estándar LSP8 */
   /* */ 
  -->
 
-<!-- Importamos las librerias para crear los NFT bajo el estandar LSP8 -->
+<!-- Importamos las librerías para crear los NFT bajo el estándar LSP8 -->
 <script setup>
     import { ref } from 'vue';
     import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json';
@@ -37,11 +37,11 @@
       window.location.reload();
     }
 
-    //Función que crea el tokem
+    //Función que crea el token
     async function onSubmit(e) {
         console.log("Entrando a onsubmit...")
         
-        //Validamos si se encuentra activa la red de lukso, si no esta activa, mostramos el error 
+        //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
         try {
             isWrongNetwork.value = await isLuksoNetwork();
             if (isWrongNetwork.value) {
@@ -57,10 +57,10 @@
         // Obtenemos las cuentas de la extensión
         const accounts = await web3.eth.getAccounts();
 
-        // Obtenemos la cuenta con la que se esta logueado
+        // Obtenemos la cuenta con la que se está autentificado
         const account = accounts[0];
 
-        // Creamos la estructura JSON del metadata para crer el NFT
+        // Creamos la estructura JSON del metadata para crear el NFT
         const LSP4MetaData = {
             description: description.value,
             icon: e.target.querySelector('input#icon').files[0],
@@ -69,23 +69,23 @@
             assets: [],
         };
 
-        //Agregamos los archivos pdf al JSON
+        //Agregamos los archivos PDF al JSON
         e.target.querySelector('input#pdf').files.forEach((value, index) => {
             LSP4MetaData.assets.push(value);
             console.log(value);
             console.log(index);
         });
 
-        //Iniciamos las variables de actualizacion
+        //Iniciamos las variables de actualización
         deployEvents.value = [];
         deploying.value = true;
         isSuccess.value = false;
 
-        //Obtenemos el id de la cadena y la version del Token
+        //Obtenemos el id de la cadena y la versión del Token
         const chainId = await web3.eth.getChainId();
         const version = chainId === CHAIN_IDS.L14 ? LSP8Mintable_0_5_0.bytecode : null;
 
-        //Configuramos el estandar para crear el token 
+        //Configuramos el estándar para crear el token 
         const factory = new LSPFactory(web3.currentProvider, { chainId });
 
         //Procedemos a crear el token 
@@ -95,9 +95,9 @@
             contracts = await factory.LSP8IdentifiableDigitalAsset.deploy(
             {
                 name: tokenName.value,                      //Nombre del token, de acuerdo al formulario
-                symbol: tokenSymbol.value,                  //Nombre del simbolo, de acuerdo al formulario
-                controllerAddress: account,                 //Propietario del token de acuerdo al usurio logueado
-                creators: [account],                        //Establecemos como creador al usurio logueado
+                symbol: tokenSymbol.value,                  //Nombre del símbolo, de acuerdo al formulario
+                controllerAddress: account,                 //Propietario del token de acuerdo al usuario autentificado
+                creators: [account],                        //Establecemos como creador al usuario autentificado
                 digitalAssetMetadata: LSP4MetaData,         //Establecemos en el activo el valor del metadada creado
             },
             {
@@ -138,19 +138,19 @@
             return;
         }
 
-        //Validamos si el proceso fue realizado con exito, si no, se reporta al usuario        
+        //Validamos si el proceso fue realizado con éxito, si no, se reporta al usuario        
         if (!contracts && !contracts.LSP8IdentifiableDigitalAsset) {
             error.value = 'Error deploying LSP8IdentifiableDigitalAsset';
             return;
         }
 
-        //Obtenemos los token del usuario, los parametros son el schema, la dirección del token, el provider de la extension y la ruta de IPFS definida 
+        //Obtenemos los tokens del usuario, los parámetros son el esquema, la dirección del token, el provider de la extensión y la ruta de IPFS definida 
         //en el archivo de constants
         const erc725LSP12IssuedAssets = new ERC725js(LSP12IssuedAssetsSchema, accounts[0], window.web3.currentProvider, {
             ipfsGateway: IPFS_GATEWAY_BASE_URL,
         });
 
-        //Filtramos unicamente los token creados por el usuario
+        //Filtramos únicamente los tokens creados por el usuario
         let LSP12IssuedAssets;
         try {
             LSP12IssuedAssets = await erc725LSP12IssuedAssets.getData('LSP12IssuedAssets[]');
@@ -167,11 +167,11 @@
             isEOA.value = true;
         }
 
-        //Obtenemos el nuevo token y lo agregamos a los token del usuario
+        //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
         const deployedLSP8IdentifiableDigitalAssetContract = contracts.LSP8IdentifiableDigitalAsset;
         LSP12IssuedAssets.value.push(deployedLSP8IdentifiableDigitalAssetContract.address);
 
-        //Códificamos los token (que incluyen el nuevo token)
+        //Codificamos los tokens (que incluyen el nuevo token)
         const LSP8InterfaceId = '0x49399145';
         const encodedErc725Data = erc725LSP12IssuedAssets.encodeData([
             {
@@ -185,7 +185,7 @@
             },
         ]);
 
-        //Asignamos los token al usuario (importante, al asignarnos se remplazan los anteriores, por tal motivo se agrega el nuevo token al arreglo de tokens)
+        //Asignamos los tokens al usuario (importante, al asignarnos se remplazan los anteriores, por tal motivo se agrega el nuevo token al arreglo de tokens)
         try {
             const profileContract = new window.web3.eth.Contract(LSP0ERC725Account.abi, accounts[0]);
             const receipt = await profileContract.methods['setData(bytes32[],bytes[])'](encodedErc725Data.keys, encodedErc725Data.values).send({ from: accounts[0] });
@@ -198,7 +198,7 @@
             return;
         }
 
-        //Señalamos que el proceso a finalizado correctamente
+        //Señalamos que el proceso ha finalizado correctamente
         isSuccess.value = true;
     }
 </script>

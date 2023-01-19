@@ -37,7 +37,7 @@
       //Validamos si hay un usuario autentificado, obtenemos primero las cuentas de la extensión
       const accounts = await ethereum.request({ method: 'eth_accounts' });
       if (!accounts.length) {
-        //Cambiamos el estatus de la bandera, para mostrar pantalla de login en la extensión//  
+        //Cambiamos el estatus de la bandera, para mostrar pantalla de acceso en la extensión//  
         this.requiresLogin = true;
         return;
       } 
@@ -49,11 +49,10 @@
     methods: {
       //Función de acceso
       async login() {
-        //Obtenemos la cuenta con la que se esta tratando de acceder
+        //Obtenemos la cuenta con la que se está tratando de acceder
         const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
 
-        //Si hay respuesta check if any number of accounts was returned
-        // IF go to the dashboard
+        //Si hay respuesta vamos a la pantalla principal
         if (accounts.length) this.$router.push('/');
         else this.error = 'No account was selected!';
       },

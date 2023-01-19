@@ -4,7 +4,7 @@
   /* */ 
  -->
  
- <!-- Importamos las librerias para recuperar los papers y cargamos los componentes que permiten transferir un NFT -->
+ <!-- Importamos las librerías para recuperar los papers y cargamos los componentes que permiten transferir un NFT -->
  <script setup>
   import { onMounted, ref } from 'vue';
   import ERC725js from '@erc725/erc725.js';
@@ -21,7 +21,7 @@
 
   //Funciones utilizadas para el cierre del modal
   async function handleRemoveAsset({ tokenId, assetAddress }) {
-    //Actualizamos el estatus de la variable de cargaZ
+    //Actualizamos el estatus de la variable de carga
     isLoading.value = true;
 
     //Establecemos el token que se transfirió
@@ -58,20 +58,20 @@
 
   //Acciones que se realizan al cargar la página//  
   onMounted(async () => {
-    //Actualizamos el estatus de la variable de cargaZ
+    //Actualizamos el estatus de la variable de carga
     isLoading.value = true;
 
     // Obtenemos las cuentas de la extensión
     const accounts = await window.web3.eth.getAccounts();
     
-    // Obtenemos la cuenta con la que se esta logueado, la guardamos en las varibles globales de la página
+    // Obtenemos la cuenta con la que se está autentificado, la guardamos en las variables globales de la página
     const account = accounts[0]; 
     
     try {
-      //Obtenemos los datos del perfil, los parametros son el schema, la cuenta, el provider de la extension 
+      //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión 
       const erc725LSP12IssuedAssets = new ERC725js(LSP5ReceivedAssetsSchema, account, window.web3.currentProvider);
 
-      //Filtramos unicamente los token que se pueden transferir
+      //Filtramos únicamente los token que se pueden transferir
       const LSP5ReceivedAssets = await erc725LSP12IssuedAssets.getData('LSP5ReceivedAssets[]');
       receivedAssets.value = LSP5ReceivedAssets.value;
     } 
@@ -81,7 +81,7 @@
       receivedAssets.value = LSP5ReceivedAssets.value;
     }
 
-    //Filtramos los token de acuerdo al token que buscamos
+    //Filtramos los tokens de acuerdo al token que buscamos
     receivedAssets.value.forEach(async (receivedAsset) => {
       
       //Determinamos para cada dirección el tipo de interfaz que soporta, los NFT soportan la interfaz FT y NFT, mientras que los FT solo soportan la interfaz FT
@@ -91,9 +91,9 @@
         lsp8IdentifiableDigitalAssetContract.methods.supportsInterface(INTERFACE_IDS.LSP8IdentifiableDigitalAsset).call(),
       ]);
 
-      //Validamos de que tipo de estandar se trata
+      //Validamos de que tipo de estándar se trata
       if (isLSP8) {
-        //Obtenemos los token ids de la cuenta
+        //Obtenemos los tokens ids de la cuenta
         const tokenIds = await lsp8IdentifiableDigitalAssetContract.methods.tokenIdsOf(account).call();
 
         //Buscamos el id del token que se va a transferir 

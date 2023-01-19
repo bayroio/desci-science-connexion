@@ -4,7 +4,7 @@
   /* */ 
  -->
  
- <!-- Importamos las librerias para recuperar los papers y cargamos los componentes que cargan los NFT y los que los cran  -->
+ <!-- Importamos las librerías para recuperar los papers y cargamos los componentes que cargan los NFT y los que los crean  -->
  <script setup>
   import ERC725js from '@erc725/erc725.js';
   import LSP12IssuedAssetsSchema from '@erc725/erc725.js/schemas/LSP12IssuedAssets.json';
@@ -40,10 +40,10 @@
     // Obtenemos las cuentas de la extensión
     const accounts = await web3.eth.getAccounts();
 
-    // Obtenemos la cuenta con la que se esta logueado
+    // Obtenemos la cuenta con la que se está autentificado
     const account = accounts[0]; 
 
-    //Obtenemos los datos del perfil, los parametros son el schema, la cuenta, el provider de la extension y la ruta de IPFS definida 
+    //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
     //en el archivo de constants
     const erc725LSP12IssuedAssets = new ERC725js(LSP12IssuedAssetsSchema, account, window.web3.currentProvider, {
         ipfsGateway: IPFS_GATEWAY_BASE_URL,
@@ -89,7 +89,7 @@
   <div class="center" style="display: block">
     <img v-if="addresses.length === 0 && !isLoading" class="emptyLogo center" src="../../assets/empty-up.png" alt="No hay ningún paper tokenizado" />
     <div v-else class="grid">
-      <!--Cargamos el listado de componentes, mandamos como parametros las direcciones de los NFT del perfil-->
+      <!--Cargamos el listado de componentes, mandamos como parámetros las direcciones de los NFT del perfil-->
       <PapersLoadComponent :address="address" v-for="address in addresses" :key="address" />
     </div>
   </div>

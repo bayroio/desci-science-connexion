@@ -1,10 +1,10 @@
 <!-- 
   /* */ 
-  /* Pantalla que permite acuñar NFT bajo al estandar LSP7 */
+  /* Pantalla que permite acuñar NFT bajo al estándar LSP7 */
   /* */ 
  -->
 
-<!-- Importamos las librerias para acuñar los NFT bajo el estandar LSP7 -->
+<!-- Importamos las librerías para acuñar los NFT bajo el estándar LSP7 -->
 <script setup>
     import { onMounted, ref } from 'vue';
     import ERC725js from '@erc725/erc725.js';
@@ -29,7 +29,7 @@
     const isSuccess = ref(false);                       //Bandera que determina si se ha completado el proceso de actualización//
     const isWrongNetwork = ref(false);                  //Bandera que determina si se ha producido un error con la red//
     const isLoading = ref(false);                       //Bandera que determina si se ha comenzado con el proceso de actualización//
-    const forceParameter = ref(false);                  //Bandera que determina si se foza el parametro al acuñar el NFT//
+    const forceParameter = ref(false);                  //Bandera que determina si se fuerza el parámetro al acuñar el NFT//
     const isMinterEOA = ref(false);                     //Bandera que determina si se trata de una cuenta EOA//
 
     //Función que cierra el modal y hace un refresh de la página    
@@ -41,7 +41,7 @@
     async function onSubmit() {
         console.log("Entrando a onsubmit...")
 
-        //Validamos si se encuentra activa la red de lukso, si no esta activa, mostramos el error 
+        //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
         try {
             isWrongNetwork.value = await isLuksoNetwork();
             if (isWrongNetwork.value) {
@@ -57,7 +57,7 @@
         // Obtenemos las cuentas de la extensión
         const accounts = await web3.eth.getAccounts();
 
-        // Obtenemos la cuenta con la que se esta logueado
+        // Obtenemos la cuenta con la que se está autentificado
         const account = accounts[0]; 
 
         //Obtenemos el código de la cuenta

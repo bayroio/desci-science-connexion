@@ -1,10 +1,10 @@
 <!-- 
   /* */ 
-  /* Pantalla que permite la transferencia del NFT bajo al estandar LSP8 */
+  /* Pantalla que permite la transferencia del NFT bajo al estándar LSP8 */
   /* */ 
  -->
 
- <!-- Importamos las librerias para transferir el NFT bajo el estandar LSP8, así como el componente de envio -->
+ <!-- Importamos las librerías para transferir el NFT bajo el estándar LSP8, así como el componente de envío -->
  <script setup>
   import { onMounted, ref, defineProps, defineEmits } from 'vue';
   import ERC725js from '@erc725/erc725.js';
@@ -17,7 +17,7 @@
   async function handleModalClose(wasAssetSent) {
     showModal.value = false;
 
-    //Leemos el token id que se paso como parametro para descontarlo
+    //Leemos el token id que se recibió como parámetro para descontarlo
     if (wasAssetSent) {
       emit('remove-asset', { assetAddress: props.address, tokenId: props.tokenId });
     }
@@ -33,7 +33,7 @@
   const LSP4Metadata = ref();                         //Variable que guarda el Metadata del Token//
   const iconUrl = ref('');                            //Variable que guarda la URL del Token//
   const showModal = ref(false);                       //Bandera que determina si se muestra el modal de transferir//  
-  const LSP8MetadataJSONSchema = {                    //Definimos el schema para transferir el token
+  const LSP8MetadataJSONSchema = {                    //Definimos el esquema para transferir el token
     name: 'LSP8MetadataJSON:<bytes32>',
     key: '0x9a26b4060ae7f7d5e3cd0000<bytes32>',
     keyType: 'Mapping',
@@ -49,7 +49,7 @@
       ipfsGateway: IPFS_GATEWAY_BASE_URL,
     });
 
-    //Filtramos unicamente los datos que requerimos (Nombre, simbolo, metadata y la imagen) 
+    //Filtramos únicamente los datos que requerimos (Nombre, símbolo, metadata y la imagen) 
     const LSP4DigitalAsset = await erc725Asset.fetchData([
       'LSP4TokenName',
       'LSP4TokenSymbol',

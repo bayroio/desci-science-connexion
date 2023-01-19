@@ -1,10 +1,10 @@
 <!-- 
   /* */ 
-  /* Pantalla que permite acuñar NFT bajo al estandar LSP8 */
+  /* Pantalla que permite acuñar NFT bajo al estándar LSP8 */
   /* */ 
  -->
 
-<!-- Importamos las librerias para acuñar los NFT bajo el estandar LSP8 -->
+<!-- Importamos las librerías para acuñar los NFT bajo el estándar LSP8 -->
 <script setup>
     import { onMounted, ref } from 'vue';
     import { useRoute } from 'vue-router';
@@ -33,7 +33,7 @@
     const isSuccess = ref(false);                       //Bandera que determina si se ha completado el proceso de actualización//
     const isWrongNetwork = ref(false);                  //Bandera que determina si se ha producido un error con la red//
     const isLoading = ref(false);                       //Bandera que determina si se ha comenzado con el proceso de actualización//
-    const forceParameter = ref(false);                  //Bandera que determina si se foza el parametro al acuñar el NFT//
+    const forceParameter = ref(false);                  //Bandera que determina si se fuerza el parámetro al acuñar el NFT//
     const isMinterEOA = ref(false);                     //Bandera que determina si se trata de una cuenta EOA//
 
     //Función que cierra el modal y hace un refresh de la página    
@@ -41,11 +41,11 @@
       window.location.reload();
     }
 
-    //Función que acuña el tokem
+    //Función que acuña el token
     async function onSubmit(e) {
         console.log("Entrando a onsubmit...")
 
-        //Validamos si se encuentra activa la red de lukso, si no esta activa, mostramos el error 
+        //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
         try {
             isWrongNetwork.value = await isLuksoNetwork();
             if (isWrongNetwork.value) {
@@ -61,7 +61,7 @@
         // Obtenemos las cuentas de la extensión
         const accounts = await web3.eth.getAccounts();
 
-        // Obtenemos la cuenta con la que se esta logueado
+        // Obtenemos la cuenta con la que se está autentificado
         const account = accounts[0]; 
         
         //Obtenemos el código de la cuenta
@@ -105,7 +105,7 @@
         const metadata = await LSP4DigitalAssetMetadata.uploadMetadata({
                 description: description.value,                                     //Actualizamos la descripción
                 icon: e.target.querySelector('input#icon').files[0],                //Actualizamos el icono
-                assets: [e.target.querySelector('input#pdf').files[0]],             //Actualizamos los pdf
+                assets: [e.target.querySelector('input#pdf').files[0]],             //Actualizamos los PDF
             },
             {
                 ipfsGateway: IPFS_GATEWAY_API_BASE_URL,
@@ -114,7 +114,7 @@
         //Informamos al usuario que se actualizo el token
         mintEvents.value.push({ stepName: 'Generar y actualizar el archivo metadata' });
 
-        //Obtenemos el token del usuario, los parametros son el schema, la dirección del token, el provider de la extension
+        //Obtenemos el token del usuario, los parámetros son el esquema, la dirección del token, el provider de la extensión
         const erc725js = new ERC725js(
             [
                 {
@@ -143,7 +143,7 @@
             //Actualizamos el perfil del usuario con la nueva cantidad de tokens
             const receipt = await lsp8IdentifiableDigitalAssetContract.methods['setData(bytes32[],bytes[])'](encodedErc725Data.keys, encodedErc725Data.values).send({ from: account });
 
-            //Informamos al usuario que se esta realizando el proceso de actualización del perfil
+            //Informamos al usuario que se está realizando el proceso de actualización del perfil
             mintEvents.value.push({ stepName: 'Actualizar el Universal Profile', functionName: 'setData', receipt });
         } 
         catch (err) {

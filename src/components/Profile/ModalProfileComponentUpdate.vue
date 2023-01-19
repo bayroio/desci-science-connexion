@@ -1,10 +1,10 @@
 <!-- 
   /* */ 
-  /* Pantalla principal del perfil, muestrala información genral del perfil */
+  /* Pantalla principal del perfil, muestra la información general del perfil */
   /* */ 
  -->
 
-<!-- Importamos las librerias para recuperar y actualizar el perfil -->
+<!-- Importamos las librerías para recuperar y actualizar el perfil -->
 <script>
     import { ref, defineEmits } from 'vue';
     import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json'; 
@@ -37,10 +37,10 @@
             // Obtenemos las cuentas de la extensión
             const accounts = await web3.eth.getAccounts();
 
-            // Obtenemos la cuenta con la que se esta logueado
+            // Obtenemos la cuenta con la que se está autentificado
             const account = accounts[0]; 
             
-            //Obtenemos los datos del perfil, los parametros son el schema, la cuenta, el provider de la extension y la ruta de IPFS definida 
+            //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
             //en el archivo de constants
             const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
                 ipfsGateway: IPFS_GATEWAY_BASE_URL,
@@ -72,7 +72,7 @@
             //Función que agrega tags al campo de texto//
             addTag (event) {
 
-                //Definimos los parametros que separan un tag (Coma y Enter)
+                //Definimos los parámetros que separan un tag (Coma y Enter)
                 if ((event.code == 'Comma') || (event.code == 'Enter')) {
                     event.preventDefault();
 
@@ -107,11 +107,11 @@
                 window.location.reload();
             },
 
-            //Función que atualiza el perfil
+            //Función que actualiza el perfil
             async onSubmit(e) {
                 console.log("Entrando a onsubmit...");
 
-                //Validamos si se encuentra activa la red de lukso, si no esta activa, mostramos el error 
+                //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
                 try {
                     isWrongNetwork.value = await isLuksoNetwork();
                     if (isWrongNetwork.value) {
@@ -128,15 +128,15 @@
                 // Obtenemos las cuentas de la extensión
                 const accounts = await web3.eth.getAccounts();
 
-                // Obtenemos la cuenta con la que se esta logueado
+                // Obtenemos la cuenta con la que se está autentificado
                 const account = accounts[0]; 
 
-                //Iniciamos las variables de actualizacion
+                //Iniciamos las variables de actualización
                 deployEvents.value = [];
                 deploying.value = true;
                 isSuccess.value = false;
 
-                //Obtenemos los datos del perfil, los parametros son el schema, la cuenta, el provider de la extension y la ruta de IPFS definida 
+                //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
                 //en el archivo de constants
                 const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
                     ipfsGateway: IPFS_GATEWAY_BASE_URL,
@@ -180,7 +180,7 @@
                     return;
                 }
 
-                //Señalamos que el proceso a finalizado correctamente
+                //Señalamos que el proceso ha finalizado correctamente
                 isSuccess.value = true;
             }
         }

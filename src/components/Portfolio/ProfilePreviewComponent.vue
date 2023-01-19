@@ -4,7 +4,7 @@
   /* */ 
  -->
 
- <!-- Importamos las librerias para transferir el NFT bajo el estandar LSP7, así como el componente de envio -->
+ <!-- Importamos las librerías para transferir el NFT bajo el estándar LSP7, así como el componente de envío -->
  <script>
   import _ from 'underscore';
   import ERC725js from '@erc725/erc725.js';
@@ -27,7 +27,7 @@
       };
     },
     props: {
-      account: String,                              //Variable que almacena la dirección del perfil (recibida como parametro) //
+      account: String,                              //Variable que almacena la dirección del perfil (recibida como parámetro) //
     },
     watch: {
       account: async function updateProfile() {
@@ -44,7 +44,7 @@
       //Función que actualiza la información del perfil//
       async updateProfile(account) {
 
-        //Validamos que se haya recibido com parámetro la dirección
+        //Validamos que se haya recibido como parámetro la dirección
         if (!isAddress(account)) {
           //Si no se recibe una dirección valida, limpiamos las variables
           this.profileData.description = '';
@@ -60,7 +60,7 @@
         this.address = account;
         this.profileData.identicon = identicon(account);
         
-        //Obtenemos los datos del perfil, los parametros son el schema, la cuenta, el provider de la extension y la ruta de IPFS definida 
+        //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
         //en el archivo de constants
         const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
           ipfsGateway: IPFS_GATEWAY_BASE_URL,
@@ -83,7 +83,7 @@
           ...metaData.value.LSP3Profile,
         };
 
-        //Validamos si la imagen esta dentro del rango de 200 y 500 de largo (estandar definido), 
+        //Validamos si la imagen está dentro del rango de 200 y 500 de largo (estándar definido), 
         //si es así, colocamos la imagen como la imagen del perfil
         this.profileData.profileImage = _.find(this.profileData.profileImage, (image) => {
           if (image.width >= 200 && image.width <= 500) return image;
