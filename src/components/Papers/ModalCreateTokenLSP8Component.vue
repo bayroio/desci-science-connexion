@@ -1,40 +1,49 @@
+<!-- 
+  /* */ 
+  /* Pantalla que permite la creacion del NFT bajo al estandar LSP8 */
+  /* */ 
+ -->
+
+<!-- Importamos las librerias para crear los NFT bajo el estandar LSP8 -->
 <script setup>
     import { ref } from 'vue';
-    import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json'; // TODO change to LSP0ERC725Account
+    import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json';
     import { LSPFactory } from '@lukso/lsp-factory.js';
     import ERC725js from '@erc725/erc725.js';
-    import LSP12IssuedAssetsSchema from '@erc725/erc725.js/schemas/LSP12IssuedAssets.json'; // https://docs.lukso.tech/tools/erc725js/schemas
-    import LSP7Mintable_0_5_0 from '../contracts/LSP7Mintable_0_5_0.json';
-    import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../constants';
-    import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../network';
+    import LSP12IssuedAssetsSchema from '@erc725/erc725.js/schemas/LSP12IssuedAssets.json';
+    import LSP8Mintable_0_5_0 from '../../contracts/LSP8Mintable_0_5_0.json';
+    import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../../constants';
+    import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
 
+    //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
     const handleModalClose = () => {
         emit('close', true);
     };
 
-    const deploying = ref(false);
-    const error = ref(false);
-    const isEOA = ref(false);
-    const deployEvents = ref([]);
-    const isSuccess = ref(false);
-    const isWrongNetwork = ref(false);
+    //Definimos las variables
+    const deploying = ref(false);               //Bandera que determina si se ha comenzado con el proceso de actualización//
+    const error = ref(false);                   //Bandera que determina si se ha producido un error//
+    const isEOA = ref(false);                   //Bandera que determina si se trata de una cuenta EOA//
+    const deployEvents = ref([]);               //Variable que guarda los eventos del proceso//
+    const isSuccess = ref(false);               //Bandera que determina si se ha completado el proceso de actualización//
+    const isWrongNetwork = ref(false);          //Bandera que determina si se ha producido un error con la red//
+    const tokenName = ref('');                  //Variable de formulario para el Nombre del Token//
+    const tokenSymbol = ref('');                //Variable de formulario para el Simbolo del Token//
+    const description = ref('');                //Variable de formulario para la descripción//
 
-    // Form fields
-    const tokenName = ref('');
-    const tokenSymbol = ref('');
-    const description = ref('');
-
+    //Función que cierra el modal y hace un refresh de la página
     function CloseModal() {
       window.location.reload();
     }
 
+    //Función que crea el tokem
     async function onSubmit(e) {
         console.log("Entrando a onsubmit...")
-        // Check network
+        
+        //Validamos si se encuentra activa la red de lukso, si no esta activa, mostramos el error 
         try {
             isWrongNetwork.value = await isLuksoNetwork();
-            console.log("isWrongNetwork...", isWrongNetwork.value);
             if (isWrongNetwork.value) {
                 return;
             }
@@ -42,76 +51,81 @@
         catch (err) {
             console.warn(err);
             error.value = err.message;
-            console.log("Error...", error.value);
             return;
         }
 
-        // Get the address from the browser extension
+        // Obtenemos las cuentas de la extensión
         const accounts = await web3.eth.getAccounts();
-        const account = accounts[0];
-        console.log("accounts...", accounts);
-        console.log("account...", account);
 
-        // Create the meta data
+        // Obtenemos la cuenta con la que se esta logueado
+        const account = accounts[0];
+
+        // Creamos la estructura JSON del metadata para crer el NFT
         const LSP4MetaData = {
             description: description.value,
             icon: e.target.querySelector('input#icon').files[0],
             links: [],
             images: [],
-            assets: [e.target.querySelector('input#pdf').files[0]],
+            assets: [],
         };
 
-        // Show the deploying status...
+        //Agregamos los archivos pdf al JSON
+        e.target.querySelector('input#pdf').files.forEach((value, index) => {
+            LSP4MetaData.assets.push(value);
+            console.log(value);
+            console.log(index);
+        });
+
+        //Iniciamos las variables de actualizacion
         deployEvents.value = [];
         deploying.value = true;
         isSuccess.value = false;
 
-        // l14 relayer uses smart contracts v0.5.0
+        //Obtenemos el id de la cadena y la version del Token
         const chainId = await web3.eth.getChainId();
-        const version = chainId === CHAIN_IDS.L14 ? LSP7Mintable_0_5_0.bytecode : null;
-        console.log("chainId...", chainId);
-        console.log("version...", version);
+        const version = chainId === CHAIN_IDS.L14 ? LSP8Mintable_0_5_0.bytecode : null;
 
-        // Inititate the LSPFactory
+        //Configuramos el estandar para crear el token 
         const factory = new LSPFactory(web3.currentProvider, { chainId });
 
-        // Deploy the LSP7 contract, https://docs.lukso.tech/tools/lsp-factoryjs/classes/lsp7-digital-asset
+        //Procedemos a crear el token 
         let contracts;
         try {
-            //Create the contract
-            contracts = await factory.LSP7DigitalAsset.deploy(
+            //Establecemos los datos del token
+            contracts = await factory.LSP8IdentifiableDigitalAsset.deploy(
             {
-                name: tokenName.value,
-                symbol: tokenSymbol.value,
-                controllerAddress: account, // the "issuer" of the asset, that is allowed to change meta data
-                isNFT: false, // Token decimals set to 18
-                creators: [account],
-                digitalAssetMetadata: LSP4MetaData,
+                name: tokenName.value,                      //Nombre del token, de acuerdo al formulario
+                symbol: tokenSymbol.value,                  //Nombre del simbolo, de acuerdo al formulario
+                controllerAddress: account,                 //Propietario del token de acuerdo al usurio logueado
+                creators: [account],                        //Establecemos como creador al usurio logueado
+                digitalAssetMetadata: LSP4MetaData,         //Establecemos en el activo el valor del metadada creado
             },
             {
-                ipfsGateway: IPFS_GATEWAY_API_BASE_URL,
-                LSP7DigitalAsset: {
-                    version,
+                ipfsGateway: IPFS_GATEWAY_API_BASE_URL,     //Configuramos el IPFS de las constantes
+                LSP8IdentifiableDigitalAsset: {
+                    version,                                 //Establecemos la versión del token
                 },
                 onDeployEvents: {
                     next: (deploymentEvent) => {
                         console.log(deploymentEvent);
 
+                        //Reportamos al usuario cuando se haya culminado cada fase
                         if (deploymentEvent.status === 'COMPLETE') {
                             deployEvents.value.push(deploymentEvent);
                         }
                     },
-                    error: (err) => {
+                    error: (error) => {
+                        console.debug("Error");
+                        //Reportamos al usuario cuando se haya producido un error
                         deploying.value = false;
-                        error.value = err.message;
-                        console.log("Error in onDeployEvents...", error.value);
-                        console.log("Error message in onDeployEvents...", error.value);
+                        error.value = error.message;
+                        console.error(error);
                     },
                     complete: (contracts) => {
+                        console.debug("complete");
+                        //Reportamos al usuario cuando se haya culminado el proceso
                         console.log('Deployment Complete');
-                        console.log("Token address", contracts.LSP7DigitalAsset.address);
-                        console.log("Token receipt", contracts.LSP7DigitalAsset.receipt);
-                        console.log(contracts.LSP7DigitalAsset);
+                        console.log(contracts.LSP8IdentifiableDigitalAsset);
                     },
                 },
             });
@@ -120,44 +134,45 @@
             console.warn(err.message);
             error.value = err.message;
             deploying.value = false;
-            console.log("LSP7DigitalAsset.deploy...", error.value);
+            console.log("LSP8DigitalAsset.deploy...", error.value);
             return;
         }
 
-        if (!contracts && !contracts.LSP7DigitalAsset) {
-            error.value = 'Error deploying LSP7DigitalAsset';
-            console.log(error.value);
+        //Validamos si el proceso fue realizado con exito, si no, se reporta al usuario        
+        if (!contracts && !contracts.LSP8IdentifiableDigitalAsset) {
+            error.value = 'Error deploying LSP8IdentifiableDigitalAsset';
             return;
         }
 
-        //--- Add the smart contract to Universal Profile ---\\
-        const deployedLSP7DigitalAssetContract = contracts.LSP7DigitalAsset;
-        const options = {
+        //Obtenemos los token del usuario, los parametros son el schema, la dirección del token, el provider de la extension y la ruta de IPFS definida 
+        //en el archivo de constants
+        const erc725LSP12IssuedAssets = new ERC725js(LSP12IssuedAssetsSchema, accounts[0], window.web3.currentProvider, {
             ipfsGateway: IPFS_GATEWAY_BASE_URL,
-        };
-        const erc725LSP12IssuedAssets = new ERC725js(LSP12IssuedAssetsSchema, accounts[0], window.web3.currentProvider, options);
+        });
 
-        // Get the current issued assets
+        //Filtramos unicamente los token creados por el usuario
         let LSP12IssuedAssets;
         try {
             LSP12IssuedAssets = await erc725LSP12IssuedAssets.getData('LSP12IssuedAssets[]');
         }
         catch (err) {
-            // Is EOA, Load all assets that were stored in local storage
+            //Validamos si se trata de una cuenta EOA, se carga la información del local storage
             LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
         }
-
-        // Add new asset
-        LSP12IssuedAssets.value.push(deployedLSP7DigitalAssetContract.address);
-
-        // if EOA, also add new asset list to localStorage
+        
+        //Si se trata de una cuenta EOA, agregamos el nuevo token al localStorage
         let bytecode = await web3.eth.getCode(accounts[0]);
         if (bytecode === '0x') {
             localStorage.setItem('issuedAssets', JSON.stringify(LSP12IssuedAssets));
+            isEOA.value = true;
         }
 
-        //Encode the new LSP12
-        const LSP7InterfaceId = '0x5fcaac27'; //'0xe33f65c3';
+        //Obtenemos el nuevo token y lo agregamos a los token del usuario
+        const deployedLSP8IdentifiableDigitalAssetContract = contracts.LSP8IdentifiableDigitalAsset;
+        LSP12IssuedAssets.value.push(deployedLSP8IdentifiableDigitalAssetContract.address);
+
+        //Códificamos los token (que incluyen el nuevo token)
+        const LSP8InterfaceId = '0x49399145';
         const encodedErc725Data = erc725LSP12IssuedAssets.encodeData([
             {
                 keyName: 'LSP12IssuedAssets[]',
@@ -165,12 +180,12 @@
             },
             {
                 keyName: 'LSP12IssuedAssetsMap:<address>',
-                dynamicKeyParts: deployedLSP7DigitalAssetContract.address,
-                value: [LSP7InterfaceId, LSP12IssuedAssets.length - 1], // LSP7 interface ID + index position of asset
+                dynamicKeyParts: deployedLSP8IdentifiableDigitalAssetContract.address,
+                value: [LSP8InterfaceId, LSP12IssuedAssets.length - 1], // LSP8 interface ID + index position of asset
             },
         ]);
 
-        //Add the LSP12 to the universal profile
+        //Asignamos los token al usuario (importante, al asignarnos se remplazan los anteriores, por tal motivo se agrega el nuevo token al arreglo de tokens)
         try {
             const profileContract = new window.web3.eth.Contract(LSP0ERC725Account.abi, accounts[0]);
             const receipt = await profileContract.methods['setData(bytes32[],bytes[])'](encodedErc725Data.keys, encodedErc725Data.values).send({ from: accounts[0] });
@@ -180,15 +195,10 @@
         catch (err) {
             console.warn(err);
             error.value = err.message;
-            deploying.value = false;
             return;
         }
 
-        // Show EOA local storage warning
-        if (bytecode === '0x') {
-            isEOA.value = true;
-        }
-
+        //Señalamos que el proceso a finalizado correctamente
         isSuccess.value = true;
     }
 </script>
@@ -203,10 +213,10 @@
 
         <div class="center">
             <h4><strong>Papers tokenizados</strong></h4>
-            <h6 style="margin-top: -25px;">basandote en: <a href="https://docs.lukso.tech/standards/nft-2.0/LSP7-Identifiable-Digital-Asset" target="_blank">NFT </a></h6>
+            <h6 style="margin-top: -25px;">basandote en: <a href="https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset" target="_blank">NFT 2.0</a></h6>
 
             <br />
-            <div v-if="isEOA" class="warning">Token NFT configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
+            <div v-if="isEOA" class="warning">Token NFT 2.0 configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
             <p v-if="isWrongNetwork" class="warning">
                 Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este token.
             </p>
@@ -238,7 +248,7 @@
 
                         <div class="item-flex">
                             <span><strong>Archivo en PDF (paper)</strong></span><br/>
-                            <input type="file" id="pdf" accept="application/pdf" required />
+                            <input type="file" id="pdf" accept="application/pdf" required multiple/>
                         </div>
                     </div>
 
@@ -253,14 +263,14 @@
 
         <div class="events">
             <span v-if="deploying">
-                Desplegando el NFT en Blockchain...<br />
+                Desplegando el NFT 2.0 en Blockchain...<br />
                 <strong>Confirme todas las transacciones en la extensión de su navegador y espere hasta que se agreguen a Blockchain.</strong>
             </span>
 
             <br /><br />
             <div v-for="(event, index) in deployEvents" :key="index">
                 <span v-if="event.type === 'PROXY_DEPLOYMENT'">
-                    NFT desplegado: {{ event.contractName }} ({{ event.type }}): <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/address/${event.contractAddress}`" target="_blank">{{ event.contractAddress }}</a>
+                    NFT 2.0 desplegado: {{ event.contractName }} ({{ event.type }}): <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/address/${event.contractAddress}`" target="_blank">{{ event.contractAddress }}</a>
                     <br />
                     Hash de la transacción: <a :href="`${BLOCKCHAIN_EXPLORER_BASE_URL}/tx/${event.receipt.transactionHash}`" target="_blank">{{ event.receipt.transactionHash }}</a>
                 </span>

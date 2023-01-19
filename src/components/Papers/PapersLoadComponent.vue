@@ -1,50 +1,55 @@
-<script setup>
+<!-- 
+  /* */ 
+  /* Pantalla que carga los papers del perfil, recibe como parametros las direcciones de los NFT */
+  /* */ 
+ -->
+ 
+ <!-- Importamos las librerias para recuperar leer los papers y cargamos los componentes que permiten acuñar los NFT -->
+ <script setup>
   import { onMounted, ref, defineProps } from 'vue';
   import ERC725js from '@erc725/erc725.js';
   import LSP4DigitalAssetSchema from '@erc725/erc725.js/schemas/LSP4DigitalAsset.json';
   import LSP7DigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP7DigitalAsset.json';
-  import { IPFS_GATEWAY_BASE_URL, IPFS_GATEWAY_API_BASE_URL, COMMON_ABIS, INTERFACE_IDS } from '../constants';
+  import { IPFS_GATEWAY_BASE_URL, IPFS_GATEWAY_API_BASE_URL, COMMON_ABIS, INTERFACE_IDS } from '../../constants';
   import ModalMintLSP7 from './ModalMintLSP7Component.vue';
   import ModalMintLSP8 from './ModalMintLSP8Component.vue';
 
-  const props = defineProps({ address: String });
-  const LSP4TokenName = ref('');
-  const LSP4TokenSymbol = ref('');
-  const iconUrl = ref('');
-  const LSP4Metadata = ref();
-  const totalSupply = ref();
-  const creationType = ref('unknown'); // LSP7 or LSP8
+  //Definimos las variables que se utilizaran dentro de la página//
+  const props = defineProps({ address: String });                           //Variable que recibe las direcciones de los NFT creados//
+  const LSP4TokenName = ref('');                                            //Variable que almacena el nombre del Token//
+  const LSP4TokenSymbol = ref('');                                          //Variable que almacena el simbolo del Token//
+  const iconUrl = ref('');                                                  //Variable que almacena el icon del Token//
+  const LSP4Metadata = ref();                                               //Variable que almacena el detalle del Token//
+  const totalSupply = ref();                                                //Variable que almacena el total de Token acuñados//
+  const creationType = ref('unknown');                                      //Variable que almacena el tipo de Token (FT o NFT)//
 
+  //Definimos las variables que se utilizaran para abrir y cerrar el modal que permita acuñar el FT//
   const showModalLSP7 = ref(false);
   const handleModalCloseLSP7 = () => {
     showModalLSP7.value = false;
   };
   
+  //Definimos las variables que se utilizaran para abrir y cerrar el modal que permita acuñar el NFT//
   const showModalLSP8 = ref(false);
   const handleModalCloseLSP8 = () => {
     showModalLSP8.value = false;
   };
   
-  
+  //Acciones que se realizan al cargar la página//
   onMounted(async () => {
-    const options = {
-      ipfsGateway: IPFS_GATEWAY_BASE_URL,
-    };
 
-    // CHECK contract's interface
+    //Determinamos que tipo de interfaz soporta cada dirección
     const supportsInterfaceContract = new window.web3.eth.Contract([COMMON_ABIS.supportsInterface], props.address);
     console.log("props.address: ", props.address);
     console.log("supportsInterfaceContract: ", supportsInterfaceContract);
 
+    //Determinamos para cada dirección el tipo de interfaz que soporta, los NFT soportan la interfaz FT y NFT, mientras que los FT solo soportan la interfaz FT
     const [isLSP7, isLSP8] = await Promise.all([
       await supportsInterfaceContract.methods.supportsInterface(INTERFACE_IDS.LSP7DigitalAsset).call(),
       await supportsInterfaceContract.methods.supportsInterface(INTERFACE_IDS.LSP8IdentifiableDigitalAsset).call(),
     ]);
 
-    console.log("INTERFACE_IDS.LSP7DigitalAsset: ", INTERFACE_IDS.LSP7DigitalAsset);
-    console.log("isLSP7: ", isLSP7);
-    console.log("isLSP8: ", isLSP8);
-
+    //De acuerdo al tipo de interfaz que soportan clasificamos el token
     try {
       if (isLSP8) {
         creationType.value = 'NFT';
@@ -63,21 +68,26 @@
       console.error(`No se puede encontrar la interface del contrato: ${props.address}`);
     }
 
-    //Get the metadata info with erc725js, standard: // https://docs.lukso.tech/standards/nft-2.0/LSP4-Digital-Asset-Metadata
-    const erc725Asset = new ERC725js(LSP4DigitalAssetSchema, props.address, window.web3.currentProvider, options);
+    //Obtenemos los datos del token, los parametros son el schema, la dirección del token, el provider de la extension y la ruta de IPFS definida 
+    //en el archivo de constants
+    const erc725Asset = new ERC725js(LSP4DigitalAssetSchema, props.address, window.web3.currentProvider, {
+        ipfsGateway: IPFS_GATEWAY_BASE_URL,
+    });
+    
+    //Filtramos unicamente los datos que nos interesan (Nombre, Simbolo y Metadata (solo el icono))
     const LSP4DigitalAsset = await erc725Asset.fetchData(['LSP4TokenName', 'LSP4TokenSymbol', 'LSP4Metadata']);
     LSP4TokenName.value = LSP4DigitalAsset[0].value;
     LSP4TokenSymbol.value = LSP4DigitalAsset[1].value;
     LSP4Metadata.value = LSP4DigitalAsset[2].value;
     const icons = LSP4DigitalAsset[2].value.LSP4Metadata.icon;
 
-    //Show icon
+    //Determinamos si existe un icono para el token y si es así lo mostramos
     if (icons && icons.length > 0) {
       iconUrl.value = LSP4DigitalAsset[2].value.LSP4Metadata.icon[0].url.replace('ipfs://', IPFS_GATEWAY_BASE_URL);
     }
 
-    // Read total supply with web3js
-    const lsp4DigitalAssetContract = new window.web3.eth.Contract(LSP7DigitalAsset.abi, props.address); // LSP7 and LSP8 both share the totalSupply function.
+    //Por último obtenemos el total de tokens acuñados
+    const lsp4DigitalAssetContract = new window.web3.eth.Contract(LSP7DigitalAsset.abi, props.address);
     totalSupply.value = isLSP8 ? await lsp4DigitalAssetContract.methods.totalSupply().call() : web3.utils.fromWei(await lsp4DigitalAssetContract.methods.totalSupply().call());
 });
 </script>

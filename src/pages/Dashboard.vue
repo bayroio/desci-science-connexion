@@ -1,10 +1,19 @@
+<!-- 
+  /* */ 
+  /* Pantalla principal del proyecto, se muestran las opciones disponibles dentro de la aplicación */
+  /* */ 
+ -->
+
+<!-- Listado de componentes que se utilizaran dentro de la pantalla -->
 <script setup>
-  import ProfileComponent from '../components/ProfileComponent.vue';
-  import LSP12IssuedAssetsComponent from '../components/LSP12IssuedAssetsComponent.vue';
-  import LSP5ReceivedAssets from '../components/LSP5ReceivedAssets.vue';
+  import ProfileComponent from '../components/Profile/ProfileComponent.vue';                //Componente que incluye la información del Perfil//
+  import PapersComponent from '../components/Papers/PapersComponent.vue';                   //Componente que incluye la Tokenización de Papers//
+  import PortfolioComponent from '../components/Portfolio/PortfolioComponent.vue';          //Componente que incluye el portafolio del Usuario//
 </script>
 
-<template>
+<style scoped>
+
+</style><template>
   <div>
 
     <h1>Bienvenido</h1>
@@ -12,7 +21,7 @@
     <!-- Add tabs -->
     <div class="tabs">
 
-      <!--Universal Profile-->
+      <!-- Tab del Perfil Universal, se incorpora el Componente Profile -->
       <div class="tabby-tab">
         <input type="radio" id="tab-1" name="tabby-tabs" checked>
         <label for="tab-1">Perfil Universal</label>
@@ -21,21 +30,21 @@
         </div>
       </div>
 
-      <!--LSP12-->
+      <!-- Tab de Papers Tokenizados, se incorpora el Componente LSP12IssuedAssets -->
       <div class="tabby-tab">
         <input type="radio" id="tab-2" name="tabby-tabs">
         <label for="tab-2">Papers Tokenizados</label>
         <div class="tabby-content">
-          <LSP12IssuedAssetsComponent style="margin-top: 60px" />
+          <PapersComponent style="margin-top: 60px" />
         </div>
       </div>
 
-      <!--LSP5-->
+      <!-- Tab de Portafolio, se incorpora el Componente LSP5ReceivedAssets -->
       <div class="tabby-tab">
         <input type="radio" id="tab-3" name="tabby-tabs">
         <label for="tab-3">Portafolio</label>
         <div class="tabby-content">
-          <LSP5ReceivedAssets style="margin-top: 60px" />
+          <PortfolioComponent style="margin-top: 60px" />
         </div>
       </div>
 
@@ -51,14 +60,5 @@
       </div> -->
 
     </div>
-
-
-
-    <!-- <div class="center">
-      <button @click="$router.push('/createToken')" style="width: 235px">Tokeniza un paper</button>
-      <button @click="$router.push('/createNFTCollection')" style="width: 350px">Crea una colección de papers tokenizados</button>
-      <LSP12IssuedAssetsComponent style="margin-top: 60px" />
-      <LSP5ReceivedAssets style="margin-top: 60px" />
-    </div> -->
   </div>
 </template>
