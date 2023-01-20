@@ -1,40 +1,51 @@
+<!-- 
+  /* */ 
+  /* Pantalla que permite acuñar NFT bajo al estándar LSP8 */
+  /* */ 
+ -->
+
+<!-- Importamos las librerías para acuñar los NFT bajo el estándar LSP8 -->
 <script setup>
     import { onMounted, ref } from 'vue';
     import { useRoute } from 'vue-router';
     import ERC725js from '@erc725/erc725.js';
     import LSP4DigitalAssetSchema from '@erc725/erc725.js/schemas/LSP4DigitalAsset.json';
     import LSP8Mintable from '@lukso/lsp-smart-contracts/artifacts/LSP8Mintable.json';
-    import { BLOCKCHAIN_EXPLORER_BASE_URL, IPFS_GATEWAY_API_BASE_URL } from '../constants';
+    import { BLOCKCHAIN_EXPLORER_BASE_URL, IPFS_GATEWAY_API_BASE_URL } from '../../constants';
     import { LSP4DigitalAssetMetadata } from '@lukso/lsp-factory.js';
-    import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../network';
-import { isContractAddressInBloom } from 'web3-utils';
+    import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
+    import { isContractAddressInBloom } from 'web3-utils';
 
-    const props = defineProps({ address: String });
+    //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
     const handleModalClose = () => {
         emit('close', true);
     };
 
-    const route = useRoute();
-    const LSP4TokenName = ref('');
-    const LSP4TokenSymbol = ref('');
-    const description = ref('');
-    const tokenId = ref(''); // Should be bytes32
-    const mintEvents = ref([]);
-    const error = ref('');
-    const isLoading = ref(false);
-    const isSuccess = ref(false);
-    const forceParameter = ref(false);
-    const isMinterEOA = ref(false);
-    const isWrongNetwork = ref(false);
+    //Definimos las variables    
+    const props = defineProps({ address: String });     //Variable que recibe la dirección del NFT a acuñar//
+    const LSP4TokenName = ref('');                      //Variable para el Nombre del Token//
+    const LSP4TokenSymbol = ref('');                    //Variable para el Simbolo del Token//
+    const error = ref('');                              //Variable que guarda los errores que se producen//
+    const description = ref('');                        //Variable de formulario para indicar la descripción del token//
+    const tokenId = ref('');                            //Variable que almacena el id del token//
+    const mintEvents = ref([]);                         //Variable que indica el número de tokens a acuñar//    
+    const isSuccess = ref(false);                       //Bandera que determina si se ha completado el proceso de actualización//
+    const isWrongNetwork = ref(false);                  //Bandera que determina si se ha producido un error con la red//
+    const isLoading = ref(false);                       //Bandera que determina si se ha comenzado con el proceso de actualización//
+    const forceParameter = ref(false);                  //Bandera que determina si se fuerza el parámetro al acuñar el NFT//
+    const isMinterEOA = ref(false);                     //Bandera que determina si se trata de una cuenta EOA//
 
+    //Función que cierra el modal y hace un refresh de la página    
     function CloseModal() {
       window.location.reload();
     }
 
+    //Función que acuña el token
     async function onSubmit(e) {
         console.log("Entrando a onsubmit...")
-        // Check network
+
+        //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
         try {
             isWrongNetwork.value = await isLuksoNetwork();
             if (isWrongNetwork.value) {
@@ -47,34 +58,41 @@ import { isContractAddressInBloom } from 'web3-utils';
             return;
         }
 
-        // Get the address from the browser extension
+        // Obtenemos las cuentas de la extensión
         const accounts = await web3.eth.getAccounts();
-        const account = accounts[0];
+
+        // Obtenemos la cuenta con la que se está autentificado
+        const account = accounts[0]; 
+        
+        //Obtenemos el código de la cuenta
         let minterBytecode = await web3.eth.getCode(account);
 
-        // If recipient is EOA, force is mandatory
+        //Validamos si se trata de un EOA, si es así se debe de forzar el acuñado
         if (minterBytecode === '0x' && forceParameter.value === false) {
             isMinterEOA.value = true;
             return;
         }
 
+        //Cambiamos el estatus del proceso
         isMinterEOA.value = false;
         isLoading.value = true;
         isSuccess.value = false;
         error.value = '';
         mintEvents.value = [];
 
-        //Create Smart Contract with https://docs.lukso.tech/standards/smart-contracts/lsp8-identifiable-digital-asset
+        //Creamos el smart contract para acuñar el NFT y las variables 
         const lsp8IdentifiableDigitalAssetContract = new window.web3.eth.Contract(LSP8Mintable.abi, props.address);
-        const paddedTokenId = web3.utils.padRight(web3.utils.stringToHex(tokenId.value), 64);
-        try {
-            const to = account;
-            const force = forceParameter.value; // When set to TRUE, to may be any address; when set to FALSE to must be a contract that supports LSP1 UniversalReceiver and not revert.
-            const data = '0x';
-            console.log("paddedtokenid: ", paddedTokenId);
+        const paddedTokenId = web3.utils.padRight(web3.utils.stringToHex(tokenId.value), 64);       //Token que se acuñara
+        const to = account;                                                                         //Persona que acuña el token
+        const force = forceParameter.value;                                                         //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
+        const data = '0x';
+        console.log("paddedtokenid: ", paddedTokenId);
 
+        try {
+            //Acuñamos el token e informaos al usuario
             const receipt = await lsp8IdentifiableDigitalAssetContract.methods.mint(to, paddedTokenId, force, data).send({ from: account });
             mintEvents.value.push({ stepName: 'Acuñar el NFT', functionName: 'acuñar', receipt });
+
         }
         catch (err) {
             error.value = err.message;
@@ -83,18 +101,28 @@ import { isContractAddressInBloom } from 'web3-utils';
             return;
         }
 
-        //Create and upload JSON metadata: https://docs.lukso.tech/tools/lsp-factoryjs/classes/lsp4-digital-asset-metadata#uploadmetadata
+        //Agregamos los archivos PDF al JSON
+        const filespdf = [];
+        e.target.querySelector('input#pdf').files.forEach((value, index) => {
+            filespdf.push(value);
+            console.log(value);
+            console.log(index);
+        });
+
+        //Creamos y actualizamos el token, con los datos proporcionados en el formulario por el usuario
         const metadata = await LSP4DigitalAssetMetadata.uploadMetadata({
-                description: description.value,
-                icon: e.target.querySelector('input#icon').files[0],
-                assets: [e.target.querySelector('input#pdf').files[0]],
+                description: description.value,                                     //Actualizamos la descripción
+                icon: e.target.querySelector('input#icon').files[0],                //Actualizamos el icono
+                assets: filespdf,                                                   //Actualizamos los PDF
             },
             {
                 ipfsGateway: IPFS_GATEWAY_API_BASE_URL,
         });
+        
+        //Informamos al usuario que se actualizo el token
         mintEvents.value.push({ stepName: 'Generar y actualizar el archivo metadata' });
 
-        //We minted the NFT, let's add its metadata in the LSP8 smart contract key/value store
+        //Obtenemos el token del usuario, los parámetros son el esquema, la dirección del token, el provider de la extensión
         const erc725js = new ERC725js(
             [
                 {
@@ -109,7 +137,7 @@ import { isContractAddressInBloom } from 'web3-utils';
             window.web3.currentProvider
         );
 
-        //Encode the metadata
+        //Codificamos los datos conforme al estándar
         const encodedErc725Data = erc725js.encodeData({
             keyName: 'LSP8MetadataJSON:<bytes32>',
             dynamicKeyParts: paddedTokenId,
@@ -119,9 +147,11 @@ import { isContractAddressInBloom } from 'web3-utils';
             },
         });
 
-        //Send transaction
         try {
+            //Actualizamos el perfil del usuario con la nueva cantidad de tokens
             const receipt = await lsp8IdentifiableDigitalAssetContract.methods['setData(bytes32[],bytes[])'](encodedErc725Data.keys, encodedErc725Data.values).send({ from: account });
+
+            //Informamos al usuario que se está realizando el proceso de actualización del perfil
             mintEvents.value.push({ stepName: 'Actualizar el Universal Profile', functionName: 'setData', receipt });
         } 
         catch (err) {
@@ -130,7 +160,7 @@ import { isContractAddressInBloom } from 'web3-utils';
             return;
         }
 
-        // Check if account is EOA, also add new asset list to localStorage
+        //Si se trata de una cuenta EOA, cargamos los datos del LocalStorage y agregamos el nuevo token acuñado
         let bytecode = await web3.eth.getCode(account);
         if (bytecode === '0x') {
             let LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
@@ -140,16 +170,25 @@ import { isContractAddressInBloom } from 'web3-utils';
             }
         }
 
+        //Informamos que se ha realizado el proceso de forma correcta
         isLoading.value = false;
         isSuccess.value = true;
     }
 
+    //Acciones que se realizan al cargar la página//
     onMounted(async () => {
+        //Cargamos la información del token 
         const erc725Asset = new ERC725js(LSP4DigitalAssetSchema, props.address, window.web3.currentProvider);
+
+        //Filtramos la información que requerimos (TokenName y Token Symbol)
         const LSP4DigitalAsset = await erc725Asset.fetchData(['LSP4TokenName', 'LSP4TokenSymbol']);
+
+        //Guardamos los valores en las variables globales de la página
         LSP4TokenName.value = LSP4DigitalAsset[0].value;
         LSP4TokenSymbol.value = LSP4DigitalAsset[1].value;
+        icon.value = '';
     });
+
 </script>
 
 <template>
@@ -183,7 +222,7 @@ import { isContractAddressInBloom } from 'web3-utils';
 
                         <div class="item-flex">
                             <span><strong>Archivo en PDF (paper)</strong></span><br/>
-                            <input type="file" id="pdf" accept="application/pdf" required />
+                            <input type="file" id="pdf" accept="application/pdf" required multiple/>
                         </div>   
                     </div>
 

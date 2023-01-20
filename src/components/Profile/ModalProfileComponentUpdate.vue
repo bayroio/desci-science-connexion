@@ -1,91 +1,120 @@
+<!-- 
+  /* */ 
+  /* Pantalla principal del perfil, muestra la información general del perfil */
+  /* */ 
+ -->
+
+<!-- Importamos las librerías para recuperar y actualizar el perfil -->
 <script>
     import { ref, defineEmits } from 'vue';
-    import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json'; // TODO change to LSP0ERC725Account
+    import LSP0ERC725Account from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json'; 
     import { LSPFactory } from '@lukso/lsp-factory.js';
     import ERC725js from '@erc725/erc725.js';
-    import LSP7Mintable_0_5_0 from '../contracts/LSP7Mintable_0_5_0.json';
     import LSP3UniversalProfileMetaDataSchema from '@erc725/erc725.js/schemas/LSP3UniversalProfileMetadata.json';
     import _ from 'underscore';
-    import { IPFS_GATEWAY_BASE_URL, CHAIN_IDS } from '../constants';
-    import { isLuksoNetwork } from '../../network';
+    import { IPFS_GATEWAY_BASE_URL, CHAIN_IDS } from '../../constants';
+    import { isLuksoNetwork } from '../../../network';
 
-    // Form fields
-    const tokenUsername = ref('');
-    const tokendescription = ref('');
-
-    const deploying = ref(false);
-    const error = ref(false);
-    const deployEvents = ref([]);
-    const isSuccess = ref(false);
-    const isWrongNetwork = ref(false);
+    //Definimos las variables
+    const tokenUsername = ref('');                      //Variable de formulario para el username//
+    const tokendescription = ref('');                   //Variable de formulario para la descripción//
+    const error = ref(false);                           //Bandera que determina si se ha producido un error//
+    const isWrongNetwork = ref(false);                  //Bandera que determina si se ha producido un error con la red//
+    const deploying = ref(false);                       //Bandera que determina si se ha comenzado con el proceso de actualización//
+    const isSuccess = ref(false);                       //Bandera que determina si se ha completado el proceso de actualización//
+    const deployEvents = ref([]);                       //Variable que guarda los eventos del proceso//
             
     export default {
         data(){
             return{
-                tags:[]
+                tags:[]                                 //Variable de formulario para guarda los tags del perfil//
             }
         },
+
+        //Acciones que se realizan al cargar la página//
         async mounted() {
-            // Get the Universal Profile Data
+
+            // Obtenemos las cuentas de la extensión
             const accounts = await web3.eth.getAccounts();
+
+            // Obtenemos la cuenta con la que se está autentificado
             const account = accounts[0]; 
             
-            
-            //Get the Profile
+            //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
+            //en el archivo de constants
             const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
                 ipfsGateway: IPFS_GATEWAY_BASE_URL,
             });
 
-            //Get the metadata
+            //Validamos los tags
+            if (this.tags.length == 0)
+                this.tags = [''];
+
+            //Una vez que se ha cargado el perfil, filtramos solo la sección del perfil (LSP3Profile)
             let metaData;
             try {
                 metaData = await profile.fetchData('LSP3Profile');
-                console.log(metaData.value.LSP3Profile.name);
             } 
             catch (e) {
                 return;
             }
             
-            //set the values
+            //Colocamos los valores del perfil, en los campos del formulario (username, description y tags)
             tokenUsername.value = metaData.value.LSP3Profile.name;
             tokendescription.value = metaData.value.LSP3Profile.description;
             this.tags = metaData.value.LSP3Profile.tags;
-
         },
 
+        //Declaraciones de funciones 
         methods: {
+
+            //Función que agrega tags al campo de texto//
             addTag (event) {
+
+                //Definimos los parámetros que separan un tag (Coma y Enter)
                 if ((event.code == 'Comma') || (event.code == 'Enter')) {
                     event.preventDefault();
 
+                    //obtenemos el texto y quitamos los espacios al inicio y final del texto
                     var val = event.target.value.trim()
 
+                    //Validamos si el texto es mayor a cero
                     if (val.length > 0) {
-                        this.tags.push(val)
-                        event.target.value = ''
+
+                        //Agregamos el texto a la variable tags
+                        if (this.tags == undefined)
+                            this.tags = [val];
+                        else
+                            this.tags.push(val);
+
+                        //Limpiamos el valor del campo de entrada
+                        event.target.value = '';
                     }
                 }
             },
+
+            //Función que remueve un tag
             removeTag (index) {
                 this.tags.splice(index, 1);
             },
+
+            //Función que remueve el último tag
             removeLastTag (event) {
                 if (event.target.value.length === 0) {
                     this.removeTag(this.tags.length - 1)
                 }
             },
+
+            //Función que cierra el modal y hace un refresh de la página
             CloseModal() {
                 window.location.reload();
             },
+
+            //Función que actualiza el perfil
             async onSubmit(e) {
                 console.log("Entrando a onsubmit...");
 
-                // for(let i=0; i < this.tags.length; i++){
-
-                // }
-                // console.log(this.tags.length);
-
-                // Check network
+                //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
                 try {
                     isWrongNetwork.value = await isLuksoNetwork();
                     if (isWrongNetwork.value) {
@@ -99,34 +128,27 @@
                     return;
                 }
 
-                // Get the address from the browser extension
+                // Obtenemos las cuentas de la extensión
                 const accounts = await web3.eth.getAccounts();
-                const account = accounts[0];
 
-                // Show the deploying status...
+                // Obtenemos la cuenta con la que se está autentificado
+                const account = accounts[0]; 
+
+                //Iniciamos las variables de actualización
                 deployEvents.value = [];
                 deploying.value = true;
                 isSuccess.value = false;
 
-                // l14 relayer uses smart contracts v0.5.0
-                const chainId = await web3.eth.getChainId();
-                const version = chainId === CHAIN_IDS.L14 ? LSP7Mintable_0_5_0.bytecode : null;
-
-                //Get the Profile
+                //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
+                //en el archivo de constants
                 const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
                     ipfsGateway: IPFS_GATEWAY_BASE_URL,
                 });
-
-                //Get the metadata
-                // let metaData;
-                // try {
-                //     metaData = await profile.fetchData('LSP3Profile');
-                // } 
-                // catch (e) {
-                //     return;
-                // }
                 
-                //Upload JSON file to IPFS
+                //Obtenemos el id de la cadena
+                const chainId = await web3.eth.getChainId();
+
+                //Creamos los datos para actualizar el perfil
                 const factory = new LSPFactory(web3.currentProvider, { chainId });
                 const uploadResult = await factory.UniversalProfile.uploadProfileData({
                     name: tokenUsername.value,
@@ -136,16 +158,22 @@
                     backgroundImage: e.target.querySelector('input#backgroundimage').files[0]
                 });
 
+                //Codificamos los datos conforme al estándar
                 const encodedData = profile.encodeData({
                     keyName: "LSP3Profile",
                     value: uploadResult,
                 });
 
-                //Add the LSP12 to the universal profile
+                //Procedemos a realizar la actualización del perfil
                 try {
+                    
+                    //Definimos el contrato y la cuenta que se actualizara
                     const profileContract = new window.web3.eth.Contract(LSP0ERC725Account.abi, accounts[0]);
+                    
+                    //Ejecutamos el proceso de actualización con los datos codificados en la cuenta
                     const receipt = await profileContract.methods['setData(bytes32[],bytes[])'](encodedData.keys, encodedData.values).send({ from: accounts[0] });
 
+                    //Mostramos mensajes al usuario del estatus del proceso
                     deployEvents.value.push({ receipt, type: 'TRANSACTION', functionName: 'setData' });
                 }
                 catch (err) {
@@ -155,6 +183,7 @@
                     return;
                 }
 
+                //Señalamos que el proceso ha finalizado correctamente
                 isSuccess.value = true;
             }
         }
@@ -162,6 +191,7 @@
 </script>
 
 <script setup>
+    //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
     const handleModalClose = () => {
         emit('close', true);
@@ -172,14 +202,13 @@
   <div class="modal">
     <div class="modal-content" @click.stop="">
 
-        <p class="warning" v-if="error">
+        <p class="warning center" v-if="error">
             {{ error }}
         </p>
 
         <div class="center">
             <h4><strong>Actualizar Perfil</strong></h4>
             <br />
-            <div v-if="isEOA" class="warning">Token NFT configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
             <p v-if="isWrongNetwork" class="warning">
                 Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este token.
             </p>
@@ -194,7 +223,7 @@
                         </div>
 
                         <div class="item-flex">
-                            <span><strong>Add Tag: </strong></span><br/>
+                            <span><strong>Agregar Tag: </strong></span><br/>
                             <input type='text' placeholder='Ingrese un tag' class='tag-input__text' @keydown='addTag' @keydown.down="removeLastTag"/>
                         </div>
                     </div>
@@ -235,8 +264,8 @@
             </form>
         </div>
 
-        <div class="events">
-            <span v-if="deploying">
+        <div class="events center">
+            <span v-if="deploying" >
                 Actualizando el perfil...<br />
                 <strong>Confirme todas las transacciones en la extensión de su navegador.</strong>
             </span>

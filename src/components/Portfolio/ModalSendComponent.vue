@@ -1,62 +1,84 @@
-<script setup>
+<!-- 
+  /* */ 
+  /* Pantalla que realiza el procedimiento de envío de un NFT */
+  /* */ 
+ -->
+ 
+ <!-- Importamos las librerías para recuperar transferir los tokens -->
+ <script setup>
   import { onMounted, defineProps, defineEmits, ref } from 'vue';
   import { isAddress } from 'web3-utils';
   import LSP7DigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP7DigitalAsset.json';
   import ProfilePreviewComponent from './ProfilePreviewComponent.vue';
   import LSP8IdentifiableDigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP8IdentifiableDigitalAsset.json';
-  import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../network';
-  import { CHAIN_IDS } from '@/constants';
+  import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
+  import { CHAIN_IDS } from '../../constants';
 
-  const props = defineProps({
-    assetAddress: String,
-    assetName: String,
-    isLsp7: Boolean,
-    isLsp8: Boolean,
-    tokenId: String,
-  });
-
+  //Funciones utilizadas para el cierre del modal
   const emit = defineEmits(['close', 'tokens-sent']);
-  const assetRecipient = ref('');
-  const amountToSend = ref(1);
-  const isLoading = ref(false);
-  const isSuccess = ref(false);
-  const txHash = ref('');
-  const forceParameter = ref(false);
-  const isRecepientEOA = ref(false);
-  const isL16 = ref(false);
-  const isL14 = ref(false);
-  const wasAssetSent = ref(false);
-  const isWrongNetwork = ref(false);
-  const error = ref(false);
-
   const handleModalClose = () => {
     emit('close', wasAssetSent.value);
   };
 
-  onMounted(async () => {
-    isLoading.value = false;
-    console.log('assetAddress', props.assetAddress);
-    try {
-      // Default links that show up
-      let chainId = await web3.eth.getChainId();
-      if (chainId === CHAIN_IDS.L14) {
-        isL14.value = true;
-      } else if (chainId === CHAIN_IDS.L16) {
-        isL16.value = true;
-      }
-    } catch (err) {
-      console.warn(err);
-    }
+  //Definimos las variables recibidas como parámetros
+  const props = defineProps({
+    assetAddress: String,                     //Variable que contiene la dirección del Token (NFT)//
+    assetName: String,                        //Variable que contiene el nombre del Token (NFT)//
+    isLsp7: Boolean,                          //Bandera que determina si el token es compatible con el estándar LSP7//
+    isLsp8: Boolean,                          //Bandera que determina si el token es compatible con el estándar LSP8//
+    tokenId: String,                          //Variable que contiene el id del Token (NFT)//
   });
 
+  //Definimos las variables
+  const error = ref(false);                   //Bandera que determina si se ha producido un error//
+  const isSuccess = ref(false);               //Bandera que determina si se ha completado el proceso de actualización//
+  const isWrongNetwork = ref(false);          //Bandera que determina si se ha producido un error con la red//
+  const isLoading = ref(false);               //Bandera que determina si se ha comenzado con el proceso de actualización//
+  const forceParameter = ref(false);          //Bandera que determina si se foza el parametro al acuñar el NFT//
+  const isRecepientEOA = ref(false);          //Bandera que determina si el receptor es una cuenta del tipo EOA//
+  const isL16 = ref(false);                   //Bandera que determina si se utiliza L16//
+  const isL14 = ref(false);                   //Bandera que determina si se utiliza L14//
+  const wasAssetSent = ref(false);            //Bandera que determina si el token fue enviado//
+  const assetRecipient = ref('');             //Variable que contiene la dirección del activo recibido
+  const amountToSend = ref(1);                //Variable que señala el número de elementos a transferir, por default 1
+  const txHash = ref('');                     //Variable que establece el hash de la transacción
+
+  //Función que cierra el modal y hace un refresh de la página
   function CloseModal() {
     window.location.reload();
   }
 
-  async function sendAsset() {
-    // Check network and update previous values
+  //Acciones que se realizan al cargar la página//
+  onMounted(async () => {
+    //Establecemos que se ha comenzado con la carga de los datos
+    isLoading.value = false;
+    console.log('assetAddress', props.assetAddress);
+
+    //Obtenemos el id de la cadena para determinar si se usa L14 o L16
     try {
       let chainId = await web3.eth.getChainId();
+
+      //Determinamos que tipo de red usamos L14 o L16
+      if (chainId === CHAIN_IDS.L14) {
+        isL14.value = true;
+      } 
+      else if (chainId === CHAIN_IDS.L16) {
+        isL16.value = true;
+      }
+    } 
+    catch (err) {
+      console.warn(err);
+    }
+  });
+
+  //Función que envía el token
+  async function sendAsset() {
+
+    //Obtenemos el id de la cadena para determinar si se usa L14 o L16
+    try {
+      let chainId = await web3.eth.getChainId();
+
+      //Determinamos que tipo de red usamos L14 o L16
       switch (chainId) {
         case CHAIN_IDS.L14:
           isL14.value = true;
@@ -79,32 +101,41 @@
       return;
     }
 
+    //Establecemos que se ha comenzado con la carga de los datos
     isLoading.value = true;
+
+    //Validamos que la dirección del receptor es una dirección valida
     let recipientBytecode = await web3.eth.getCode(assetRecipient.value);
     if (!isAddress(assetRecipient.value)) {
       console.warn(`La dirección: ${assetRecipient.value} no es valida.`);
       return;
     }
-    // If recipient is EOA, force is mandatory
+    
+    //Validamos si la cuenta receptora es del tipo EOA
     else if (recipientBytecode === '0x' && forceParameter.value === false) {
       isRecepientEOA.value = true;
       return;
     }
-
     isRecepientEOA.value = false;
-    txHash.value = '';
     console.log('Enviando activo a:', assetRecipient.value);
 
-    const accounts = await window.web3.eth.getAccounts();
-    const account = accounts[0];
+    // Obtenemos las cuentas de la extensión
+    const accounts = await web3.eth.getAccounts();
+      
+    // Obtenemos la cuenta con la que se está autentificado, la guardamos en las variables globales de la página
+    const account = accounts[0]; 
 
+    //Comenzamos con el proceso de transferencia
+    txHash.value = '';
     try {
-      if (props.isLsp7) {
-        await sendLSP7Token(account, props.assetAddress);
-      }
-      else if (props.isLsp8) {
+
+      //Validamos de que tipo de estándar se trata
+      if (props.isLsp8) {
+        
+        //Llamamos a la función de transferir
         await sendLSP8Token(account, props.assetAddress);
 
+        //Si se trata de una cuenta EOA, cargamos los datos del LocalStorage y actualizamos los valores
         if (localStorage.getItem('receivedAssets')) {
           const LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
 
@@ -116,11 +147,17 @@
         }
       }
 
+      else if (props.isLsp7) {
+        //Llamamos a la función de transferir
+        await sendLSP7Token(account, props.assetAddress);
+      }
+
+      //Indicamos que se culminado el proceso de envío
       wasAssetSent.value = true;
       emit('tokens-sent');
-
       isLoading.value = true;
       isSuccess.value = true;
+
     }
     catch (err) {
       // It can fail if the recipient is not a UP (cf. force option)
@@ -130,33 +167,42 @@
     }
   }
 
-  // https://docs.lukso.tech/standards/smart-contracts/lsp7-digital-asset#transfer
+  //Función que envía tokens creados bajo el estándar LSP7
   async function sendLSP7Token(accountAddress, assetAddress) {
-    const from = accountAddress;
-    const to = assetRecipient.value;
-    const amount = web3.utils.toWei(amountToSend.value.toString());
-    const force = forceParameter.value; // When set to TRUE, to may be any address; when set to FALSE to must be a contract that supports LSP1 UniversalReceiver and not revert.
-    const data = '0x';
+
+    //Creamos el smart contract para transferir el token
     const lsp7DigitalAssetContract = new window.web3.eth.Contract(LSP7DigitalAsset.abi, assetAddress);
+
+    const from = accountAddress;                                                    //Cuenta que transfiere el token
+    const to = assetRecipient.value;                                                //Cuenta que recibe el token
+    const amount = web3.utils.toWei(amountToSend.value.toString());                 //Cantidad que será transferida, por default 1
+    const force = forceParameter.value;                                             //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
+    const data = '0x';
+
+    //Realizamos la transferencia
     const receipt = await lsp7DigitalAssetContract.methods.transfer(from, to, amount, force, data).send({ from: accountAddress });
     
-    console.info('Transaction receipt:', receipt);
-
+    //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;
   }
 
+  //Función que envía tokens creados bajo el estándar LSP8
   async function sendLSP8Token(accountAddress, assetAddress) {
+
+    //Creamos el smart contract para transferir el token
     const lsp8IdentifiableDigitalAssetContract = new window.web3.eth.Contract(LSP8IdentifiableDigitalAsset.abi, assetAddress);
-    const tokenIds = await lsp8IdentifiableDigitalAssetContract.methods.tokenIdsOf(accountAddress).call();
-    const from = accountAddress;
-    const to = assetRecipient.value;
-    const force = true; // When set to TRUE, to may be any address; when set to FALSE to must be a contract that supports LSP1 UniversalReceiver and not revert.
+
+    const tokenIds = await lsp8IdentifiableDigitalAssetContract.methods.tokenIdsOf(accountAddress).call();      //Obtenemos el id del token
+    const from = accountAddress;                                                                                //Cuenta que transfiere el token
+    const to = assetRecipient.value;                                                                            //Cuenta que recibe el token
+    const force = true;                                                                                         //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
     const data = '0x';
 
+    //Realizamos la transferencia
     const receipt = await lsp8IdentifiableDigitalAssetContract.methods.transfer(from, to, props.tokenId, force, data).send({ from: accountAddress });
-    console.info('Transaction receipt:', receipt);
+    
+    //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;
-
   }
 </script>
 
