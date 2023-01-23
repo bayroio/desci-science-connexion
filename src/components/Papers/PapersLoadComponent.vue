@@ -94,7 +94,7 @@
 
 <template>
   <div class="asset-wrapper">
-    <div class="preview-card" :style="{ boxShadow: creationType === 'NFT ' ? 'none' : '' }">
+    <div class="preview-card" :style="{ boxShadow: creationType === 'NFT ' ? 'none' : 'none' }">
       <div class="image" :style="{ backgroundImage: `url(${iconUrl})`, borderRadius: creationType === 'NFT ' ? '50%' : '50%' }">
         <small class="supply">{{ creationType }} - Balance: {{ totalSupply }}</small>
       </div>

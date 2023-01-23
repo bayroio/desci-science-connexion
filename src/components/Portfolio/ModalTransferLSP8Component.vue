@@ -73,7 +73,7 @@
 
 <template>
   <div class="asset-wrapper">
-    <div class="preview-card">
+    <div class="preview-card" :style="{ boxShadow: isLsp7 ? 'none' : 'none' }">
       <div class="image" :style="{ backgroundImage: `url(${iconUrl})`, borderRadius: isLsp7 ? '50%' : '50%'  }"></div>
       <div class="infos">{{ LSP4TokenName }} ({{ LSP4TokenSymbol }})</div>
     </div>
