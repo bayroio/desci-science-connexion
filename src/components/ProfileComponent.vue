@@ -135,6 +135,10 @@
       </td>    
     </tr>
     <tr>
+      <td colspan="2" align="left">
+        <button class="button" @click="showModal=!showModal" style="width: 200px">Crea Vault</button>
+        <ModalUpdate @close="handleModalClose" v-if="showModal" />
+      </td>
       <td colspan="2" align="right">
         <button class="button" @click="showModal=!showModal" style="width: 200px">Actualizar</button>
         <ModalUpdate @close="handleModalClose" v-if="showModal" />
