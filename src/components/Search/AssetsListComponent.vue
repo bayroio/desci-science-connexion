@@ -1,55 +1,60 @@
 <!-- Importamos las librerías para recuperar el perfil y cargamos el componente para actualizar el perfil -->
-<script>
-  import { IPFS_GATEWAY_BASE_URL, URL_ASSETS_SEARCH, ASSETS_COUNT, URL_ASSETS_NO_IMAGE, URL_PROFILE_ASSETS } from '../../constants';
+<script setup>
+  import { IPFS_GATEWAY_BASE_URL, URL_ASSETS_SEARCH, URL_ASSETS_SEARCH2, ASSETS_COUNT, URL_ASSETS_NO_IMAGE, URL_PROFILE_ASSETS } from '../../constants';
   import axios from 'axios';
+  import { defineProps, onMounted, ref } from 'vue';
 
-  //Definimos las variables que se utilizaran dentro de la página
-  export default {
-    
-    data() {
-      return {
-        info: null
-      }
-    },
+  const props = defineProps({ textSearch: String });                           //Variable que busca un asset//
+  const info = ref();
 
-    // //Acciones que se realizan al cargar la página//
-    async mounted() {
-      //Leemos los datos de los perfiles
+  //Acciones que se realizan al cargar la página//
+  onMounted(async () => {
+    //Leemos los datos de los perfiles
+    if (props.textSearch == ""){
       const {data} = await axios.get(URL_ASSETS_SEARCH);
 
-      //Limitamos la busqueda de perfiles 8 registros//
-      this.info = data.slice(0,ASSETS_COUNT);
-    },
-
-    methods: {
-      getimage(array){
-        let path = URL_ASSETS_NO_IMAGE;
-        if (array == null){
-          return path;
-        }
-
-        path = array[0][0].url;
-        return path.replace('ipfs://', IPFS_GATEWAY_BASE_URL);
-      },
-      getname(name){
-        return name.substring(0,15);
-      },
-      getaddress(address){
-        return "#" + address.substring(2,6);
-      },
-      getdescription(description){
-        return description.substring(0,16) + "...";
-      },
-      getlink(address){
-        return URL_PROFILE_ASSETS + "asset/" + address;
-      }
+      //Limitamos la busqueda de perfiles//
+      info.value = data.slice(0,ASSETS_COUNT);
     }
+    else{
+      const {data} = await axios.get(URL_ASSETS_SEARCH2 + props.textSearch);
+
+      //Limitamos la busqueda de perfiles//
+      info.value = data.slice(0,ASSETS_COUNT);
+    }
+  });
+
+
+  const getimage = (array) =>  {
+    let path = URL_ASSETS_NO_IMAGE;
+    if (array == null){
+      return path;
+    }
+
+    path = array[0][0].url;
+    return path.replace('ipfs://', IPFS_GATEWAY_BASE_URL);
+  }
+
+  const getname = (name) =>  {
+    return name.substring(0,15);
+  }
+
+  const getaddress = (address) =>  {
+    return "#" + address.substring(2,6);
+  }
+
+  const getdescription = (description) =>  {
+    return description.substring(0,16) + "...";
+  }
+
+  const getlink = (address) =>  {
+    return URL_PROFILE_ASSETS + "asset/" + address;
   }
 </script>
 
 <template>
     <div class="cards">
-    <div v-for="item in this.info" :key="item.name" class="card">
+    <div v-for="item in info" :key="item.name" class="card">
       <a v-bind:href="getlink(item.address)" target="_blank">
         <img v-bind:src="getimage(item.images)" class="cardimg"/> 
 

@@ -3,11 +3,13 @@ export const IPFS_GATEWAY_API_BASE_URL = 'https://api.2eff.lukso.dev:443';
 export const BLOCKCHAIN_EXPLORER_BASE_URL = 'https://blockscout.com/lukso/l14';
 export const URL_PROFILE_SEARCH = 'https://erc725cache.l14.lukso.network/front-page'
 export const URL_ASSETS_SEARCH = 'https://erc725cache.l14.lukso.network/assets'
+export const URL_PROFILE_SEARCH2 = 'https://erc725cache.l14.lukso.network/search?searchTerm='
+export const URL_ASSETS_SEARCH2 = 'https://erc725cache.l14.lukso.network/search-assets?q='
 export const URL_PROFILE_ASSETS = 'https://universalprofile.cloud/'
 export const URL_PROFILE_NO_IMAGE = 'https://s2.coinmarketcap.com/static/img/coins/200x200/5625.png'
 export const URL_ASSETS_NO_IMAGE = 'https://s2.coinmarketcap.com/static/img/coins/200x200/5625.png'
 export const URL_REFRESH_IMAGE = 'https://cdn-icons-png.flaticon.com/512/2805/2805355.png'
-
+export const URL_SEARCH_IMAGE = 'https://cdn-icons-png.flaticon.com/512/54/54481.png'
 
 export const PROFILE_COUNT = 4;
 export const ASSETS_COUNT = 4;

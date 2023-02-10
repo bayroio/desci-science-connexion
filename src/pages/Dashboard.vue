@@ -24,7 +24,7 @@
 
       <!-- Tab del Perfil Universal, se incorpora el Componente Profile -->
       <div class="tabby-tab">
-        <input type="radio" id="tab-1" name="tabby-tabs">
+        <input type="radio" id="tab-1" name="tabby-tabs" checked>
         <label for="tab-1">Perfil Universal</label>
         <div class="tabby-content">
           <ProfileComponent />
@@ -51,7 +51,7 @@
 
       <!-- Tab de Busqueda -->
       <div class="tabby-tab">
-        <input type="radio" id="tab-4" name="tabby-tabs" checked>
+        <input type="radio" id="tab-4" name="tabby-tabs">
         <label for="tab-4">Búsqueda</label>
         <div class="tabby-content">
           <SearchComponent style="margin-top: 60px" />
