@@ -40,8 +40,8 @@
 
     //Determinamos que tipo de interfaz soporta cada dirección
     const supportsInterfaceContract = new window.web3.eth.Contract([COMMON_ABIS.supportsInterface], props.address);
-    console.log("props.address: ", props.address);
-    console.log("supportsInterfaceContract: ", supportsInterfaceContract);
+    // console.log("props.address: ", props.address);
+    // console.log("supportsInterfaceContract: ", supportsInterfaceContract);
 
     //Determinamos para cada dirección el tipo de interfaz que soporta, los NFT soportan la interfaz FT y NFT, mientras que los FT solo soportan la interfaz FT
     const [isLSP7, isLSP8] = await Promise.all([

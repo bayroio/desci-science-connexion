@@ -15,7 +15,7 @@
         if (!accounts.length) {
           throw Error('No accounts given: ' + accounts);
         }
-        console.log('Authenticated account:\n', accounts);
+        //console.log('Authenticated account:\n', accounts);
 
         // GET the Universal Profile
         window.account = accounts[0];
