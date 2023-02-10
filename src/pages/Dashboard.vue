@@ -9,6 +9,7 @@
   import ProfileComponent from '../components/Profile/ProfileComponent.vue';                //Componente que incluye la información del Perfil//
   import PapersComponent from '../components/Papers/PapersComponent.vue';                   //Componente que incluye la Tokenización de Papers//
   import PortfolioComponent from '../components/Portfolio/PortfolioComponent.vue';          //Componente que incluye el portafolio del Usuario//
+  import SearchComponent from '../components/Search/SearchComponent.vue';                   //Componente que incluye la busqueda de información//  
 </script>
 
 <style scoped>
@@ -23,7 +24,7 @@
 
       <!-- Tab del Perfil Universal, se incorpora el Componente Profile -->
       <div class="tabby-tab">
-        <input type="radio" id="tab-1" name="tabby-tabs" checked>
+        <input type="radio" id="tab-1" name="tabby-tabs">
         <label for="tab-1">Perfil Universal</label>
         <div class="tabby-content">
           <ProfileComponent />
@@ -48,6 +49,14 @@
         </div>
       </div>
 
+      <!-- Tab de Busqueda -->
+      <div class="tabby-tab">
+        <input type="radio" id="tab-4" name="tabby-tabs" checked>
+        <label for="tab-4">Búsqueda</label>
+        <div class="tabby-content">
+          <SearchComponent style="margin-top: 60px" />
+        </div>
+      </div>
 
 
       <!--Transfer-->
