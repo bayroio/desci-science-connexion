@@ -1,26 +1,26 @@
 <!-- 
   /* */ 
-  /* Pantalla principal de busqueda de información */
+  /* Pantalla principal de búsqueda de información */
   /* */ 
  -->
 
 <!-- Listado de componentes que se utilizaran dentro de la pantalla -->
 <script setup>
   import ProfileListComponent from './ProfileListComponent.vue';                //Componente que incluye la información del Perfil//
-  import AssetsListComponent from './AssetsListComponent.vue';                  //Componente que incluye la información del Perfil//
-  import { URL_REFRESH_IMAGE, URL_SEARCH_IMAGE } from '../../constants';
+  import AssetsListComponent from './AssetsListComponent.vue';                  //Componente que incluye la información de los Activos//
+  import { URL_REFRESH_IMAGE, URL_SEARCH_IMAGE } from '../../constants';        //Carga de constantes globales
   import { ref } from 'vue';
   import { methods } from 'underscore';
 
   let profilesearch = ref('');                      //Variable de formulario para buscar el perfil//
   let assetsearch = ref('');                        //Variable de formulario para buscar el activo//
 
-  let profileKey = ref(0);                          //Variable que permite hacerel refresh del perfil//
+  let profileKey = ref(0);                          //Variable y acción que permite hacer el refresh del perfil//
   const reloadprofiles = () =>  {
       profileKey.value += 1;
   }
     
-  let assetsKey = ref(0);                           //Variable que permite hacerel refresh de los activos//
+  let assetsKey = ref(0);                           //Variable y acción que permite hacer el refresh de los activos//
   const reloadassets = () => {
       assetsKey.value += 1;
   }
@@ -28,14 +28,20 @@
 </script>
 
 <template>
+  
+  <!-- Sección de Perfiles -->
   <div>
     <h4 class="center"><strong>Profiles</strong></h4>
+
+    <!--Sección de búsqueda -->
     <div class="inputform">
       <input type="text" class="inputsearch" v-model="profilesearch" id="searchprofile" placeholder="Buscar Perfil ..."/>
       <a href="#" @click="reloadprofiles">
         <img v-bind:src="URL_SEARCH_IMAGE" class="imgsearch"/>
       </a>
     </div>
+
+    <!-- Sección de perfiles-->
     <div class="reload">
       <a href="#" @click="reloadprofiles">
         <img v-bind:src="URL_REFRESH_IMAGE" class="imgreload"/>
@@ -46,14 +52,20 @@
   </div>
 
   <br/><br/>
+
+  <!-- Sección de Assets -->
   <div>
     <h4 class="center"><strong>Assets</strong></h4>
+
+    <!--Sección de búsqueda -->
     <div class="inputform">
       <input type="text" class="inputsearch" v-model="assetsearch" id="searchasset" placeholder="Buscar Activo ..."/>
       <a href="#" @click="reloadassets">
         <img v-bind:src="URL_SEARCH_IMAGE" class="imgsearch"/>
       </a>
     </div>
+
+    <!-- Sección de Activos-->
     <div class="reload">
       <a href="#" @click="reloadassets">
         <img v-bind:src="URL_REFRESH_IMAGE" class="imgreload"/>
