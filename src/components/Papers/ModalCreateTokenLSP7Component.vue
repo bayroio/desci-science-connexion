@@ -101,7 +101,7 @@
                 name: tokenName.value,                      //Nombre del token, de acuerdo al formulario
                 symbol: tokenSymbol.value,                  //Nombre del símbolo, de acuerdo al formulario
                 controllerAddress: account,                 //Propietario del token de acuerdo al usurio logueado
-                isNFT: false,                               //Establecemos si se trata de un FT (false) o un NFT (true)
+                isNFT: true,                               //Establecemos si se trata de un FT (false) o un NFT (true)
                 creators: [account],                        //Establecemos como creador al usuario autentificado
                 digitalAssetMetadata: LSP4MetaData,         //Establecemos en el activo el valor del metadada creado
             },
