@@ -33,7 +33,8 @@
 
       // Obtenemos las cuentas de la extensión
       const accounts = await web3.eth.getAccounts();
-      
+      //console.log(accounts[0]);
+
       // Obtenemos la cuenta con la que se está autentificado, la guardamos en las variables globales de la página
       const account = accounts[0]; 
       this.address = account;
@@ -50,13 +51,48 @@
 
       //Una vez que se ha cargado el perfil, filtramos solo la sección del perfil (LSP3Profile)
       let metaData;
+      this.profile_v = true;
       try {
         metaData = await profile.fetchData('LSP3Profile');
-        //console.log(metaData);
       } 
       catch (e) {
-        this.profileData.name = false;
-        this.error = e;
+        let profile_empty = false;
+
+        //Obtenemos la información del LocalStorage
+        let ProfileLocal = JSON.parse(localStorage.getItem('ProfileInfo'));
+
+        if(ProfileLocal == null) {
+          profile_empty = true;
+        }
+        else {
+          //Get the address info
+          for(let i = 0; i < ProfileLocal.profiles.length; i++) {
+            let p = ProfileLocal.profiles[i];
+
+            if(p.address == this.address){
+              this.profileData.name = p.username;
+              this.profileData.tags = p.tags;
+              this.profileData.description = p.description;
+              this.profileData.profileImage.url = p.profileImage[0].url.replace('ipfs://', profile.options.ipfsGateway);
+              return;
+            }
+          }
+
+          profile_empty = true;
+        }
+
+
+        if (profile_empty) {
+          //Ocultamos la información del Perfil
+          this.profile_v = false;
+          this.profileData.name = false;
+          this.profileData.tags = false;
+          this.profileData.links = false;
+
+          this.error = e;
+
+          return;
+        }
         return;
       }
       
@@ -117,32 +153,35 @@
           <span class="username">{{ address }}</span><br/>
 
           <br/>
-          <span><strong>Username: </strong></span><br/>
-          <span class="username" v-if="profileData.name"> {{ profileData.name }} </span><br/>
+          <div v-if="profile_v">
+            <span><strong>Username: </strong></span><br/>
+            <span class="username" v-if="profileData.name"> {{ profileData.name }} </span><br/>
 
-          <br/>
-          <span><strong>Tags: </strong></span><br/>
-          <div v-if="profileData.tags">
-            <span class="username"  v-for="(item, index) in profileData.tags" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
-          </div>
-          
-          <br/>
-          <span><strong>Links: </strong></span><br/>
-          <div v-if="profileData.links">
-            <span class="username"  v-for="(item, index) in profileData.links" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
-          </div>
-                    
-          <br/>
-          <span><strong>Descripción: </strong></span><br/>
-          <span class="description">
-            {{ profileData.description }}
-          </span><br/>
+            <br/>
+            <span><strong>Tags: </strong></span><br/>
+            <div v-if="profileData.tags">
+              <span class="username"  v-for="(item, index) in profileData.tags" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
+            </div>
 
-          <br/>
-          <span v-if="profileData.name === false" class="warning" id="extension">
+            <br/>
+            <span><strong>Links: </strong></span><br/>
+            <div v-if="profileData.links">
+              <span class="username"  v-for="(item, index) in profileData.links" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
+            </div>
+                      
+            <br/>
+            <span><strong>Descripción: </strong></span><br/>
+            <span class="description">
+              {{ profileData.description }}
+            </span><br/>
+
+            <br/>
+            
+          </div>
+          <!-- <span v-if="profileData.name === false" class="warning" id="extension">
             Se esta utilizando MetaMask con esta dApp, <br />
             se recomienda intentar con <br /><a href="https://docs.lukso.tech/guides/universal-profile/browser-extension/install-browser-extension">Extensión Universal</a>.
-          </span>
+          </span> -->
 
         </div>
       </td>    

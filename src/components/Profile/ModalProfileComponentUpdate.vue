@@ -114,19 +114,19 @@
             async onSubmit(e) {
                 console.log("Entrando a onsubmit...");
 
-                //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
-                try {
-                    isWrongNetwork.value = await isLuksoNetwork();
-                    if (isWrongNetwork.value) {
-                        return;
-                    }
-                } 
-                catch (err) {
-                    console.warn(err);
-                    error.value = err.message;
-                    console.log("Error...", error.value);
-                    return;
-                }
+                // //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
+                // try {
+                //     isWrongNetwork.value = await isLuksoNetwork();
+                //     if (isWrongNetwork.value) {
+                //         return;
+                //     }
+                // } 
+                // catch (err) {
+                //     console.warn(err);
+                //     error.value = err.message;
+                //     console.log("Error...", error.value);
+                //     return;
+                // }
 
                 // Obtenemos las cuentas de la extensión
                 const accounts = await web3.eth.getAccounts();
@@ -144,7 +144,7 @@
                 const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
                     ipfsGateway: IPFS_GATEWAY_BASE_URL,
                 });
-                
+
                 //Obtenemos el id de la cadena
                 const chainId = await web3.eth.getChainId();
 
@@ -166,9 +166,8 @@
 
                 //Procedemos a realizar la actualización del perfil
                 try {
-                    
                     //Definimos el contrato y la cuenta que se actualizara
-                    const profileContract = new window.web3.eth.Contract(LSP0ERC725Account.abi, accounts[0]);
+                    const profileContract = new window.web3.eth.Contract(LSP0ERC725Account.abi, accounts[0], { gasPrice: '20000000000' });
                     
                     //Ejecutamos el proceso de actualización con los datos codificados en la cuenta
                     const receipt = await profileContract.methods['setData(bytes32[],bytes[])'](encodedData.keys, encodedData.values).send({ from: accounts[0] });
@@ -185,6 +184,60 @@
 
                 //Señalamos que el proceso ha finalizado correctamente
                 isSuccess.value = true;
+
+                //Validamos si guardamos la información en el localstorage
+                let bytecode = await web3.eth.getCode(account);
+                if (bytecode === '0x') {
+                    //Obtenemos la información del LocalStorage
+                    let ProfileLocal = JSON.parse(localStorage.getItem('ProfileInfo'));
+                    
+                    var pr = {};
+
+                    if(ProfileLocal == null) {
+                        
+                        //Creamos el registro, ya que no existe
+                        pr.address = account;
+                        pr.username = uploadResult.json.LSP3Profile.name;
+                        pr.url = uploadResult.url;
+                        pr.description = uploadResult.json.LSP3Profile.description;
+                        pr.tags = uploadResult.json.LSP3Profile.tags;
+                        pr.profileImage = uploadResult.json.LSP3Profile.profileImage;
+                        pr.backgroundImage = uploadResult.json.LSP3Profile.backgroundImage;
+
+                        //Lo agramos a un arreglo
+                        var obj = {};
+                        obj.profiles = [];
+                        obj.profiles.push(pr);
+                        
+                        //Guardamos el registro en el LocalStorage
+                        localStorage.setItem('ProfileInfo', JSON.stringify(obj));
+                        return;
+                    }
+                    else {
+                        //Get the address info
+                        for(let i = 0; i < ProfileLocal.profiles.length; i++) {
+                            let p = ProfileLocal.profiles[i];
+
+                            if(p.address == account){
+                                ProfileLocal.profiles.splice(i,1);
+                                break;
+                            }
+                        }
+
+                        //Creamos el registro, ya que no existe
+                        pr.address = account;
+                        pr.username = uploadResult.json.LSP3Profile.name;
+                        pr.url = uploadResult.url;
+                        pr.description = uploadResult.json.LSP3Profile.description;
+                        pr.tags = uploadResult.json.LSP3Profile.tags;
+                        pr.profileImage = uploadResult.json.LSP3Profile.profileImage;
+                        pr.backgroundImage = uploadResult.json.LSP3Profile.backgroundImage;
+
+                        //Guardamos el registro en el LocalStorage
+                        ProfileLocal.profiles.push(pr);
+                        localStorage.setItem('ProfileInfo', JSON.stringify(ProfileLocal));
+                    }
+                }
             }
         }
     }
