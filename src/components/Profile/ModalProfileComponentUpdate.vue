@@ -40,6 +40,33 @@
             // Obtenemos la cuenta con la que se está autentificado
             const account = accounts[0]; 
             
+            //Validamos si guardamos la información en el localstorage
+            let bytecode = await web3.eth.getCode(account);
+            if (bytecode === '0x') {
+
+                //Obtenemos la información del LocalStorage
+                let ProfileLocal = JSON.parse(localStorage.getItem('ProfileInfo'));
+
+                if(ProfileLocal == null) {
+                    return;
+                }
+                else {
+                    //Get the address info
+                    for(let i = 0; i < ProfileLocal.profiles.length; i++) {
+                        let p = ProfileLocal.profiles[i];
+
+                        if(p.address == account){
+                            tokenUsername.value = p.username;
+                            this.tags = p.tags;
+                            tokendescription.value = p.description;
+                            return;
+                        }
+                    }
+
+                    return;
+                }
+            }                
+
             //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
             //en el archivo de constants
             const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
@@ -48,7 +75,7 @@
 
             //Validamos los tags
             if (this.tags.length == 0)
-                this.tags = [''];
+                this.tags = [];
 
             //Una vez que se ha cargado el perfil, filtramos solo la sección del perfil (LSP3Profile)
             let metaData;
