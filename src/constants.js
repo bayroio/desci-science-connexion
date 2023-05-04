@@ -17,7 +17,7 @@ export const ASSETS_COUNT = 4;
 
 // https://docs.lukso.tech/standards/smart-contracts/interface-ids
 export const INTERFACE_IDS = {
-  LSP7DigitalAsset: '0x01ffc9a7', //'0xe33f65c3',
+  LSP7DigitalAsset: '0xe33f65c3', //'0x01ffc9a7', //'0xe33f65c3',
   LSP8IdentifiableDigitalAsset: '0x49399145',
 };
 

@@ -146,6 +146,7 @@
 
         //Obtenemos los tokens del usuario, los parámetros son el esquema, la dirección del token, el provider de la extensión y la ruta de IPFS definida 
         //en el archivo de constants
+        const deployedLSP8IdentifiableDigitalAssetContract = contracts.LSP8IdentifiableDigitalAsset;
         const erc725LSP12IssuedAssets = new ERC725js(LSP12IssuedAssetsSchema, accounts[0], window.web3.currentProvider, {
             ipfsGateway: IPFS_GATEWAY_BASE_URL,
         });
@@ -160,6 +161,9 @@
             LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
         }
         
+        //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
+        LSP12IssuedAssets.value.push(deployedLSP8IdentifiableDigitalAssetContract.address);
+
         //Si se trata de una cuenta EOA, agregamos el nuevo token al localStorage
         let bytecode = await web3.eth.getCode(accounts[0]);
         if (bytecode === '0x') {
@@ -167,9 +171,6 @@
             isEOA.value = true;
         }
 
-        //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
-        const deployedLSP8IdentifiableDigitalAssetContract = contracts.LSP8IdentifiableDigitalAsset;
-        LSP12IssuedAssets.value.push(deployedLSP8IdentifiableDigitalAssetContract.address);
 
         //Codificamos los tokens (que incluyen el nuevo token)
         const LSP8InterfaceId = '0x49399145';

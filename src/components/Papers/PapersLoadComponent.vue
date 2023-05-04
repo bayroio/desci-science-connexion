@@ -10,7 +10,7 @@
   import ERC725js from '@erc725/erc725.js';
   import LSP4DigitalAssetSchema from '@erc725/erc725.js/schemas/LSP4DigitalAsset.json';
   import LSP7DigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP7DigitalAsset.json';
-  import { IPFS_GATEWAY_BASE_URL, IPFS_GATEWAY_API_BASE_URL, COMMON_ABIS, INTERFACE_IDS } from '../../constants';
+  import { IPFS_GATEWAY_BASE_URL, COMMON_ABIS, INTERFACE_IDS } from '../../constants';
   import ModalMintLSP7 from './ModalMintLSP7Component.vue';
   import ModalMintLSP8 from './ModalMintLSP8Component.vue';
 

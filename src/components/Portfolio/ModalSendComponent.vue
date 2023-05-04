@@ -114,7 +114,7 @@
     //Validamos si la cuenta receptora es del tipo EOA
     else if (recipientBytecode === '0x' && forceParameter.value === false) {
       isRecepientEOA.value = true;
-      return;
+      //return;
     }
     isRecepientEOA.value = false;
     console.log('Enviando activo a:', assetRecipient.value);
@@ -176,7 +176,7 @@
     const from = accountAddress;                                                    //Cuenta que transfiere el token
     const to = assetRecipient.value;                                                //Cuenta que recibe el token
     const amount = web3.utils.toWei(amountToSend.value.toString());                 //Cantidad que será transferida, por default 1
-    const force = forceParameter.value;                                             //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
+    const force = true;                                             //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
     const data = '0x';
 
     //Realizamos la transferencia
@@ -228,7 +228,7 @@
               <input type="number" placeholder="0x..." v-model="amountToSend" id="amount" required />
             </div>
 
-            <div>
+            <!-- <div>
               <span title="Los tokens y NFT solo se pueden enviar a perfiles universales o contratos inteligentes que implementan un receptor universal de forma predeterminada. Para enviarlo a un EOA, debe usar el parámetro de fuerza.">
                 <p class="warning" v-if="isRecepientEOA">Tu dirección receptora es una EOA, por favor permite la trasnferencia a la EOA.</p>
               </span>
@@ -239,7 +239,7 @@
               <p class="warning" v-if="error">
                 {{ error }}
               </p>
-            </div>
+            </div> -->
 
             <!-- <div style="margin-top: 10px">
               <input style="margin: 5px 0px 0px -50px" type="checkbox" v-model="forceParameter" id="force" value="false" />

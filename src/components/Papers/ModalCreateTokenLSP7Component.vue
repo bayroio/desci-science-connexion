@@ -61,8 +61,9 @@
 
         // Obtenemos la cuenta con la que se está autentificado
         const account = accounts[0]; 
-        console.log("accounts...", accounts);
-        console.log("account...", account);
+        // console.log("accounts...", accounts);
+        // console.log("account...", account);
+        // console.log(tokenName.value);
 
         // Creamos la estructura JSON del metadata para crear el NFT
         const LSP4MetaData = {
@@ -101,14 +102,14 @@
                 name: tokenName.value,                      //Nombre del token, de acuerdo al formulario
                 symbol: tokenSymbol.value,                  //Nombre del símbolo, de acuerdo al formulario
                 controllerAddress: account,                 //Propietario del token de acuerdo al usurio logueado
-                isNFT: true,                               //Establecemos si se trata de un FT (false) o un NFT (true)
+                isNFT: true,                                //Establecemos si se trata de un FT (false) o un NFT (true)
                 creators: [account],                        //Establecemos como creador al usuario autentificado
                 digitalAssetMetadata: LSP4MetaData,         //Establecemos en el activo el valor del metadada creado
             },
             {
                 ipfsGateway: IPFS_GATEWAY_API_BASE_URL,     //Configuramos el IPFS de las constantes
                 LSP7DigitalAsset: {
-                   version,                                 //Establecemos la versión del token
+                    version,                                //Establecemos la versión del token
                 },
                 onDeployEvents: {
                     next: (deploymentEvent) => {
@@ -153,6 +154,7 @@
 
         //Obtenemos los tokens del usuario, los parámetros son el esquema, la dirección del token, el provider de la extensión y la ruta de IPFS definida 
         //en el archivo de constants
+        const deployedLSP7DigitalAssetContract = contracts.LSP7DigitalAsset;
         const erc725LSP12IssuedAssets = new ERC725js(LSP12IssuedAssetsSchema, accounts[0], window.web3.currentProvider, {
             ipfsGateway: IPFS_GATEWAY_BASE_URL,
         });
@@ -167,6 +169,9 @@
             LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
         }
 
+        //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
+        LSP12IssuedAssets.value.push(deployedLSP7DigitalAssetContract.address);
+
         //Si se trata de una cuenta EOA, agregamos el nuevo token al localStorage
         let bytecode = await web3.eth.getCode(accounts[0]);
         if (bytecode === '0x') {
@@ -174,12 +179,8 @@
             isEOA.value = true;
         }
 
-        //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
-        const deployedLSP7DigitalAssetContract = contracts.LSP7DigitalAsset;
-        LSP12IssuedAssets.value.push(deployedLSP7DigitalAssetContract.address);
-
         //Codificamos los tokens (que incluyen el nuevo token)
-        const LSP7InterfaceId = '0x5fcaac27';
+        const LSP7InterfaceId = '0xe33f65c3';
         const encodedErc725Data = erc725LSP12IssuedAssets.encodeData([
             {
                 keyName: 'LSP12IssuedAssets[]',
