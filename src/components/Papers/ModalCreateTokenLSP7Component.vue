@@ -39,8 +39,8 @@
 
     //Función que crea el token
     async function onSubmit(e) {
-        console.log("Entrando a onsubmit...")
-
+        console.log("Entrando a onsubmit...");
+        
         //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
         try {
             isWrongNetwork.value = await isLuksoNetwork();
@@ -61,14 +61,20 @@
 
         // Obtenemos la cuenta con la que se está autentificado
         const account = accounts[0]; 
-        // console.log("accounts...", accounts);
-        // console.log("account...", account);
-        // console.log(tokenName.value);
 
         // Creamos la estructura JSON del metadata para crear el NFT
         const LSP4MetaData = {
             description: description.value,
-            icon: e.target.querySelector('input#icon').files[0],
+            // icon: e.target.querySelector('input#icon').files[0],
+            icon: [
+                {
+                    width: 640,
+                    height: 598,
+                    hashFunction: 'keccak256(bytes)',
+                    hash: '0x78cfe3eea3a1924ec6d9b6599c507f150e956465494f98a4aa9b47422399cc8f',
+                    url: 'ipfs://QmQhn79RV4GrzdYix39vgaWY3VzE4NvmCR2WqPYEgPDNop'
+                }
+            ],
             links: [],
             images: [],
             assets: [],
@@ -254,10 +260,10 @@
                     </div>
 
                     <div class="formfields">
-                        <div class="item-flex">
+                        <!-- <div class="item-flex">
                             <span><strong>Ícono del Token (representación íconografica)</strong></span><br/>
-                            <input type="file" id="icon" accept="image/*" required /><br/>
-                        </div>
+                            <input type="file" id="icon" accept="image/*" value="https://upload.wikimedia.org/wikipedia/commons/4/47/Logo_del_ITESM.svg" required /><br/>
+                        </div> -->
 
                         <div class="item-flex">
                             <span><strong>Archivo en PDF (paper)</strong></span><br/>

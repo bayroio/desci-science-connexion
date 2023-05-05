@@ -63,7 +63,16 @@
         // Creamos la estructura JSON del metadata para crear el NFT
         const LSP4MetaData = {
             description: description.value,
-            icon: e.target.querySelector('input#icon').files[0],
+            //icon: e.target.querySelector('input#icon').files[0],
+            icon: [
+                {
+                    width: 640,
+                    height: 598,
+                    hashFunction: 'keccak256(bytes)',
+                    hash: '0x78cfe3eea3a1924ec6d9b6599c507f150e956465494f98a4aa9b47422399cc8f',
+                    url: 'ipfs://QmQhn79RV4GrzdYix39vgaWY3VzE4NvmCR2WqPYEgPDNop'
+                }
+            ],
             links: [],
             images: [],
             assets: [],
