@@ -50,14 +50,34 @@
     //Si se trata de un token EOA, actualizamos el número total acuñado en el LocalStorage
     if (!parseInt(balanceOf.value) && localStorage.getItem('receivedAssets')) {
 
-      //Leemos los datos del local storage
-      const LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
+      //Quitamos el asset, ya que esta en cero, Leemos los datos del local storage
+      const LSP5ReceivedAssetsComplete = JSON.parse(localStorage.getItem('receivedAssets'));
+
+      // Obtenemos la cuenta con la que se está autentificado
+      const accounts = await web3.eth.getAccounts();
+      const account = accounts[0]; 
+
+      //Obtenemos los assets
+      let LSP5ReceivedAssets;
+      for(let i = 0; i < LSP5ReceivedAssetsComplete.profiles.length; i++) {
+          let a = LSP5ReceivedAssetsComplete.profiles[i].account;
+          
+          if(a == account){
+            //Guardamos la dirección del NFT creado
+            LSP5ReceivedAssets = LSP5ReceivedAssetsComplete.profiles[i];
+            LSP5ReceivedAssetsComplete.profiles.splice(i,1);
+            break;
+          }
+      }
+
+      //Quitamos el asset
       LSP5ReceivedAssets.value = LSP5ReceivedAssets.value.filter(function (assetAddress) {
         return assetAddress !== props.address;
       });
 
       //Actualizamos los datos del LocalStorage
-      localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssets));
+      LSP5ReceivedAssetsComplete.profiles.push(LSP5ReceivedAssets);
+      localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssetsComplete));
     }
   }
 

@@ -75,9 +75,21 @@
       const LSP5ReceivedAssets = await erc725LSP12IssuedAssets.getData('LSP5ReceivedAssets[]');
       receivedAssets.value = LSP5ReceivedAssets.value;
     } 
-    catch (err) {
-      // Validamos si se trata de una cuenta EOA, si es así, cargamos la información del Local Storage
-      const LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
+    catch (err) {      
+      //Obtenemos los assets
+      const LSP5ReceivedAssetsComplete = JSON.parse(localStorage.getItem('receivedAssets'));
+      let LSP5ReceivedAssets;
+
+      //Cargamos solo los de la dirección autentificada
+      for(let i = 0; i < LSP5ReceivedAssetsComplete.profiles.length; i++) {
+          let a = LSP5ReceivedAssetsComplete.profiles[i].account;
+          
+          if(a == account){
+            //Guardamos la dirección del NFT creado
+            LSP5ReceivedAssets = LSP5ReceivedAssetsComplete.profiles[i];
+            break;
+          }
+      }
       receivedAssets.value = LSP5ReceivedAssets.value;
     }
 
