@@ -41,14 +41,45 @@
 
     methods: {
       setupLocalStorage(itemName, account){
+        var item = {};
+
         if (localStorage.getItem(itemName) === null) {
-          localStorage.setItem(itemName, JSON.stringify({"value":[], "account": account}));
+
+          //Create the item
+          item.value = [];
+          item.account = account;
+
+          //Lo agramos a un arreglo
+          var obj = {};
+          obj.profiles = [];
+          obj.profiles.push(item);
+          
+          //Guardamos el registro en el LocalStorage
+          localStorage.setItem(itemName, JSON.stringify(obj));
         }
         else{
           const localStorageOwner = JSON.parse(localStorage.getItem(itemName));
-            
-          if(localStorageOwner.account !== account){
-            localStorage.removeItem(itemName);
+
+          //Get the address info
+          var flag = true;
+          for(let i = 0; i < localStorageOwner.profiles.length; i++) {
+              let p = localStorageOwner.profiles[i];
+
+              if(p.account == account){
+                  flag = false;
+                  break;
+              }
+          }
+
+          //Validamos si se encuentra la cuenta
+          if (flag){
+            //Create the item
+            item.value = [];
+            item.account = account;
+
+            localStorageOwner.profiles.push(item);
+
+            localStorage.setItem(itemName, JSON.stringify(localStorageOwner));
           }
         }
       },

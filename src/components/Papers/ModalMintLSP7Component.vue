@@ -97,11 +97,28 @@
             //Si se trata de una cuenta EOA, cargamos los datos del LocalStorage y agregamos el nuevo token acuñado
             let bytecode = await web3.eth.getCode(account);
             if (bytecode === '0x') {
-                let LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
+                let LSP5ReceivedAssetsComplete = JSON.parse(localStorage.getItem('receivedAssets'));
+                let LSP5ReceivedAssets;
+
+                //Obtenemos los assets del usuario
+                for(let i = 0; i < LSP5ReceivedAssetsComplete.profiles.length; i++) {
+                    let p = LSP5ReceivedAssetsComplete.profiles[i];
+
+                    if(p.account == account){
+                        LSP5ReceivedAssets = p;
+                        LSP5ReceivedAssetsComplete.profiles.splice(i,1);
+                        break;
+                    }
+                }
+
+                //Buscamos si la dirección del asset ya se encuentra registrado
                 if (LSP5ReceivedAssets.value.indexOf(props.address) === -1) {
                     LSP5ReceivedAssets.value.push(props.address);
-                    localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssets));
                 }
+
+                //Agregamos la dirección al address
+                LSP5ReceivedAssetsComplete.profiles.push(LSP5ReceivedAssets);
+                localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssetsComplete));
             }
         }
         catch (err) {

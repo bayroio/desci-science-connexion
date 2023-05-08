@@ -58,11 +58,19 @@
     } 
     catch (err) {     
       // Probamos si es una cuenta del tipo EOA, procedemos a leer la información del localStorage
-      const LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
+      const LSP12IssuedAssetsComplete = JSON.parse(localStorage.getItem('issuedAssets'));
 
-      console.log(LSP12IssuedAssets.value);
-      //Guardamos la dirección del NFT creado
-      addresses.value = LSP12IssuedAssets.value;
+      //Leemos los assets
+      for(let i = 0; i < LSP12IssuedAssetsComplete.profiles.length; i++) {
+          let a = LSP12IssuedAssetsComplete.profiles[i].account;
+
+          if(a == account){
+            //Guardamos la dirección del NFT creado
+            const LSP12IssuedAssets = LSP12IssuedAssetsComplete.profiles[i];
+            addresses.value = LSP12IssuedAssets.value;
+            break;
+          }
+      }
     }
 
     //Terminamos el proceso de carga

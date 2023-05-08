@@ -162,12 +162,24 @@
 
         //Filtramos únicamente los tokens creados por el usuario
         let LSP12IssuedAssets;
+        let LSP12AssetsComplete;
+        let i = 0;
         try {
             LSP12IssuedAssets = await erc725LSP12IssuedAssets.getData('LSP12IssuedAssets[]');
         }
         catch (err) {
+
             //Validamos si se trata de una cuenta EOA, se carga la información del local storage
-            LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
+            LSP12AssetsComplete = JSON.parse(localStorage.getItem('issuedAssets'));
+
+            //Leemos los assets
+            for(i = 0; i < LSP12AssetsComplete.profiles.length; i++) {
+                let a = LSP12AssetsComplete.profiles[i].account;
+
+                if(a == account){
+                    LSP12IssuedAssets = LSP12AssetsComplete.profiles[i];
+                }
+            }            
         }
         
         //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
@@ -176,7 +188,23 @@
         //Si se trata de una cuenta EOA, agregamos el nuevo token al localStorage
         let bytecode = await web3.eth.getCode(accounts[0]);
         if (bytecode === '0x') {
-            localStorage.setItem('issuedAssets', JSON.stringify(LSP12IssuedAssets));
+
+            //Save the assets
+            LSP12AssetsComplete = JSON.parse(localStorage.getItem('issuedAssets'));
+
+            //Delete the address info
+            for(let i = 0; i < LSP12AssetsComplete.profiles.length; i++) {
+                let p = LSP12AssetsComplete.profiles[i];
+
+                if(p.account == account){
+                    LSP12AssetsComplete.profiles.splice(i,1);
+                    break;
+                }
+            }
+            
+            //Add the item
+            LSP12AssetsComplete.profiles.push(LSP12IssuedAssets);
+            localStorage.setItem('issuedAssets', JSON.stringify(LSP12AssetsComplete));
             isEOA.value = true;
         }
 
