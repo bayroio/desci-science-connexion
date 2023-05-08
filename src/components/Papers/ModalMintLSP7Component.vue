@@ -67,12 +67,12 @@
         if (mintAmount.value === 0) {
             return;
         }
-        else if (minterBytecode === '0x' && forceParameter.value === false) {
-            //Validamos si se trata de un EOA, si es así se debe de forzar el acuñado
-            isMinterEOA.value = true;
-            return;
-        }
-        isMinterEOA.value = false;
+        // else if (minterBytecode === '0x' && forceParameter.value === false) {
+        //     //Validamos si se trata de un EOA, si es así se debe de forzar el acuñado
+        //     isMinterEOA.value = true;
+        //     return;
+        // }
+        isMinterEOA.value = true;
         console.log(`Acuñando ${mintAmount.value} nuevos tokens.`);
 
 
@@ -84,7 +84,7 @@
             const lsp7DigitalAssetContract = new window.web3.eth.Contract(LSP7DigitalAsset.abi, props.address);
             const to = account;                                                     //Persona que acuña el token
             const amount = web3.utils.toWei(mintAmount.value.toString());           //Cantidad de tokens a acuñar
-            const force = forceParameter.value;                                     //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
+            const force = true;                                     //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
             const data = '0x';
 
             //Acuñamos el token y guardamos el hash de resultado
@@ -143,12 +143,12 @@
                     <span><strong>Cantidad a acuñar: </strong></span><br/>
                     <input type="number" v-model="mintAmount" placeholder="1" id="amount" required />
 
-                    <div>
+                    <!-- <div>
                         <span title="Los tokens y NFT solo se pueden enviar a perfiles universales o contratos inteligentes que implementan un receptor universal de forma predeterminada. Para enviarlo a un EOA, debe usar el parámetro de fuerza.">
                             <input style="position: absolute; margin: 5px 0px 0px 0px" type="checkbox" v-model="forceParameter" id="force" value="false" />
                             <span style="margin-left: 20px"><strong>Permite la transferencia de tokens a una cuenta EOA </strong></span><br/>
                         </span>
-                    </div>
+                    </div> -->
                     <br />
                     <div class="right">
                         <button type="submit">Acuñar</button>

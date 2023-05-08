@@ -61,10 +61,7 @@
         //Obtenemos la información del LocalStorage
         let ProfileLocal = JSON.parse(localStorage.getItem('ProfileInfo'));
 
-        if(ProfileLocal == null) {
-          profile_empty = true;
-        }
-        else {
+        if(ProfileLocal != null) {
           //Get the address info
           for(let i = 0; i < ProfileLocal.profiles.length; i++) {
             let p = ProfileLocal.profiles[i];
@@ -77,22 +74,8 @@
               return;
             }
           }
-
-          profile_empty = true;
         }
 
-
-        if (profile_empty) {
-          //Ocultamos la información del Perfil
-          this.profile_v = false;
-          this.profileData.name = false;
-          this.profileData.tags = false;
-          this.profileData.links = false;
-
-          this.error = e;
-
-          return;
-        }
         return;
       }
       
@@ -130,9 +113,6 @@
 
 
 <template>
-  <div>
-    <h4 class="center"><strong>Datos Generales</strong></h4>
-  </div>
 
   <table style="border: none">
     <tr>
@@ -153,7 +133,12 @@
           <span class="username">{{ address }}</span><br/>
 
           <br/>
-          <div v-if="profile_v">
+          <div v-if="profile_v" style="border: 1px solid lightgray; padding: 15px; border-radius: 15px;">
+
+            <div>
+              <h4 class="center"><strong>Datos Generales</strong></h4>
+            </div>
+
             <span><strong>Username: </strong></span><br/>
             <span class="username" v-if="profileData.name"> {{ profileData.name }} </span><br/>
 
@@ -188,7 +173,7 @@
     </tr>
     <tr>
       <td colspan="2" align="right">
-        <button class="button" @click="showModal=!showModal" style="width: 200px">Actualizar</button>
+        <button class="button" @click="showModal=!showModal" style="width: 300px">Actualizar datos generales</button>
         <ModalUpdate @close="handleModalClose" v-if="showModal" />
       </td>
     </tr>

@@ -251,10 +251,10 @@
                     </div>
 
                     <div class="formfields">
-                        <div class="item-flex">
+                        <!-- <div class="item-flex">
                             <span><strong>Ícono del Token (representación íconografica)</strong></span><br/>
                             <input type="file" id="icon" accept="image/*" required /><br/>
-                        </div>
+                        </div> -->
 
                         <div class="item-flex">
                             <span><strong>Archivo en PDF (paper)</strong></span><br/>

@@ -52,11 +52,11 @@
     //Una vez que se ha cargado el perfil, filtramos solo la sección de los NFT creados (LSP12IssuedAssets)
     try {
       const LSP12IssuedAssets = await erc725LSP12IssuedAssets.getData('LSP12IssuedAssets[]');
-
+      
       //Guardamos la dirección del NFT creado
       addresses.value = LSP12IssuedAssets.value;
     } 
-    catch (err) {
+    catch (err) {     
       // Probamos si es una cuenta del tipo EOA, procedemos a leer la información del localStorage
       const LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
 
