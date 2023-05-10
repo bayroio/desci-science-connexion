@@ -13,6 +13,7 @@
   import identicon from 'ethereum-blockies-base64';
   import { IPFS_GATEWAY_BASE_URL } from '../../constants';
   import ModalUpdate from './ModalProfileComponentUpdate.vue';
+  import { leer_perfil } from '../../services.js';
 
   //Definimos las variables que se utilizaran dentro de la página
   export default {
@@ -36,13 +37,19 @@
       //console.log(accounts[0]);
 
       // Obtenemos la cuenta con la que se está autentificado, la guardamos en las variables globales de la página
-      const account = accounts[0]; 
+      let account = accounts[0]; 
       this.address = account;
       this.profileData.address = account;
 
       //Obtenemos la imagen (default) de la cuenta autentificada
       this.profileData.identicon = identicon(account);
       
+      //Obtenemos la direccion del universal profile, para ello Validamos si es una cuenta EOA
+      let bytecode = await web3.eth.getCode(accounts[0]);
+      if (bytecode === '0x') {
+        account = await leer_perfil(accounts[0]);  
+      }
+
       //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
       //en el archivo de constants
       const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
@@ -56,6 +63,7 @@
         metaData = await profile.fetchData('LSP3Profile');
       } 
       catch (e) {
+        console.log(e);
         let profile_empty = false;
 
         //Obtenemos la información del LocalStorage
