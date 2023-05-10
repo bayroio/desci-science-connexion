@@ -11,10 +11,6 @@ export async function startcontainer() {
         const accountKey = process.env.VUE_APP_accountKey;
         const containerName = process.env.VUE_APP_containerName;
 
-        console.log(storageaccount);
-        console.log(accountKey);
-        console.log(containerName);
-
         //Creamos las variables para crear el sas
         const end = new Date(new Date().getTime() + (30 * 60 * 1000));
         const signedpermissions = 'rwdlac';
