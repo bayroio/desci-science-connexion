@@ -190,6 +190,58 @@ export async function mintissuedassets(wallet, address_assets) {
 }
 
 
+export async function getreceivedassets(wallet) {
+    try 
+    {
+        await startcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+
+        //Regresamos el valor de la direccion
+        return metadata.receivedAssets;
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
+
+export async function removereceivedassets(wallet, address_assets) {
+    try 
+    {
+        await startcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+
+        //Quitamos el asset
+        metadata.receivedAssets = metadata.receivedAssets.filter(function (assetAddress) {
+            return assetAddress !== address_assets;
+        });
+        console.log(metadata.receivedAssets);
+
+        //Guardamos los valores en el storage
+        const uploadBlobResponse = await blockBlobClient.upload(JSON.stringify(metadata), JSON.stringify(metadata).length);
+
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
 
 //Funcion que lee un archivo
 async function blobToString(blob) {

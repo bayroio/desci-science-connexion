@@ -13,6 +13,7 @@
   import LSP8IdentifiableDigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP8IdentifiableDigitalAsset.json';
   import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
   import { CHAIN_IDS } from '../../constants';
+  import { removereceivedassets, mintissuedassets } from '../../services.js';
 
   //Funciones utilizadas para el cierre del modal
   const emit = defineEmits(['close', 'tokens-sent']);
@@ -137,34 +138,7 @@
 
         let bytecode = await web3.eth.getCode(account);
         if (bytecode === '0x') {
-          //Quitamos el asset, ya que esta en cero, Leemos los datos del local storage
-          const LSP5ReceivedAssetsComplete = JSON.parse(localStorage.getItem('receivedAssets'));
-
-          // Obtenemos la cuenta con la que se está autentificado
-          const accounts = await web3.eth.getAccounts();
-          const account = accounts[0]; 
-
-          //Obtenemos los assets
-          let LSP5ReceivedAssets;
-          for(let i = 0; i < LSP5ReceivedAssetsComplete.profiles.length; i++) {
-              let a = LSP5ReceivedAssetsComplete.profiles[i].account;
-              
-              if(a == account){
-                //Guardamos la dirección del NFT creado
-                LSP5ReceivedAssets = LSP5ReceivedAssetsComplete.profiles[i];
-                LSP5ReceivedAssetsComplete.profiles.splice(i,1);
-                break;
-              }
-          }
-
-          //Quitamos el asset
-          LSP5ReceivedAssets.value = LSP5ReceivedAssets.value.filter(function (assetAddress) {
-            return assetAddress !== props.address;
-          });
-
-          //Actualizamos los datos del LocalStorage
-          LSP5ReceivedAssetsComplete.profiles.push(LSP5ReceivedAssets);
-          localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssetsComplete));
+          await removereceivedassets(account, props.address);
         }
       }
 
@@ -203,31 +177,10 @@
     //Realizamos la transferencia
     const receipt = await lsp7DigitalAssetContract.methods.transfer(from, to, amount, force, data).send({ from: accountAddress });
     
-    //Si se trata de una cuenta EOA, cargamos los datos del LocalStorage y agregamos el nuevo token acuñado
+    // Probamos si es una cuenta del tipo EOA, procedemos a leer la información del localStorage
     let bytecode = await web3.eth.getCode(assetRecipient.value);
     if (bytecode === '0x') {
-        let LSP5ReceivedAssetsComplete = JSON.parse(localStorage.getItem('receivedAssets'));
-        let LSP5ReceivedAssets;
-
-        //Obtenemos los assets del usuario
-        for(let i = 0; i < LSP5ReceivedAssetsComplete.profiles.length; i++) {
-            let p = LSP5ReceivedAssetsComplete.profiles[i];
-
-            if(p.account == assetRecipient.value){
-                LSP5ReceivedAssets = p;
-                LSP5ReceivedAssetsComplete.profiles.splice(i,1);
-                break;
-            }
-        }
-
-        //Buscamos si la dirección del asset ya se encuentra registrado
-        if (LSP5ReceivedAssets.value.indexOf(assetAddress) === -1) {
-            LSP5ReceivedAssets.value.push(assetAddress);
-        }
-
-        //Agregamos la dirección al address
-        LSP5ReceivedAssetsComplete.profiles.push(LSP5ReceivedAssets);
-        localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssetsComplete));
+      await mintissuedassets(assetRecipient.value, assetAddress);
     }
 
     //Guardamos el hash de la transacción
@@ -252,28 +205,7 @@
     //Si se trata de una cuenta EOA, cargamos los datos del LocalStorage y agregamos el nuevo token acuñado
     let bytecode = await web3.eth.getCode(assetRecipient.value);
     if (bytecode === '0x') {
-        let LSP5ReceivedAssetsComplete = JSON.parse(localStorage.getItem('receivedAssets'));
-        let LSP5ReceivedAssets;
-
-        //Obtenemos los assets del usuario
-        for(let i = 0; i < LSP5ReceivedAssetsComplete.profiles.length; i++) {
-            let p = LSP5ReceivedAssetsComplete.profiles[i];
-
-            if(p.account == assetRecipient.value){
-                LSP5ReceivedAssets = p;
-                LSP5ReceivedAssetsComplete.profiles.splice(i,1);
-                break;
-            }
-        }
-
-        //Buscamos si la dirección del asset ya se encuentra registrado
-        if (LSP5ReceivedAssets.value.indexOf(assetAddress) === -1) {
-            LSP5ReceivedAssets.value.push(assetAddress);
-        }
-
-        //Agregamos la dirección al address
-        LSP5ReceivedAssetsComplete.profiles.push(LSP5ReceivedAssets);
-        localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssetsComplete));
+      await mintissuedassets(assetRecipient.value, assetAddress);
     }
 
     //Guardamos el hash de la transacción

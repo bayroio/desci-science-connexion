@@ -13,6 +13,7 @@
   import ModalTransferLSP7Component from './ModalTransferLSP7Component.vue';
   import ModalTransferLSP8Component from './ModalTransferLSP8Component.vue';
   import { INTERFACE_IDS } from '../../constants';
+  import { getreceivedassets } from '../../services.js';
 
   //Definimos las variables
   const isLoading = ref(false);         //Bandera que determina si se ha comenzado con el proceso de carga//
@@ -75,22 +76,12 @@
       const LSP5ReceivedAssets = await erc725LSP12IssuedAssets.getData('LSP5ReceivedAssets[]');
       receivedAssets.value = LSP5ReceivedAssets.value;
     } 
-    catch (err) {      
-      //Obtenemos los assets
-      const LSP5ReceivedAssetsComplete = JSON.parse(localStorage.getItem('receivedAssets'));
-      let LSP5ReceivedAssets;
-
-      //Cargamos solo los de la dirección autentificada
-      for(let i = 0; i < LSP5ReceivedAssetsComplete.profiles.length; i++) {
-          let a = LSP5ReceivedAssetsComplete.profiles[i].account;
-          
-          if(a == account){
-            //Guardamos la dirección del NFT creado
-            LSP5ReceivedAssets = LSP5ReceivedAssetsComplete.profiles[i];
-            break;
-          }
+    catch (err) {
+      // Probamos si es una cuenta del tipo EOA, procedemos a leer la información del localStorage
+      let bytecode = await web3.eth.getCode(accounts[0]);
+      if (bytecode === '0x') {
+        receivedAssets.value = await getreceivedassets(accounts[0]);  
       }
-      receivedAssets.value = LSP5ReceivedAssets.value;
     }
 
     //Filtramos los tokens de acuerdo al token que buscamos
