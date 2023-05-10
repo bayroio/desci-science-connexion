@@ -14,7 +14,7 @@
     import LSP7Mintable_0_5_0 from '../../contracts/LSP7Mintable_0_5_0.json';
     import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../../constants';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
-    import { agregar_assets, leer_assets } from '../../services.js';
+    import { addissuedassets, getissuedassets } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -178,7 +178,7 @@
             //Validamos si se trata de una cuenta EOA, se carga la información del local storage
             let bytecode = await web3.eth.getCode(accounts[0]);
             if (bytecode === '0x') {
-                LSP12AssetsComplete = await leer_assets(accounts[0]);  
+                LSP12AssetsComplete = await getissuedassets(accounts[0]);  
 
                 let obj = {};
                 obj.value = LSP12AssetsComplete;
@@ -197,7 +197,7 @@
         if (bytecode === '0x') {
             
             //Guardamos los assets de la cuenta
-            await agregar_assets(accounts[0], LSP12IssuedAssets.value);  
+            await addissuedassets(accounts[0], LSP12IssuedAssets.value);  
 
             isEOA.value = true;
         }

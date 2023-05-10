@@ -13,7 +13,7 @@
   import identicon from 'ethereum-blockies-base64';
   import { IPFS_GATEWAY_BASE_URL } from '../../constants';
   import ModalUpdate from './ModalProfileComponentUpdate.vue';
-  import { leer_perfil } from '../../services.js';
+  import { getprofile } from '../../services.js';
 
   //Definimos las variables que se utilizaran dentro de la página
   export default {
@@ -47,7 +47,7 @@
       //Obtenemos la direccion del universal profile, para ello Validamos si es una cuenta EOA
       let bytecode = await web3.eth.getCode(accounts[0]);
       if (bytecode === '0x') {
-        account = await leer_perfil(accounts[0]);  
+        account = await getprofile(accounts[0]);  
       }
 
       //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 

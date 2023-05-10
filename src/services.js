@@ -3,7 +3,7 @@ const { v1: uuidv1 } = require("uuid");
 
 let containerClient;
 
-export async function iniciarcontainer() {
+export async function startcontainer() {
     try 
     {
         // Creamos la conexion con azure
@@ -30,10 +30,10 @@ export async function iniciarcontainer() {
     }
 }
 
-export async function leer_perfil(wallet) {
+export async function getprofile(wallet) {
     try 
     {
-        await iniciarcontainer();
+        await startcontainer();
 
         //Definimos el archivo a leer
         const blobName = `${wallet}.txt`;
@@ -53,10 +53,10 @@ export async function leer_perfil(wallet) {
     }
 }
 
-export async function agregar_perfil(wallet) {
+export async function addprofile(wallet) {
     try 
     {
-        await iniciarcontainer();
+        await startcontainer();
 
         //Definimos el archivo para el usuario registrado
         const blobName = `${wallet}.txt`;
@@ -83,10 +83,10 @@ export async function agregar_perfil(wallet) {
     }
 }
 
-export async function actualizar_perfil(wallet, address_universal_profile) {
+export async function updateprofile(wallet, address_universal_profile) {
     try 
     {
-        await iniciarcontainer();
+        await startcontainer();
 
         //Definimos el archivo a leer
         const blobName = `${wallet}.txt`;
@@ -111,10 +111,10 @@ export async function actualizar_perfil(wallet, address_universal_profile) {
 }
 
 
-export async function leer_assets(wallet) {
+export async function getissuedassets(wallet) {
     try 
     {
-        await iniciarcontainer();
+        await startcontainer();
 
         //Definimos el archivo a leer
         const blobName = `${wallet}.txt`;
@@ -134,10 +134,10 @@ export async function leer_assets(wallet) {
     }
 }
 
-export async function agregar_assets(wallet, address_assets) {
+export async function addissuedassets(wallet, address_assets) {
     try 
     {
-        await iniciarcontainer();
+        await startcontainer();
 
         //Definimos el archivo a leer
         const blobName = `${wallet}.txt`;
@@ -160,10 +160,10 @@ export async function agregar_assets(wallet, address_assets) {
     }
 }
 
-export async function acuñar_assets(wallet, address_assets) {
+export async function mintissuedassets(wallet, address_assets) {
     try 
     {
-        await iniciarcontainer();
+        await startcontainer();
 
         //Definimos el archivo a leer
         const blobName = `${wallet}.txt`;

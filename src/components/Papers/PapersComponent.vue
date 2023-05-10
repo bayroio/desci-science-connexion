@@ -13,7 +13,7 @@
   import PapersLoadComponent from './PapersLoadComponent.vue';
   import ModalCreateTokenLSP7 from './ModalCreateTokenLSP7Component.vue';
   import ModalCreateTokenLSP8 from './ModalCreateTokenLSP8Component.vue';
-  import { leer_assets } from '../../services.js';
+  import { getissuedassets } from '../../services.js';
   
   
   //Definimos las variables que se utilizaran dentro de la página//
@@ -61,7 +61,7 @@
       // Probamos si es una cuenta del tipo EOA, procedemos a leer la información del localStorage
       let bytecode = await web3.eth.getCode(accounts[0]);
       if (bytecode === '0x') {
-        addresses.value = await leer_assets(accounts[0]);  
+        addresses.value = await getissuedassets(accounts[0]);  
       }
     }
 

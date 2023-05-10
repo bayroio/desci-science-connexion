@@ -14,7 +14,7 @@
     import _ from 'underscore';
     import { IPFS_GATEWAY_BASE_URL, CHAIN_IDS } from '../../constants';
     import { isLuksoNetwork } from '../../../network';
-    import { actualizar_perfil, leer_perfil } from '../../services.js';
+    import { updateprofile, getprofile } from '../../services.js';
 
     //Definimos las variables
     const tokenUsername = ref('');                      //Variable de formulario para el username//
@@ -44,7 +44,7 @@
             //Obtenemos la direccion del universal profile, para ello Validamos si es una cuenta EOA
             let bytecode = await web3.eth.getCode(accounts[0]);
             if (bytecode === '0x') {
-                account = await leer_perfil(accounts[0]);  
+                account = await getprofile(accounts[0]);  
             }
 
             //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
@@ -167,7 +167,7 @@
                             // console.log(contracts);
                             
                             //Actualizamos la direccion del universal profile
-                            await actualizar_perfil(account, contracts.LSP0ERC725Account?.address);
+                            await updateprofile(account, contracts.LSP0ERC725Account?.address);
                             isSuccess.value = true;
                         },
                     }

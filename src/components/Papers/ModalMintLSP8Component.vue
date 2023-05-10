@@ -15,7 +15,7 @@
     import { LSP4DigitalAssetMetadata } from '@lukso/lsp-factory.js';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
     import { isContractAddressInBloom } from 'web3-utils';
-    import { acuñar_assets } from '@/services';
+    import { mintissuedassets } from '@/services';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -164,7 +164,7 @@
         //Si se trata de una cuenta EOA, cargamos los datos del LocalStorage y agregamos el nuevo token acuñado
         let bytecode = await web3.eth.getCode(account);
         if (bytecode === '0x') {
-            acuñar_assets(account, props.address);
+            mintissuedassets(account, props.address);
         }
 
         //Informamos que se ha realizado el proceso de forma correcta

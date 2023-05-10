@@ -1,6 +1,6 @@
 <script setup>
   import Web3 from 'web3';
-  import { agregar_perfil } from './services.js';
+  import { addprofile } from './services.js';
   window.web3 = new Web3(Web3.givenProvider);
 </script>
 
@@ -26,7 +26,7 @@
         if (bytecode === '0x') {
           
           //Validamos el registro en el storage
-          await agregar_perfil(accounts[0]);
+          await addprofile(accounts[0]);
 
           //this.setupLocalStorage("receivedAssets", accounts[0]);
           //this.setupLocalStorage("issuedAssets", accounts[0])
