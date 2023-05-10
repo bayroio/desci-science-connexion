@@ -1,18 +1,49 @@
 const { BlobServiceClient } = require("@azure/storage-blob");
-const { v1: uuidv1 } = require("uuid");
+import * as CryptoJS from 'crypto-js';
 
 let containerClient;
 
+
 export async function startcontainer() {
     try 
-    {
-        // Creamos la conexion con azure
-        const storageaccount = "itesm";
-        const sas = "?sv=2022-11-02&ss=bfqt&srt=sco&sp=rwdlacupiytfx&se=2023-05-30T10:54:36Z&st=2023-05-10T02:54:36Z&spr=https,http&sig=p%2BgLkuCcJ1TqHXrF2Xlw8kUDRM2bNYaBWlpXMKn8Fp0%3D";
-        const blobServiceClient = new BlobServiceClient(`https://${storageaccount}.blob.core.windows.net${sas}`);    
+    {   
+        const storageaccount = process.env.VUE_APP_storageaccount;
+        const accountKey = process.env.VUE_APP_accountKey;
+        const containerName = process.env.VUE_APP_containerName;
 
-        //Definimos el container existe
-        const containerName = "lukso";
+        console.log(storageaccount);
+        console.log(accountKey);
+        console.log(containerName);
+
+        //Creamos las variables para crear el sas
+        const end = new Date(new Date().getTime() + (30 * 60 * 1000));
+        const signedpermissions = 'rwdlac';
+        const signedservice = 'b';
+        const signedresourcetype = 'sco';
+        const signedexpiry = end.toISOString().substring(0, end.toISOString().lastIndexOf('.')) + 'Z';
+        const signedProtocol = 'https';
+        const signedversion = '2018-03-28';
+      
+        const StringToSign = 
+            storageaccount + '\n' + 
+            signedpermissions + '\n' + 
+            signedservice + '\n' + 
+            signedresourcetype + '\n' + '\n' + 
+            signedexpiry + '\n' + '\n' +
+            signedProtocol + '\n' +
+            signedversion + '\n';
+
+        //Encryptamos la llave
+        var str = CryptoJS.HmacSHA256(StringToSign,CryptoJS.enc.Base64.parse(accountKey));
+        var sig = CryptoJS.enc.Base64.stringify(str);
+      
+        //Creamos el sas
+        const sasToken =`?sv=${(signedversion)}&ss=${(signedservice)}&srt=${(signedresourcetype)}&sp=${(signedpermissions)}&se=${encodeURIComponent(signedexpiry)}&spr=${(signedProtocol)}&sig=${encodeURIComponent(sig)}`;
+        
+        // Creamos la conexion con azure
+        const blobServiceClient = new BlobServiceClient(`https://${storageaccount}.blob.core.windows.net${sasToken}`);    
+  
+        //Definimos el container
         containerClient = blobServiceClient.getContainerClient(containerName);
      
         //Validar si el container existe
@@ -29,6 +60,7 @@ export async function startcontainer() {
         console.log(`Error: ${err.message}`);
     }
 }
+
 
 export async function getprofile(wallet) {
     try 
