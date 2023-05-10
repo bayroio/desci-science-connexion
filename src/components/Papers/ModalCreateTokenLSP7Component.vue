@@ -14,6 +14,7 @@
     import LSP7Mintable_0_5_0 from '../../contracts/LSP7Mintable_0_5_0.json';
     import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../../constants';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
+    import { agregar_assets, leer_assets } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -81,10 +82,10 @@
         };
 
         //Agregamos los archivos PDF al JSON
-        e.target.querySelector('input#pdf').files.forEach((value, index) => {
+        Array.from(e.target.querySelector('input#pdf').files).forEach((value, index) => {
             LSP4MetaData.assets.push(value);
-            console.log(value);
-            console.log(index);
+            // console.log(value);
+            // console.log(index);
         });
 
         //Iniciamos las variables de actualización
@@ -175,41 +176,29 @@
         catch (err) {
 
             //Validamos si se trata de una cuenta EOA, se carga la información del local storage
-            LSP12AssetsComplete = JSON.parse(localStorage.getItem('issuedAssets'));
-            
-            //Leemos los assets
-            for(i = 0; i < LSP12AssetsComplete.profiles.length; i++) {
-                let a = LSP12AssetsComplete.profiles[i].account;
+            let bytecode = await web3.eth.getCode(accounts[0]);
+            if (bytecode === '0x') {
+                LSP12AssetsComplete = await leer_assets(accounts[0]);  
 
-                if(a == account){
-                    LSP12IssuedAssets = LSP12AssetsComplete.profiles[i];
-                }
+                let obj = {};
+                obj.value = LSP12AssetsComplete;
+                obj.account = accounts[0];
+
+                LSP12IssuedAssets = obj;
+                console.log(LSP12IssuedAssets);
             }            
         }
 
         //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
         LSP12IssuedAssets.value.push(deployedLSP7DigitalAssetContract.address);
 
-        //Si se trata de una cuenta EOA, agregamos el nuevo token al localStorage
+        //Validamos si se trata de una cuenta EOA, se carga la información del local storage
         let bytecode = await web3.eth.getCode(accounts[0]);
         if (bytecode === '0x') {
+            
+            //Guardamos los assets de la cuenta
+            await agregar_assets(accounts[0], LSP12IssuedAssets.value);  
 
-            //Save the assets
-            LSP12AssetsComplete = JSON.parse(localStorage.getItem('issuedAssets'));
-
-            //Delete the address info
-            for(let i = 0; i < LSP12AssetsComplete.profiles.length; i++) {
-                let p = LSP12AssetsComplete.profiles[i];
-
-                if(p.account == account){
-                    LSP12AssetsComplete.profiles.splice(i,1);
-                    break;
-                }
-            }
-
-            //Add the item
-            LSP12AssetsComplete.profiles.push(LSP12IssuedAssets);
-            localStorage.setItem('issuedAssets', JSON.stringify(LSP12AssetsComplete));
             isEOA.value = true;
         }
 
@@ -223,7 +212,7 @@
             {
                 keyName: 'LSP12IssuedAssetsMap:<address>',
                 dynamicKeyParts: deployedLSP7DigitalAssetContract.address,
-                value: [LSP7InterfaceId, LSP12IssuedAssets.length - 1], // LSP7 interface ID + index position of asset
+                value: [LSP7InterfaceId, LSP12IssuedAssets.value.length - 1], // LSP7 interface ID + index position of asset
             },
         ]);
 

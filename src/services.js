@@ -30,6 +30,29 @@ export async function iniciarcontainer() {
     }
 }
 
+export async function leer_perfil(wallet) {
+    try 
+    {
+        await iniciarcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+
+        //Regresamos el valor de la direccion
+        return metadata.profileaddress;
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
+
 export async function agregar_perfil(wallet) {
     try 
     {
@@ -87,7 +110,8 @@ export async function actualizar_perfil(wallet, address_universal_profile) {
     }
 }
 
-export async function leer_perfil(wallet) {
+
+export async function leer_assets(wallet) {
     try 
     {
         await iniciarcontainer();
@@ -103,12 +127,40 @@ export async function leer_perfil(wallet) {
         const metadata = JSON.parse(downloaded);
 
         //Regresamos el valor de la direccion
-        return metadata.profileaddress;
+        return metadata.issuedAssets;
     }
     catch (err) {
         console.log(`Error: ${err.message}`);
     }
 }
+
+export async function agregar_assets(wallet, address_assets) {
+    try 
+    {
+        await iniciarcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+        
+        //Actualizamos la informacion
+        metadata.issuedAssets = address_assets;
+
+        //Guardamos los valores en el storage
+        const uploadBlobResponse = await blockBlobClient.upload(JSON.stringify(metadata), JSON.stringify(metadata).length);
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
+
+
 
 
 //Funcion que lee un archivo
