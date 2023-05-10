@@ -160,6 +160,34 @@ export async function agregar_assets(wallet, address_assets) {
     }
 }
 
+export async function acuñar_assets(wallet, address_assets) {
+    try 
+    {
+        await iniciarcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+        
+        //Cargamos la informacion de los receivedAssets
+        if (metadata.receivedAssets.indexOf(address_assets) === -1) {
+            //No se encuentra el asset, por lo que lo agregamos a los assets
+            metadata.receivedAssets.push(address_assets);
+
+            //Guardamos los valores en el storage
+            const uploadBlobResponse = await blockBlobClient.upload(JSON.stringify(metadata), JSON.stringify(metadata).length);
+        }
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
 
 
 
