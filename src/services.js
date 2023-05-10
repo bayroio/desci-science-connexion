@@ -12,7 +12,8 @@ export async function startcontainer() {
         const containerName = process.env.VUE_APP_containerName;
 
         //Creamos las variables para crear el sas
-        const end = new Date(new Date().getTime() + (30 * 60 * 1000));
+        const end = new Date(new Date().getTime() + (30 * 1000));
+        console.log(end);
         const signedpermissions = 'rwdlac';
         const signedservice = 'b';
         const signedresourcetype = 'sco';
