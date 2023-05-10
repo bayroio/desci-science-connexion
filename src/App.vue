@@ -1,5 +1,6 @@
 <script setup>
   import Web3 from 'web3';
+  import { agregar_address } from './services.js';
   window.web3 = new Web3(Web3.givenProvider);
 </script>
 
@@ -20,11 +21,15 @@
         // GET the Universal Profile
         window.account = accounts[0];
 
-        // Check if address is EOA, create localStorage to store assets on
+        // Validamos si es una cuenta EOA
         let bytecode = await web3.eth.getCode(accounts[0]);
         if (bytecode === '0x') {
-          this.setupLocalStorage("receivedAssets", accounts[0]);
-          this.setupLocalStorage("issuedAssets", accounts[0])
+          
+          //Validamos el registro en el storage
+          agregar_address(accounts[0]);
+
+          //this.setupLocalStorage("receivedAssets", accounts[0]);
+          //this.setupLocalStorage("issuedAssets", accounts[0])
         }
 
         // If address is Universal Profile, clear cache used before
