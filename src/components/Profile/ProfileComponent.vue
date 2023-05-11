@@ -13,6 +13,7 @@
   import identicon from 'ethereum-blockies-base64';
   import { IPFS_GATEWAY_BASE_URL } from '../../constants';
   import ModalUpdate from './ModalProfileComponentUpdate.vue';
+  import { getprofile } from '../../services.js';
 
   //Definimos las variables que se utilizaran dentro de la página
   export default {
@@ -33,15 +34,22 @@
 
       // Obtenemos las cuentas de la extensión
       const accounts = await web3.eth.getAccounts();
-      
+      //console.log(accounts[0]);
+
       // Obtenemos la cuenta con la que se está autentificado, la guardamos en las variables globales de la página
-      const account = accounts[0]; 
+      let account = accounts[0]; 
       this.address = account;
       this.profileData.address = account;
 
       //Obtenemos la imagen (default) de la cuenta autentificada
       this.profileData.identicon = identicon(account);
       
+      //Obtenemos la direccion del universal profile, para ello Validamos si es una cuenta EOA
+      let bytecode = await web3.eth.getCode(accounts[0]);
+      if (bytecode === '0x') {
+        account = await getprofile(accounts[0]);  
+      }
+
       //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
       //en el archivo de constants
       const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
@@ -50,13 +58,32 @@
 
       //Una vez que se ha cargado el perfil, filtramos solo la sección del perfil (LSP3Profile)
       let metaData;
+      this.profile_v = true;
       try {
         metaData = await profile.fetchData('LSP3Profile');
-        //console.log(metaData);
       } 
       catch (e) {
-        this.profileData.name = false;
-        this.error = e;
+        console.log(e);
+        let profile_empty = false;
+
+        //Obtenemos la información del LocalStorage
+        let ProfileLocal = JSON.parse(localStorage.getItem('ProfileInfo'));
+
+        if(ProfileLocal != null) {
+          //Get the address info
+          for(let i = 0; i < ProfileLocal.profiles.length; i++) {
+            let p = ProfileLocal.profiles[i];
+
+            if(p.address == this.address){
+              this.profileData.name = p.username;
+              this.profileData.tags = p.tags;
+              this.profileData.description = p.description;
+              this.profileData.profileImage.url = p.profileImage[0].url.replace('ipfs://', profile.options.ipfsGateway);
+              return;
+            }
+          }
+        }
+
         return;
       }
       
@@ -94,9 +121,6 @@
 
 
 <template>
-  <div>
-    <h4 class="center"><strong>Datos Generales</strong></h4>
-  </div>
 
   <table style="border: none">
     <tr>
@@ -117,39 +141,47 @@
           <span class="username">{{ address }}</span><br/>
 
           <br/>
-          <span><strong>Username: </strong></span><br/>
-          <span class="username" v-if="profileData.name"> {{ profileData.name }} </span><br/>
+          <div v-if="profile_v" style="border: 1px solid lightgray; padding: 15px; border-radius: 15px;">
 
-          <br/>
-          <span><strong>Tags: </strong></span><br/>
-          <div v-if="profileData.tags">
-            <span class="username"  v-for="(item, index) in profileData.tags" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
-          </div>
-          
-          <br/>
-          <span><strong>Links: </strong></span><br/>
-          <div v-if="profileData.links">
-            <span class="username"  v-for="(item, index) in profileData.links" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
-          </div>
-                    
-          <br/>
-          <span><strong>Descripción: </strong></span><br/>
-          <span class="description">
-            {{ profileData.description }}
-          </span><br/>
+            <div>
+              <h4 class="center"><strong>Datos Generales</strong></h4>
+            </div>
 
-          <br/>
-          <span v-if="profileData.name === false" class="warning" id="extension">
+            <span><strong>Username: </strong></span><br/>
+            <span class="username" v-if="profileData.name"> {{ profileData.name }} </span><br/>
+
+            <br/>
+            <span><strong>Tags: </strong></span><br/>
+            <div v-if="profileData.tags">
+              <span class="username"  v-for="(item, index) in profileData.tags" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
+            </div>
+
+            <br/>
+            <span><strong>Links: </strong></span><br/>
+            <div v-if="profileData.links">
+              <span class="username"  v-for="(item, index) in profileData.links" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
+            </div>
+                      
+            <br/>
+            <span><strong>Descripción: </strong></span><br/>
+            <span class="description">
+              {{ profileData.description }}
+            </span><br/>
+
+            <br/>
+            
+          </div>
+          <!-- <span v-if="profileData.name === false" class="warning" id="extension">
             Se esta utilizando MetaMask con esta dApp, <br />
             se recomienda intentar con <br /><a href="https://docs.lukso.tech/guides/universal-profile/browser-extension/install-browser-extension">Extensión Universal</a>.
-          </span>
+          </span> -->
 
         </div>
       </td>    
     </tr>
     <tr>
       <td colspan="2" align="right">
-        <button class="button" @click="showModal=!showModal" style="width: 200px">Actualizar</button>
+        <button class="button" @click="showModal=!showModal" style="width: 300px">Actualizar datos generales</button>
         <ModalUpdate @close="handleModalClose" v-if="showModal" />
       </td>
     </tr>

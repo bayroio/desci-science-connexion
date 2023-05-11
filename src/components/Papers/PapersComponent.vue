@@ -13,6 +13,7 @@
   import PapersLoadComponent from './PapersLoadComponent.vue';
   import ModalCreateTokenLSP7 from './ModalCreateTokenLSP7Component.vue';
   import ModalCreateTokenLSP8 from './ModalCreateTokenLSP8Component.vue';
+  import { getissuedassets } from '../../services.js';
   
   
   //Definimos las variables que se utilizaran dentro de la página//
@@ -52,16 +53,16 @@
     //Una vez que se ha cargado el perfil, filtramos solo la sección de los NFT creados (LSP12IssuedAssets)
     try {
       const LSP12IssuedAssets = await erc725LSP12IssuedAssets.getData('LSP12IssuedAssets[]');
-
+      
       //Guardamos la dirección del NFT creado
       addresses.value = LSP12IssuedAssets.value;
     } 
-    catch (err) {
+    catch (err) {     
       // Probamos si es una cuenta del tipo EOA, procedemos a leer la información del localStorage
-      const LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
-
-      //Guardamos la dirección del NFT creado
-      addresses.value = LSP12IssuedAssets.value;
+      let bytecode = await web3.eth.getCode(accounts[0]);
+      if (bytecode === '0x') {
+        addresses.value = await getissuedassets(accounts[0]);  
+      }
     }
 
     //Terminamos el proceso de carga
@@ -75,11 +76,11 @@
   </div>
   
   <div class="center">
-    <!-- <button class="button" @click="showModalLSP7 = !showModalLSP7" style="width: 230px">Crear NFT</button>
-    <ModalCreateTokenLSP7 @close="handleModalCloseLSP7" v-if="showModalLSP7" /> -->
+    <button class="button" @click="showModalLSP7 = !showModalLSP7" style="width: 230px">Tokenizar un paper</button>
+    <ModalCreateTokenLSP7 @close="handleModalCloseLSP7" v-if="showModalLSP7" />
 
-    <button class="button" @click="showModalLSP8 = !showModalLSP8" style="width: 230px">Tokenizar un paper</button>
-    <ModalCreateTokenLSP8 @close="handleModalCloseLSP8" v-if="showModalLSP8" />
+    <!-- <button class="button" @click="showModalLSP8 = !showModalLSP8" style="width: 230px">Tokenizar un paper</button>
+    <ModalCreateTokenLSP8 @close="handleModalCloseLSP8" v-if="showModalLSP8" /> -->
   </div>
 
   <br />

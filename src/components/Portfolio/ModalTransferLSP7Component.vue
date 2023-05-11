@@ -12,6 +12,7 @@
   import LSP7DigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP7DigitalAsset.json';
   import { IPFS_GATEWAY_BASE_URL, INTERFACE_IDS } from '../../constants';
   import ModalSendComponent from './ModalSendComponent.vue';
+  import { removereceivedassets } from '../../services.js';
 
   //Funciones utilizadas para el cierre del modal
   const emit = defineEmits(['remove-asset']);
@@ -48,16 +49,14 @@
     await refreshToken();
 
     //Si se trata de un token EOA, actualizamos el número total acuñado en el LocalStorage
-    if (!parseInt(balanceOf.value) && localStorage.getItem('receivedAssets')) {
+    if (!parseInt(balanceOf.value)) {
 
-      //Leemos los datos del local storage
-      const LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
-      LSP5ReceivedAssets.value = LSP5ReceivedAssets.value.filter(function (assetAddress) {
-        return assetAddress !== props.address;
-      });
-
-      //Actualizamos los datos del LocalStorage
-      localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssets));
+      // Probamos si es una cuenta del tipo EOA, procedemos a leer la información del localStorage
+      const accounts = await web3.eth.getAccounts();
+      let bytecode = await web3.eth.getCode(accounts[0]);
+      if (bytecode === '0x') {
+        await removereceivedassets(accounts[0], props.address);
+      }
     }
   }
 

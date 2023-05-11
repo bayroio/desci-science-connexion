@@ -15,6 +15,7 @@
     import { LSP4DigitalAssetMetadata } from '@lukso/lsp-factory.js';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
     import { isContractAddressInBloom } from 'web3-utils';
+    import { mintissuedassets } from '@/services';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -68,10 +69,10 @@
         let minterBytecode = await web3.eth.getCode(account);
 
         //Validamos si se trata de un EOA, si es así se debe de forzar el acuñado
-        if (minterBytecode === '0x' && forceParameter.value === false) {
-            isMinterEOA.value = true;
-            return;
-        }
+        // if (minterBytecode === '0x' && forceParameter.value === false) {
+        //     isMinterEOA.value = true;
+        //     return;
+        // }
 
         //Cambiamos el estatus del proceso
         isMinterEOA.value = false;
@@ -84,12 +85,12 @@
         const lsp8IdentifiableDigitalAssetContract = new window.web3.eth.Contract(LSP8Mintable.abi, props.address);
         const paddedTokenId = web3.utils.padRight(web3.utils.stringToHex(tokenId.value), 64);       //Token que se acuñara
         const to = account;                                                                         //Persona que acuña el token
-        const force = forceParameter.value;                                                         //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
+        const force = true;                                                         //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
         const data = '0x';
         console.log("paddedtokenid: ", paddedTokenId);
 
         try {
-            //Acuñamos el token e informaos al usuario
+            //Acuñamos el token e informamos al usuario
             const receipt = await lsp8IdentifiableDigitalAssetContract.methods.mint(to, paddedTokenId, force, data).send({ from: account });
             mintEvents.value.push({ stepName: 'Acuñar el NFT', functionName: 'acuñar', receipt });
 
@@ -163,11 +164,7 @@
         //Si se trata de una cuenta EOA, cargamos los datos del LocalStorage y agregamos el nuevo token acuñado
         let bytecode = await web3.eth.getCode(account);
         if (bytecode === '0x') {
-            let LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
-            if (LSP5ReceivedAssets.value.indexOf(props.address) === -1) {
-                LSP5ReceivedAssets.value.push(props.address);
-                localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssets));
-            }
+            mintissuedassets(account, props.address);
         }
 
         //Informamos que se ha realizado el proceso de forma correcta
@@ -225,13 +222,13 @@
                             <input type="file" id="pdf" accept="application/pdf" required multiple/>
                         </div>   
                     </div>
-
-                    <div style="margin-top: 10px">
+ 
+<!--                    <div style="margin-top: 10px">
                         <span title="Los tokens y NFT solo se pueden enviar a perfiles universales o contratos inteligentes que implementan un receptor universal de forma predeterminada. Para enviarlo a un EOA, debe usar el parámetro de fuerza">
                             <input style="position: absolute; margin: 5px 0px 0px 0px" type="checkbox" v-model="forceParameter" id="force" value="false" />
                             <span style="margin-left: 20px"><strong>Permite la transferencia de tokens a una cuenta EOA </strong></span><br/>
                         </span>
-                    </div>
+                    </div> -->
 
                     <br /><br />
                     <div class="right">

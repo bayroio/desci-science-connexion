@@ -14,6 +14,7 @@
     import LSP8Mintable_0_5_0 from '../../contracts/LSP8Mintable_0_5_0.json';
     import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../../constants';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
+    import { addissuedassets, getissuedassets } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -63,17 +64,26 @@
         // Creamos la estructura JSON del metadata para crear el NFT
         const LSP4MetaData = {
             description: description.value,
-            icon: e.target.querySelector('input#icon').files[0],
+            //icon: e.target.querySelector('input#icon').files[0],
+            icon: [
+                {
+                    width: 640,
+                    height: 598,
+                    hashFunction: 'keccak256(bytes)',
+                    hash: '0x78cfe3eea3a1924ec6d9b6599c507f150e956465494f98a4aa9b47422399cc8f',
+                    url: 'ipfs://QmQhn79RV4GrzdYix39vgaWY3VzE4NvmCR2WqPYEgPDNop'
+                }
+            ],
             links: [],
             images: [],
             assets: [],
         };
 
         //Agregamos los archivos PDF al JSON
-        e.target.querySelector('input#pdf').files.forEach((value, index) => {
+        Array.from(e.target.querySelector('input#pdf').files).forEach((value, index) => {
             LSP4MetaData.assets.push(value);
-            console.log(value);
-            console.log(index);
+            // console.log(value);
+            // console.log(index);
         });
 
         //Iniciamos las variables de actualización
@@ -146,30 +156,46 @@
 
         //Obtenemos los tokens del usuario, los parámetros son el esquema, la dirección del token, el provider de la extensión y la ruta de IPFS definida 
         //en el archivo de constants
+        const deployedLSP8IdentifiableDigitalAssetContract = contracts.LSP8IdentifiableDigitalAsset;
         const erc725LSP12IssuedAssets = new ERC725js(LSP12IssuedAssetsSchema, accounts[0], window.web3.currentProvider, {
             ipfsGateway: IPFS_GATEWAY_BASE_URL,
         });
 
         //Filtramos únicamente los tokens creados por el usuario
         let LSP12IssuedAssets;
+        let LSP12AssetsComplete;
+        let i = 0;
         try {
             LSP12IssuedAssets = await erc725LSP12IssuedAssets.getData('LSP12IssuedAssets[]');
         }
         catch (err) {
+
             //Validamos si se trata de una cuenta EOA, se carga la información del local storage
-            LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
+            let bytecode = await web3.eth.getCode(accounts[0]);
+            if (bytecode === '0x') {
+                LSP12AssetsComplete = await getissuedassets(accounts[0]);  
+
+                let obj = {};
+                obj.value = LSP12AssetsComplete;
+                obj.account = accounts[0];
+
+                LSP12IssuedAssets = obj;
+                console.log(LSP12IssuedAssets);
+            }
         }
         
-        //Si se trata de una cuenta EOA, agregamos el nuevo token al localStorage
+        //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
+        LSP12IssuedAssets.value.push(deployedLSP8IdentifiableDigitalAssetContract.address);
+
+        //Validamos si se trata de una cuenta EOA, se carga la información del local storage
         let bytecode = await web3.eth.getCode(accounts[0]);
         if (bytecode === '0x') {
-            localStorage.setItem('issuedAssets', JSON.stringify(LSP12IssuedAssets));
+            
+            //Guardamos los assets de la cuenta
+            await addissuedassets(accounts[0], LSP12IssuedAssets.value);  
+
             isEOA.value = true;
         }
-
-        //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
-        const deployedLSP8IdentifiableDigitalAssetContract = contracts.LSP8IdentifiableDigitalAsset;
-        LSP12IssuedAssets.value.push(deployedLSP8IdentifiableDigitalAssetContract.address);
 
         //Codificamos los tokens (que incluyen el nuevo token)
         const LSP8InterfaceId = '0x49399145';
@@ -181,7 +207,7 @@
             {
                 keyName: 'LSP12IssuedAssetsMap:<address>',
                 dynamicKeyParts: deployedLSP8IdentifiableDigitalAssetContract.address,
-                value: [LSP8InterfaceId, LSP12IssuedAssets.length - 1], // LSP8 interface ID + index position of asset
+                value: [LSP8InterfaceId, LSP12IssuedAssets.value.length - 1], // LSP8 interface ID + index position of asset
             },
         ]);
 
@@ -241,10 +267,10 @@
                     </div>
 
                     <div class="formfields">
-                        <div class="item-flex">
+                        <!-- <div class="item-flex">
                             <span><strong>Ícono del Token (representación íconografica)</strong></span><br/>
                             <input type="file" id="icon" accept="image/*" required /><br/>
-                        </div>
+                        </div> -->
 
                         <div class="item-flex">
                             <span><strong>Archivo en PDF (paper)</strong></span><br/>

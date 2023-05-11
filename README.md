@@ -4,6 +4,7 @@ DeSci para Science Connexion incluye Universal Profiles y NFT 2.0 (LSP8)
 ## Project setup
 ```
 npm install
+npm install --save axios vue-axios
 ```
 
 ### Compiles and hot-reloads for development

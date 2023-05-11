@@ -1,5 +1,6 @@
 <script setup>
   import Web3 from 'web3';
+  import { addprofile } from './services.js';
   window.web3 = new Web3(Web3.givenProvider);
 </script>
 
@@ -15,16 +16,20 @@
         if (!accounts.length) {
           throw Error('No accounts given: ' + accounts);
         }
-        console.log('Authenticated account:\n', accounts);
+        //console.log('Authenticated account:\n', accounts);
 
         // GET the Universal Profile
         window.account = accounts[0];
 
-        // Check if address is EOA, create localStorage to store assets on
+        // Validamos si es una cuenta EOA
         let bytecode = await web3.eth.getCode(accounts[0]);
         if (bytecode === '0x') {
-          this.setupLocalStorage("receivedAssets", accounts[0]);
-          this.setupLocalStorage("issuedAssets", accounts[0])
+          
+          //Validamos el registro en el storage
+          await addprofile(accounts[0]);
+
+          //this.setupLocalStorage("receivedAssets", accounts[0]);
+          //this.setupLocalStorage("issuedAssets", accounts[0])
         }
 
         // If address is Universal Profile, clear cache used before
@@ -41,14 +46,45 @@
 
     methods: {
       setupLocalStorage(itemName, account){
+        var item = {};
+
         if (localStorage.getItem(itemName) === null) {
-          localStorage.setItem(itemName, JSON.stringify({"value":[], "account": account}));
+
+          //Create the item
+          item.value = [];
+          item.account = account;
+
+          //Lo agramos a un arreglo
+          var obj = {};
+          obj.profiles = [];
+          obj.profiles.push(item);
+          
+          //Guardamos el registro en el LocalStorage
+          localStorage.setItem(itemName, JSON.stringify(obj));
         }
         else{
           const localStorageOwner = JSON.parse(localStorage.getItem(itemName));
-            
-          if(localStorageOwner.account !== account){
-            localStorage.removeItem(itemName);
+
+          //Get the address info
+          var flag = true;
+          for(let i = 0; i < localStorageOwner.profiles.length; i++) {
+              let p = localStorageOwner.profiles[i];
+
+              if(p.account == account){
+                  flag = false;
+                  break;
+              }
+          }
+
+          //Validamos si se encuentra la cuenta
+          if (flag){
+            //Create the item
+            item.value = [];
+            item.account = account;
+
+            localStorageOwner.profiles.push(item);
+
+            localStorage.setItem(itemName, JSON.stringify(localStorageOwner));
           }
         }
       },

@@ -13,6 +13,7 @@
   import ModalTransferLSP7Component from './ModalTransferLSP7Component.vue';
   import ModalTransferLSP8Component from './ModalTransferLSP8Component.vue';
   import { INTERFACE_IDS } from '../../constants';
+  import { getreceivedassets } from '../../services.js';
 
   //Definimos las variables
   const isLoading = ref(false);         //Bandera que determina si se ha comenzado con el proceso de carga//
@@ -76,9 +77,11 @@
       receivedAssets.value = LSP5ReceivedAssets.value;
     } 
     catch (err) {
-      // Validamos si se trata de una cuenta EOA, si es así, cargamos la información del Local Storage
-      const LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
-      receivedAssets.value = LSP5ReceivedAssets.value;
+      // Probamos si es una cuenta del tipo EOA, procedemos a leer la información del localStorage
+      let bytecode = await web3.eth.getCode(accounts[0]);
+      if (bytecode === '0x') {
+        receivedAssets.value = await getreceivedassets(accounts[0]);  
+      }
     }
 
     //Filtramos los tokens de acuerdo al token que buscamos

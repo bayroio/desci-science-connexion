@@ -13,6 +13,7 @@
   import LSP8IdentifiableDigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP8IdentifiableDigitalAsset.json';
   import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
   import { CHAIN_IDS } from '../../constants';
+  import { removereceivedassets, mintissuedassets } from '../../services.js';
 
   //Funciones utilizadas para el cierre del modal
   const emit = defineEmits(['close', 'tokens-sent']);
@@ -114,7 +115,7 @@
     //Validamos si la cuenta receptora es del tipo EOA
     else if (recipientBytecode === '0x' && forceParameter.value === false) {
       isRecepientEOA.value = true;
-      return;
+      //return;
     }
     isRecepientEOA.value = false;
     console.log('Enviando activo a:', assetRecipient.value);
@@ -135,15 +136,9 @@
         //Llamamos a la función de transferir
         await sendLSP8Token(account, props.assetAddress);
 
-        //Si se trata de una cuenta EOA, cargamos los datos del LocalStorage y actualizamos los valores
-        if (localStorage.getItem('receivedAssets')) {
-          const LSP5ReceivedAssets = JSON.parse(localStorage.getItem('receivedAssets'));
-
-          LSP5ReceivedAssets.value = LSP5ReceivedAssets.value.filter(function (assetAddress) {
-            return assetAddress !== props.assetAddress;
-          });
-
-          localStorage.setItem('receivedAssets', JSON.stringify(LSP5ReceivedAssets));
+        let bytecode = await web3.eth.getCode(account);
+        if (bytecode === '0x') {
+          await removereceivedassets(account, props.address);
         }
       }
 
@@ -176,12 +171,18 @@
     const from = accountAddress;                                                    //Cuenta que transfiere el token
     const to = assetRecipient.value;                                                //Cuenta que recibe el token
     const amount = web3.utils.toWei(amountToSend.value.toString());                 //Cantidad que será transferida, por default 1
-    const force = forceParameter.value;                                             //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
+    const force = true;                                             //Determina si se va a forzar la compatibilidad (true) o solo para las cuentas que tienen habilitado el LSP1 UniversalReceiver(false).
     const data = '0x';
 
     //Realizamos la transferencia
     const receipt = await lsp7DigitalAssetContract.methods.transfer(from, to, amount, force, data).send({ from: accountAddress });
     
+    // Probamos si es una cuenta del tipo EOA, procedemos a leer la información del localStorage
+    let bytecode = await web3.eth.getCode(assetRecipient.value);
+    if (bytecode === '0x') {
+      await mintissuedassets(assetRecipient.value, assetAddress);
+    }
+
     //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;
   }
@@ -201,6 +202,12 @@
     //Realizamos la transferencia
     const receipt = await lsp8IdentifiableDigitalAssetContract.methods.transfer(from, to, props.tokenId, force, data).send({ from: accountAddress });
     
+    //Si se trata de una cuenta EOA, cargamos los datos del LocalStorage y agregamos el nuevo token acuñado
+    let bytecode = await web3.eth.getCode(assetRecipient.value);
+    if (bytecode === '0x') {
+      await mintissuedassets(assetRecipient.value, assetAddress);
+    }
+
     //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;
   }
@@ -228,7 +235,7 @@
               <input type="number" placeholder="0x..." v-model="amountToSend" id="amount" required />
             </div>
 
-            <div>
+            <!-- <div>
               <span title="Los tokens y NFT solo se pueden enviar a perfiles universales o contratos inteligentes que implementan un receptor universal de forma predeterminada. Para enviarlo a un EOA, debe usar el parámetro de fuerza.">
                 <p class="warning" v-if="isRecepientEOA">Tu dirección receptora es una EOA, por favor permite la trasnferencia a la EOA.</p>
               </span>
@@ -239,7 +246,7 @@
               <p class="warning" v-if="error">
                 {{ error }}
               </p>
-            </div>
+            </div> -->
 
             <!-- <div style="margin-top: 10px">
               <input style="margin: 5px 0px 0px -50px" type="checkbox" v-model="forceParameter" id="force" value="false" />

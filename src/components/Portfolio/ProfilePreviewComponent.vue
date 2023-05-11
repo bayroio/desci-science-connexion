@@ -12,6 +12,7 @@
   import identicon from 'ethereum-blockies-base64';
   import { IPFS_GATEWAY_BASE_URL } from '../../constants';
   import { isAddress } from 'web3-utils';
+  import { getprofile, addprofile } from '../../services.js';
 
   //Definimos las variables que utilizaremos
   export default {
@@ -60,6 +61,13 @@
         this.address = account;
         this.profileData.identicon = identicon(account);
         
+        //Obtenemos la direccion del universal profile, para ello Validamos si es una cuenta EOA
+        let bytecode = await web3.eth.getCode(account);
+        if (bytecode === '0x') {          
+          await addprofile(account);
+          account = await getprofile(account);  
+        }
+
         //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida 
         //en el archivo de constants
         const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {

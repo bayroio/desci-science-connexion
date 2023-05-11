@@ -14,6 +14,7 @@
     import LSP7Mintable_0_5_0 from '../../contracts/LSP7Mintable_0_5_0.json';
     import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../../constants';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
+    import { addissuedassets, getissuedassets } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -39,8 +40,8 @@
 
     //Función que crea el token
     async function onSubmit(e) {
-        console.log("Entrando a onsubmit...")
-
+        console.log("Entrando a onsubmit...");
+        
         //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
         try {
             isWrongNetwork.value = await isLuksoNetwork();
@@ -61,23 +62,30 @@
 
         // Obtenemos la cuenta con la que se está autentificado
         const account = accounts[0]; 
-        console.log("accounts...", accounts);
-        console.log("account...", account);
 
         // Creamos la estructura JSON del metadata para crear el NFT
         const LSP4MetaData = {
             description: description.value,
-            icon: e.target.querySelector('input#icon').files[0],
+            // icon: e.target.querySelector('input#icon').files[0],
+            icon: [
+                {
+                    width: 640,
+                    height: 598,
+                    hashFunction: 'keccak256(bytes)',
+                    hash: '0x78cfe3eea3a1924ec6d9b6599c507f150e956465494f98a4aa9b47422399cc8f',
+                    url: 'ipfs://QmQhn79RV4GrzdYix39vgaWY3VzE4NvmCR2WqPYEgPDNop'
+                }
+            ],
             links: [],
             images: [],
             assets: [],
         };
 
         //Agregamos los archivos PDF al JSON
-        e.target.querySelector('input#pdf').files.forEach((value, index) => {
+        Array.from(e.target.querySelector('input#pdf').files).forEach((value, index) => {
             LSP4MetaData.assets.push(value);
-            console.log(value);
-            console.log(index);
+            // console.log(value);
+            // console.log(index);
         });
 
         //Iniciamos las variables de actualización
@@ -101,14 +109,14 @@
                 name: tokenName.value,                      //Nombre del token, de acuerdo al formulario
                 symbol: tokenSymbol.value,                  //Nombre del símbolo, de acuerdo al formulario
                 controllerAddress: account,                 //Propietario del token de acuerdo al usurio logueado
-                isNFT: false,                               //Establecemos si se trata de un FT (false) o un NFT (true)
+                isNFT: true,                                //Establecemos si se trata de un FT (false) o un NFT (true)
                 creators: [account],                        //Establecemos como creador al usuario autentificado
                 digitalAssetMetadata: LSP4MetaData,         //Establecemos en el activo el valor del metadada creado
             },
             {
                 ipfsGateway: IPFS_GATEWAY_API_BASE_URL,     //Configuramos el IPFS de las constantes
                 LSP7DigitalAsset: {
-                   version,                                 //Establecemos la versión del token
+                    version,                                //Establecemos la versión del token
                 },
                 onDeployEvents: {
                     next: (deploymentEvent) => {
@@ -153,33 +161,49 @@
 
         //Obtenemos los tokens del usuario, los parámetros son el esquema, la dirección del token, el provider de la extensión y la ruta de IPFS definida 
         //en el archivo de constants
+        const deployedLSP7DigitalAssetContract = contracts.LSP7DigitalAsset;
         const erc725LSP12IssuedAssets = new ERC725js(LSP12IssuedAssetsSchema, accounts[0], window.web3.currentProvider, {
             ipfsGateway: IPFS_GATEWAY_BASE_URL,
         });
 
         //Filtramos únicamente los tokens creados por el usuario
         let LSP12IssuedAssets;
+        let LSP12AssetsComplete;
+        let i = 0;
         try {
             LSP12IssuedAssets = await erc725LSP12IssuedAssets.getData('LSP12IssuedAssets[]');
         }
         catch (err) {
-            //Validamos si se trata de una cuenta EOA, se carga la información del local storage
-            LSP12IssuedAssets = JSON.parse(localStorage.getItem('issuedAssets'));
-        }
 
-        //Si se trata de una cuenta EOA, agregamos el nuevo token al localStorage
-        let bytecode = await web3.eth.getCode(accounts[0]);
-        if (bytecode === '0x') {
-            localStorage.setItem('issuedAssets', JSON.stringify(LSP12IssuedAssets));
-            isEOA.value = true;
+            //Validamos si se trata de una cuenta EOA, se carga la información del local storage
+            let bytecode = await web3.eth.getCode(accounts[0]);
+            if (bytecode === '0x') {
+                LSP12AssetsComplete = await getissuedassets(accounts[0]);  
+
+                let obj = {};
+                obj.value = LSP12AssetsComplete;
+                obj.account = accounts[0];
+
+                LSP12IssuedAssets = obj;
+                console.log(LSP12IssuedAssets);
+            }            
         }
 
         //Obtenemos el nuevo token y lo agregamos a los tokens del usuario
-        const deployedLSP7DigitalAssetContract = contracts.LSP7DigitalAsset;
         LSP12IssuedAssets.value.push(deployedLSP7DigitalAssetContract.address);
 
+        //Validamos si se trata de una cuenta EOA, se carga la información del local storage
+        let bytecode = await web3.eth.getCode(accounts[0]);
+        if (bytecode === '0x') {
+            
+            //Guardamos los assets de la cuenta
+            await addissuedassets(accounts[0], LSP12IssuedAssets.value);  
+
+            isEOA.value = true;
+        }
+
         //Codificamos los tokens (que incluyen el nuevo token)
-        const LSP7InterfaceId = '0x5fcaac27';
+        const LSP7InterfaceId = '0xe33f65c3';
         const encodedErc725Data = erc725LSP12IssuedAssets.encodeData([
             {
                 keyName: 'LSP12IssuedAssets[]',
@@ -188,7 +212,7 @@
             {
                 keyName: 'LSP12IssuedAssetsMap:<address>',
                 dynamicKeyParts: deployedLSP7DigitalAssetContract.address,
-                value: [LSP7InterfaceId, LSP12IssuedAssets.length - 1], // LSP7 interface ID + index position of asset
+                value: [LSP7InterfaceId, LSP12IssuedAssets.value.length - 1], // LSP7 interface ID + index position of asset
             },
         ]);
 
@@ -253,10 +277,10 @@
                     </div>
 
                     <div class="formfields">
-                        <div class="item-flex">
+                        <!-- <div class="item-flex">
                             <span><strong>Ícono del Token (representación íconografica)</strong></span><br/>
-                            <input type="file" id="icon" accept="image/*" required /><br/>
-                        </div>
+                            <input type="file" id="icon" accept="image/*" value="https://upload.wikimedia.org/wikipedia/commons/4/47/Logo_del_ITESM.svg" required /><br/>
+                        </div> -->
 
                         <div class="item-flex">
                             <span><strong>Archivo en PDF (paper)</strong></span><br/>

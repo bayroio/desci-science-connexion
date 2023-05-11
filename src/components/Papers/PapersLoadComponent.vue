@@ -10,7 +10,7 @@
   import ERC725js from '@erc725/erc725.js';
   import LSP4DigitalAssetSchema from '@erc725/erc725.js/schemas/LSP4DigitalAsset.json';
   import LSP7DigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP7DigitalAsset.json';
-  import { IPFS_GATEWAY_BASE_URL, IPFS_GATEWAY_API_BASE_URL, COMMON_ABIS, INTERFACE_IDS } from '../../constants';
+  import { IPFS_GATEWAY_BASE_URL, COMMON_ABIS, INTERFACE_IDS } from '../../constants';
   import ModalMintLSP7 from './ModalMintLSP7Component.vue';
   import ModalMintLSP8 from './ModalMintLSP8Component.vue';
 
@@ -40,8 +40,8 @@
 
     //Determinamos que tipo de interfaz soporta cada dirección
     const supportsInterfaceContract = new window.web3.eth.Contract([COMMON_ABIS.supportsInterface], props.address);
-    console.log("props.address: ", props.address);
-    console.log("supportsInterfaceContract: ", supportsInterfaceContract);
+    // console.log("props.address: ", props.address);
+    // console.log("supportsInterfaceContract: ", supportsInterfaceContract);
 
     //Determinamos para cada dirección el tipo de interfaz que soporta, los NFT soportan la interfaz FT y NFT, mientras que los FT solo soportan la interfaz FT
     const [isLSP7, isLSP8] = await Promise.all([
