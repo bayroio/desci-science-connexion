@@ -102,6 +102,7 @@
 
         //Procedemos a crear el token 
         let contracts;
+        const transactionlog = [];
         try {
             //Establecemos los datos del token
             contracts = await factory.LSP7DigitalAsset.deploy(
@@ -121,6 +122,7 @@
                 onDeployEvents: {
                     next: (deploymentEvent) => {
                         console.log(deploymentEvent);
+                        transactionlog.value.push(deploymentEvent);
 
                         //Reportamos al usuario cuando se haya culminado cada fase
                         if (deploymentEvent.status === 'COMPLETE') {
@@ -134,12 +136,16 @@
                         console.log("Error in onDeployEvents...", error.value);
                         console.log("Error message in onDeployEvents...", error.value);
                     },
-                    complete: (contracts) => {
+                    complete: async (contracts) => {
                         //Reportamos al usuario cuando se haya culminado el proceso
                         console.log('Deployment Complete');
                         console.log("Token address", contracts.LSP7DigitalAsset.address);
                         console.log("Token receipt", contracts.LSP7DigitalAsset.receipt);
                         console.log(contracts.LSP7DigitalAsset);
+
+                        //Actualizamos el log de transacciones
+                        await updatelog(account, transactionlog);
+
                     },
                 },
             });

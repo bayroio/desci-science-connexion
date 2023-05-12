@@ -100,6 +100,7 @@
 
         //Procedemos a crear el token 
         let contracts;
+        const transactionlog = [];
         try {
             //Establecemos los datos del token
             contracts = await factory.LSP8IdentifiableDigitalAsset.deploy(
@@ -118,6 +119,7 @@
                 onDeployEvents: {
                     next: (deploymentEvent) => {
                         console.log(deploymentEvent);
+                        transactionlog.value.push(deploymentEvent);
 
                         //Reportamos al usuario cuando se haya culminado cada fase
                         if (deploymentEvent.status === 'COMPLETE') {
@@ -131,11 +133,14 @@
                         error.value = error.message;
                         console.error(error);
                     },
-                    complete: (contracts) => {
+                    complete: async (contracts) => {
                         console.debug("complete");
                         //Reportamos al usuario cuando se haya culminado el proceso
                         console.log('Deployment Complete');
                         console.log(contracts.LSP8IdentifiableDigitalAsset);
+
+                        //Actualizamos el log de transacciones
+                        await updatelog(account, transactionlog);
                     },
                 },
             });

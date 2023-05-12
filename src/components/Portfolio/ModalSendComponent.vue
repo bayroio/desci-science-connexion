@@ -183,6 +183,10 @@
       await mintissuedassets(assetRecipient.value, assetAddress);
     }
 
+    //Guardamos el log 
+    let transactionlog = [];
+    transactionlog.push(`Send Digital Asset Contract ${assetAddress} from ${accountAddress} to ${assetRecipient.value} `);
+
     //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;
   }
@@ -207,6 +211,11 @@
     if (bytecode === '0x') {
       await mintissuedassets(assetRecipient.value, assetAddress);
     }
+
+    //Guardamos el log 
+    let transactionlog = [];
+    transactionlog.push(`Send Digital Asset Contract ${assetAddress} from ${accountAddress} to ${assetRecipient.value} `);
+    await updatelog(accountAddress, transactionlog);
 
     //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;

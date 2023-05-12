@@ -94,6 +94,11 @@
             const receipt = await lsp8IdentifiableDigitalAssetContract.methods.mint(to, paddedTokenId, force, data).send({ from: account });
             mintEvents.value.push({ stepName: 'Acuñar el NFT', functionName: 'acuñar', receipt });
 
+            //Guardamos el log 
+            let transactionlog = [];
+            transactionlog.push(`Mint ${amount} Digital Asset Contract ${props.address} from ${account}`);
+            await updatelog(accountAddress, transactionlog);
+
         }
         catch (err) {
             error.value = err.message;

@@ -146,7 +146,7 @@
                 });
 
                 //Create the smart contract
-                const profileDeploymentEvents = [];
+                const transactionlog = [];
                 const myContracts = await lspFactory.UniversalProfile.deploy({
                     controllerAddresses: [account], 
                     lsp3Profile: uploadResult
@@ -155,7 +155,7 @@
                     onDeployEvents: {
                         next: (deploymentEvent) => {
                             //console.log(deploymentEvent);
-                            //deployEvents.value.push(deploymentEvent);
+                            transactionlog.value.push(deploymentEvent);
                         },
                         error: (error) => {
                             console.log("Error...");
@@ -168,6 +168,10 @@
                             
                             //Actualizamos la direccion del universal profile
                             await updateprofile(account, contracts.LSP0ERC725Account?.address);
+
+                            //Actualizamos el log de transacciones
+                            await updatelog(account, transactionlog);
+
                             isSuccess.value = true;
                         },
                     }
