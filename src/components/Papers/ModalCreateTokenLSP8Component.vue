@@ -118,29 +118,33 @@
                 },
                 onDeployEvents: {
                     next: (deploymentEvent) => {
-                        console.log(deploymentEvent);
-                        transactionlog.value.push(deploymentEvent);
+                        transactionlog.push(JSON.stringify(deploymentEvent));
 
                         //Reportamos al usuario cuando se haya culminado cada fase
                         if (deploymentEvent.status === 'COMPLETE') {
                             deployEvents.value.push(deploymentEvent);
                         }
                     },
-                    error: (error) => {
-                        console.debug("Error");
+                    error: async (error) => {
                         //Reportamos al usuario cuando se haya producido un error
                         deploying.value = false;
                         error.value = error.message;
-                        console.error(error);
+
+                        transactionlog.push(JSON.stringify(err.message));
+                        await updatelog(account, transactionlog);
+
+                        console.log("Error in onDeployEvents...", error.value);
+                        console.log("Error message in onDeployEvents...", error.value);
                     },
                     complete: async (contracts) => {
-                        console.debug("complete");
+                        //Actualizamos el log de transacciones
+                        console.log(transactionlog);
+                        await updatelog(account, transactionlog);
+
                         //Reportamos al usuario cuando se haya culminado el proceso
                         console.log('Deployment Complete');
-                        console.log(contracts.LSP8IdentifiableDigitalAsset);
+                        console.log("Token:", contracts.LSP8IdentifiableDigitalAsset);
 
-                        //Actualizamos el log de transacciones
-                        await updatelog(account, transactionlog);
                     },
                 },
             });

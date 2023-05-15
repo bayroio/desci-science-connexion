@@ -14,7 +14,7 @@
     import LSP7Mintable_0_5_0 from '../../contracts/LSP7Mintable_0_5_0.json';
     import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../../constants';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
-    import { addissuedassets, getissuedassets } from '../../services.js';
+    import { addissuedassets, getissuedassets, updatelog } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -41,7 +41,7 @@
     //Función que crea el token
     async function onSubmit(e) {
         console.log("Entrando a onsubmit...");
-        
+                
         //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
         try {
             isWrongNetwork.value = await isLuksoNetwork();
@@ -121,31 +121,34 @@
                 },
                 onDeployEvents: {
                     next: (deploymentEvent) => {
-                        console.log(deploymentEvent);
-                        transactionlog.value.push(deploymentEvent);
+                        transactionlog.push(JSON.stringify(deploymentEvent));
 
                         //Reportamos al usuario cuando se haya culminado cada fase
                         if (deploymentEvent.status === 'COMPLETE') {
                             deployEvents.value.push(deploymentEvent);
                         }
                     },
-                    error: (err) => {
+                    error: async (err) => {
                         //Reportamos al usuario cuando se haya producido un error
                         deploying.value = false;
                         error.value = err.message;
+
+                        transactionlog.push(JSON.stringify(err.message));
+                        await updatelog(account, transactionlog);
+
                         console.log("Error in onDeployEvents...", error.value);
                         console.log("Error message in onDeployEvents...", error.value);
                     },
                     complete: async (contracts) => {
+                        //Actualizamos el log de transacciones
+                        console.log(transactionlog);
+                        await updatelog(account, transactionlog);
+
                         //Reportamos al usuario cuando se haya culminado el proceso
                         console.log('Deployment Complete');
                         console.log("Token address", contracts.LSP7DigitalAsset.address);
                         console.log("Token receipt", contracts.LSP7DigitalAsset.receipt);
                         console.log(contracts.LSP7DigitalAsset);
-
-                        //Actualizamos el log de transacciones
-                        await updatelog(account, transactionlog);
-
                     },
                 },
             });

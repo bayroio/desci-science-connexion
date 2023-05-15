@@ -16,6 +16,7 @@
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
     import { isContractAddressInBloom } from 'web3-utils';
     import { mintissuedassets } from '@/services';
+    import { updatelog } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -96,8 +97,10 @@
 
             //Guardamos el log 
             let transactionlog = [];
-            transactionlog.push(`Mint ${amount} Digital Asset Contract ${props.address} from ${account}`);
-            await updatelog(accountAddress, transactionlog);
+            transactionlog.push(JSON.stringify(`Mint ${amount} Digital Asset Contract ${props.address} from ${account}`));
+            console.log(transactionlog);
+            await updatelog(account, transactionlog);
+            console.log('1');
 
         }
         catch (err) {

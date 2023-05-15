@@ -10,7 +10,6 @@ export async function startcontainer() {
         const storageaccount = process.env.VUE_APP_storageaccount;
         const accountKey = process.env.VUE_APP_accountKey;
         const containerName = process.env.VUE_APP_containerName;
-        console.log (storageaccount);
 
         //Creamos las variables para crear el sas
         const end = new Date(new Date().getTime() + (30 * 1000));
@@ -302,12 +301,12 @@ export async function updatelog(wallet, transactionlog){
         const blobName = `${wallet}_log.txt`;
         const blobClient = containerClient.getBlobClient(blobName);
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
-      
+
         //Leemos el archivo
         const downloadBlockBlobResponse = await blobClient.download();
         const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
         const metadata = JSON.parse(downloaded);
-        
+     
         //Actualizamos la informacion
         for (let i=0; i < transactionlog.length; i++){
             metadata.log.push(transactionlog[i]);

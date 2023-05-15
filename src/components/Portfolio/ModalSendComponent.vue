@@ -13,7 +13,7 @@
   import LSP8IdentifiableDigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP8IdentifiableDigitalAsset.json';
   import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
   import { CHAIN_IDS } from '../../constants';
-  import { removereceivedassets, mintissuedassets } from '../../services.js';
+  import { removereceivedassets, mintissuedassets, updatelog } from '../../services.js';
 
   //Funciones utilizadas para el cierre del modal
   const emit = defineEmits(['close', 'tokens-sent']);
@@ -186,6 +186,9 @@
     //Guardamos el log 
     let transactionlog = [];
     transactionlog.push(`Send Digital Asset Contract ${assetAddress} from ${accountAddress} to ${assetRecipient.value} `);
+    await updatelog(accountAddress, transactionlog);
+
+    console.log('123456789');
 
     //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;
