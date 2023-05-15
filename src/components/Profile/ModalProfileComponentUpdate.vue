@@ -342,7 +342,7 @@
 
                         <div class="item-flex">
                             <span><strong>Fondo del perfil</strong></span><br/>
-                            <input type="file" id="backgroundimage" accept="image/*" required />
+                            <input type="file" id="backgroundimage" accept="image/*" />
                         </div>
                     </div>
 

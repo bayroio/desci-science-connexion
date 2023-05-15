@@ -24,7 +24,6 @@
     for (let i=0; i<tran.length; i++){
       //Get the text
       let text = JSON.parse(tran[i]);
-      console.log(text);
       transactions.value.push({
         number: i+1,
         type: text.type,
