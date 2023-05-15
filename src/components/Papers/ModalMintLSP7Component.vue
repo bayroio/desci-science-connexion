@@ -94,10 +94,17 @@
 
             //Guardamos el log 
             let transactionlog = [];
-            transactionlog.push(JSON.stringify(`Mint ${amount} Digital Asset Contract ${props.address} from ${account}`));
-            console.log(transactionlog);
+            transactionlog.push(JSON.stringify({
+                type: 'TRANSACTION',
+                contractName: 'MintDigitalAsset',
+                functionName: 'setData',
+                status: 'COMPLETE',
+                receipt: {
+                    from: props.address,
+                    to: account,
+                }
+            }));
             await updatelog(account, transactionlog);
-            console.log('1');
 
             //Culminamos el proceso de acuñado
             isSuccess.value = true;

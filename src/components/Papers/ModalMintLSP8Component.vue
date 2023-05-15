@@ -97,11 +97,18 @@
 
             //Guardamos el log 
             let transactionlog = [];
-            transactionlog.push(JSON.stringify(`Mint ${amount} Digital Asset Contract ${props.address} from ${account}`));
+            transactionlog.push(JSON.stringify({
+                type: 'TRANSACTION',
+                contractName: 'MintDigitalAsset',
+                functionName: 'setData',
+                status: 'COMPLETE',
+                receipt: {
+                    from: props.address,
+                    to: account,
+                }
+            }));
             console.log(transactionlog);
             await updatelog(account, transactionlog);
-            console.log('1');
-
         }
         catch (err) {
             error.value = err.message;

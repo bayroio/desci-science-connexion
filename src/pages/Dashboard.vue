@@ -9,7 +9,8 @@
   import ProfileComponent from '../components/Profile/ProfileComponent.vue';                //Componente que incluye la información del Perfil//
   import PapersComponent from '../components/Papers/PapersComponent.vue';                   //Componente que incluye la Tokenización de Papers//
   import PortfolioComponent from '../components/Portfolio/PortfolioComponent.vue';          //Componente que incluye el portafolio del Usuario//
-  import SearchComponent from '../components/Search/SearchComponent.vue';                   //Componente que incluye la busqueda de información//  
+  import Transactions from '../components/Transactions/Transactions.vue';                   //Componente que incluye las transacciones de información//  
+  import SearchComponent from '../components/Search/SearchComponent.vue';                   //Componente que incluye la busqueda de información//    
 </script>
 
 <style scoped>
@@ -49,10 +50,19 @@
         </div>
       </div>
 
-      <!-- Tab de Busqueda -->
+      <!-- Tab de Transacciones -->
       <div class="tabby-tab">
         <input type="radio" id="tab-4" name="tabby-tabs">
-        <label for="tab-4">Búsqueda</label>
+        <label for="tab-4">Transacciones</label>
+        <div class="tabby-content">
+          <Transactions style="margin-top: 60px" />
+        </div>
+      </div>
+
+      <!-- Tab de Busqueda -->
+      <div class="tabby-tab">
+        <input type="radio" id="tab-5" name="tabby-tabs">
+        <label for="tab-5">Búsqueda</label>
         <div class="tabby-content">
           <SearchComponent style="margin-top: 60px" />
         </div>

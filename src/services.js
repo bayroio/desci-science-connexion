@@ -320,6 +320,27 @@ export async function updatelog(wallet, transactionlog){
     }
 }
 
+export async function downloadlog(wallet){
+    try 
+    {
+        await startcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}_log.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+
+        return metadata.log;
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
 
 //Funcion que lee un archivo
 async function blobToString(blob) {

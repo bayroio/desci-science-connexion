@@ -185,10 +185,17 @@
 
     //Guardamos el log 
     let transactionlog = [];
-    transactionlog.push(`Send Digital Asset Contract ${assetAddress} from ${accountAddress} to ${assetRecipient.value} `);
-    await updatelog(accountAddress, transactionlog);
-
-    console.log('123456789');
+    transactionlog.push(JSON.stringify({
+        type: 'TRANSACTION',
+        contractName: 'SendDigitalAsset',
+        functionName: 'setData',
+        status: 'COMPLETE',
+        receipt: {
+            from: accountAddress,
+            to: assetRecipient.value,
+        }
+    }));
+    await updatelog(account, transactionlog);
 
     //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;
@@ -217,8 +224,18 @@
 
     //Guardamos el log 
     let transactionlog = [];
-    transactionlog.push(`Send Digital Asset Contract ${assetAddress} from ${accountAddress} to ${assetRecipient.value} `);
-    await updatelog(accountAddress, transactionlog);
+    transactionlog.value.push(JSON.stringify({
+        type: 'TRANSACTION',
+        contractName: 'SendDigitalAsset',
+        functionName: 'setData',
+        status: 'Complete',
+        receipt: {
+            from: accountAddress,
+            to: assetRecipient.value,
+        }
+    }));
+    console.log(transactionlog);
+    await updatelog(account, transactionlog);
 
     //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;
