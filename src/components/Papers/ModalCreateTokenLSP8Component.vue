@@ -100,6 +100,7 @@
 
         //Procedemos a crear el token 
         let contracts;
+        const transactionlog = [];
         try {
             //Establecemos los datos del token
             contracts = await factory.LSP8IdentifiableDigitalAsset.deploy(
@@ -117,25 +118,33 @@
                 },
                 onDeployEvents: {
                     next: (deploymentEvent) => {
-                        console.log(deploymentEvent);
+                        transactionlog.push(JSON.stringify(deploymentEvent));
 
                         //Reportamos al usuario cuando se haya culminado cada fase
                         if (deploymentEvent.status === 'COMPLETE') {
                             deployEvents.value.push(deploymentEvent);
                         }
                     },
-                    error: (error) => {
-                        console.debug("Error");
+                    error: async (error) => {
                         //Reportamos al usuario cuando se haya producido un error
                         deploying.value = false;
                         error.value = error.message;
-                        console.error(error);
+
+                        transactionlog.push(JSON.stringify(err.message));
+                        await updatelog(account, transactionlog);
+
+                        console.log("Error in onDeployEvents...", error.value);
+                        console.log("Error message in onDeployEvents...", error.value);
                     },
-                    complete: (contracts) => {
-                        console.debug("complete");
+                    complete: async (contracts) => {
+                        //Actualizamos el log de transacciones
+                        console.log(transactionlog);
+                        await updatelog(account, transactionlog);
+
                         //Reportamos al usuario cuando se haya culminado el proceso
                         console.log('Deployment Complete');
-                        console.log(contracts.LSP8IdentifiableDigitalAsset);
+                        console.log("Token:", contracts.LSP8IdentifiableDigitalAsset);
+
                     },
                 },
             });
@@ -242,7 +251,7 @@
             <h6 style="margin-top: -25px;">basandote en: <a href="https://docs.lukso.tech/standards/nft-2.0/LSP8-Identifiable-Digital-Asset" target="_blank">NFT 2.0</a></h6>
 
             <br />
-            <div v-if="isEOA" class="warning">Token NFT 2.0 configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
+            <!-- <div v-if="isEOA" class="warning">Token NFT 2.0 configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div> -->
             <p v-if="isWrongNetwork" class="warning">
                 Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este token.
             </p>

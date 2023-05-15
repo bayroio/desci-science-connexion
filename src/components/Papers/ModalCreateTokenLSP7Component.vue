@@ -14,7 +14,7 @@
     import LSP7Mintable_0_5_0 from '../../contracts/LSP7Mintable_0_5_0.json';
     import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../../constants';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
-    import { addissuedassets, getissuedassets } from '../../services.js';
+    import { addissuedassets, getissuedassets, updatelog } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -41,7 +41,7 @@
     //Función que crea el token
     async function onSubmit(e) {
         console.log("Entrando a onsubmit...");
-        
+                
         //Validamos si se encuentra activa la red de lukso, si no está activa, mostramos el error 
         try {
             isWrongNetwork.value = await isLuksoNetwork();
@@ -102,6 +102,7 @@
 
         //Procedemos a crear el token 
         let contracts;
+        const transactionlog = [];
         try {
             //Establecemos los datos del token
             contracts = await factory.LSP7DigitalAsset.deploy(
@@ -120,21 +121,29 @@
                 },
                 onDeployEvents: {
                     next: (deploymentEvent) => {
-                        console.log(deploymentEvent);
+                        transactionlog.push(JSON.stringify(deploymentEvent));
 
                         //Reportamos al usuario cuando se haya culminado cada fase
                         if (deploymentEvent.status === 'COMPLETE') {
                             deployEvents.value.push(deploymentEvent);
                         }
                     },
-                    error: (err) => {
+                    error: async (err) => {
                         //Reportamos al usuario cuando se haya producido un error
                         deploying.value = false;
                         error.value = err.message;
+
+                        transactionlog.push(JSON.stringify(err.message));
+                        await updatelog(account, transactionlog);
+
                         console.log("Error in onDeployEvents...", error.value);
                         console.log("Error message in onDeployEvents...", error.value);
                     },
-                    complete: (contracts) => {
+                    complete: async (contracts) => {
+                        //Actualizamos el log de transacciones
+                        console.log(transactionlog);
+                        await updatelog(account, transactionlog);
+
                         //Reportamos al usuario cuando se haya culminado el proceso
                         console.log('Deployment Complete');
                         console.log("Token address", contracts.LSP7DigitalAsset.address);
@@ -252,7 +261,7 @@
             <h6 style="margin-top: -25px;">basandote en: <a href="https://docs.lukso.tech/standards/nft-2.0/LSP7-Identifiable-Digital-Asset" target="_blank">NFT </a></h6>
 
             <br />
-            <div v-if="isEOA" class="warning">Token NFT configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div>
+            <!-- <div v-if="isEOA" class="warning">Token NFT configurado y puesto en blockchain de forma correcta, pero debido al uso de Metamask, el token solo puede ser resguardado en el almacenamiento local del browser.</div> -->
             <p v-if="isWrongNetwork" class="warning">
                 Por favor cambia tu red a LUKSO <a style="cursor: pointer" @click="addLuksoL14Testnet()">L14</a> o <a style="cursor: pointer" @click="addLuksoL16Testnet()">L16 </a>para crear este token.
             </p>

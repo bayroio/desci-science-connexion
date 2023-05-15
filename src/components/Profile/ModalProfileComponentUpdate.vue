@@ -14,7 +14,7 @@
     import _ from 'underscore';
     import { IPFS_GATEWAY_BASE_URL, CHAIN_IDS } from '../../constants';
     import { isLuksoNetwork } from '../../../network';
-    import { updateprofile, getprofile } from '../../services.js';
+    import { updateprofile, getprofile, updatelog } from '../../services.js';
 
     //Definimos las variables
     const tokenUsername = ref('');                      //Variable de formulario para el username//
@@ -146,7 +146,7 @@
                 });
 
                 //Create the smart contract
-                const profileDeploymentEvents = [];
+                const transactionlog = [];
                 const myContracts = await lspFactory.UniversalProfile.deploy({
                     controllerAddresses: [account], 
                     lsp3Profile: uploadResult
@@ -155,9 +155,12 @@
                     onDeployEvents: {
                         next: (deploymentEvent) => {
                             //console.log(deploymentEvent);
-                            //deployEvents.value.push(deploymentEvent);
+                            transactionlog.push(deploymentEvent);
                         },
-                        error: (error) => {
+                        error: async (error) => {
+                            //Actualizamos el log de transacciones
+                            await updatelog(account, transactionlog);
+
                             console.log("Error...");
                             deploying.value = false;
                         },
@@ -165,9 +168,12 @@
                             // console.log('Universal Profile deployment completed');
                             // console.log("Mi UP Address", contracts.LSP0ERC725Account?.address);
                             // console.log(contracts);
+                            //Actualizamos el log de transacciones
+                            await updatelog(account, transactionlog);
                             
                             //Actualizamos la direccion del universal profile
                             await updateprofile(account, contracts.LSP0ERC725Account?.address);
+
                             isSuccess.value = true;
                         },
                     }
@@ -336,7 +342,7 @@
 
                         <div class="item-flex">
                             <span><strong>Fondo del perfil</strong></span><br/>
-                            <input type="file" id="backgroundimage" accept="image/*" required />
+                            <input type="file" id="backgroundimage" accept="image/*" />
                         </div>
                     </div>
 

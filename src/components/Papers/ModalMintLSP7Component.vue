@@ -13,6 +13,7 @@
     import { BLOCKCHAIN_EXPLORER_BASE_URL } from '../../constants';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
     import { mintissuedassets } from '@/services';
+    import { updatelog } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -76,7 +77,6 @@
         isMinterEOA.value = true;
         console.log(`Acuñando ${mintAmount.value} nuevos tokens.`);
 
-
         try {
             //Cambiamos el estatus del proceso
             isLoading.value = true;
@@ -91,6 +91,20 @@
             //Acuñamos el token y guardamos el hash de resultado
             const receipt = await lsp7DigitalAssetContract.methods.mint(to, amount, force, data).send({ from: account });
             txHash.value = receipt.transactionHash;
+
+            //Guardamos el log 
+            let transactionlog = [];
+            transactionlog.push(JSON.stringify({
+                type: 'TRANSACTION',
+                contractName: 'MintDigitalAsset',
+                functionName: 'setData',
+                status: 'COMPLETE',
+                receipt: {
+                    from: props.address,
+                    to: account,
+                }
+            }));
+            await updatelog(account, transactionlog);
 
             //Culminamos el proceso de acuñado
             isSuccess.value = true;

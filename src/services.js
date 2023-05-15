@@ -12,7 +12,7 @@ export async function startcontainer() {
         const containerName = process.env.VUE_APP_containerName;
 
         //Creamos las variables para crear el sas
-        const end = new Date(new Date().getTime() + (30 * 60 * 1000));
+        const end = new Date(new Date().getTime() + (30 * 1000));
         const signedpermissions = 'rwdlac';
         const signedservice = 'b';
         const signedresourcetype = 'sco';
@@ -105,6 +105,27 @@ export async function addprofile(wallet) {
             //Se ha creado el registro
             //console.log("Registro Creado");
         }
+
+
+        
+        //Definimos el archivo del log para el usuario registrado
+        const blobNamelog = `${wallet}_log.txt`;
+        const blockBlobClientLog = containerClient.getBlockBlobClient(blobNamelog);
+
+        //Validamos si hay un registro para el usuario
+        let flagblockBlobClientLog = await blockBlobClientLog.exists()
+        if (!flagblockBlobClientLog){
+            //No existe registro, creamos el objeto
+            let logmetadata = {};
+            logmetadata.log = [];
+
+            //Guardamos los valores en el storage
+            const uploadBlobResponseLog = await blockBlobClientLog.upload(JSON.stringify(logmetadata), JSON.stringify(logmetadata).length);
+            
+            //Se ha creado el registro
+            //console.log("Registro Creado");
+        }
+
     }
     catch (err) {
         console.log(`Error: ${err.message}`);
@@ -265,6 +286,56 @@ export async function removereceivedassets(wallet, address_assets) {
         //Guardamos los valores en el storage
         const uploadBlobResponse = await blockBlobClient.upload(JSON.stringify(metadata), JSON.stringify(metadata).length);
 
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
+
+export async function updatelog(wallet, transactionlog){
+    try 
+    {
+        await startcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}_log.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+     
+        //Actualizamos la informacion
+        for (let i=0; i < transactionlog.length; i++){
+            metadata.log.push(transactionlog[i]);
+        }
+
+        //Guardamos los valores en el storage
+        const uploadBlobResponse = await blockBlobClient.upload(JSON.stringify(metadata), JSON.stringify(metadata).length);
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
+
+export async function downloadlog(wallet){
+    try 
+    {
+        await startcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}_log.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+
+        return metadata.log;
     }
     catch (err) {
         console.log(`Error: ${err.message}`);

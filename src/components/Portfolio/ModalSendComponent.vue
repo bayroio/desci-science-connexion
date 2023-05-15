@@ -13,7 +13,7 @@
   import LSP8IdentifiableDigitalAsset from '@lukso/lsp-smart-contracts/artifacts/LSP8IdentifiableDigitalAsset.json';
   import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
   import { CHAIN_IDS } from '../../constants';
-  import { removereceivedassets, mintissuedassets } from '../../services.js';
+  import { removereceivedassets, mintissuedassets, updatelog } from '../../services.js';
 
   //Funciones utilizadas para el cierre del modal
   const emit = defineEmits(['close', 'tokens-sent']);
@@ -183,6 +183,20 @@
       await mintissuedassets(assetRecipient.value, assetAddress);
     }
 
+    //Guardamos el log 
+    let transactionlog = [];
+    transactionlog.push(JSON.stringify({
+        type: 'TRANSACTION',
+        contractName: 'SendDigitalAsset',
+        functionName: 'setData',
+        status: 'COMPLETE',
+        receipt: {
+            from: accountAddress,
+            to: assetRecipient.value,
+        }
+    }));
+    await updatelog(account, transactionlog);
+
     //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;
   }
@@ -207,6 +221,21 @@
     if (bytecode === '0x') {
       await mintissuedassets(assetRecipient.value, assetAddress);
     }
+
+    //Guardamos el log 
+    let transactionlog = [];
+    transactionlog.value.push(JSON.stringify({
+        type: 'TRANSACTION',
+        contractName: 'SendDigitalAsset',
+        functionName: 'setData',
+        status: 'Complete',
+        receipt: {
+            from: accountAddress,
+            to: assetRecipient.value,
+        }
+    }));
+    console.log(transactionlog);
+    await updatelog(account, transactionlog);
 
     //Guardamos el hash de la transacción
     txHash.value = receipt.transactionHash;

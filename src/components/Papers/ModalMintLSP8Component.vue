@@ -16,6 +16,7 @@
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
     import { isContractAddressInBloom } from 'web3-utils';
     import { mintissuedassets } from '@/services';
+    import { updatelog } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -94,6 +95,20 @@
             const receipt = await lsp8IdentifiableDigitalAssetContract.methods.mint(to, paddedTokenId, force, data).send({ from: account });
             mintEvents.value.push({ stepName: 'Acuñar el NFT', functionName: 'acuñar', receipt });
 
+            //Guardamos el log 
+            let transactionlog = [];
+            transactionlog.push(JSON.stringify({
+                type: 'TRANSACTION',
+                contractName: 'MintDigitalAsset',
+                functionName: 'setData',
+                status: 'COMPLETE',
+                receipt: {
+                    from: props.address,
+                    to: account,
+                }
+            }));
+            console.log(transactionlog);
+            await updatelog(account, transactionlog);
         }
         catch (err) {
             error.value = err.message;
