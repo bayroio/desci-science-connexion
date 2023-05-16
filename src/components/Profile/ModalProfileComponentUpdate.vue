@@ -155,10 +155,11 @@
                     onDeployEvents: {
                         next: (deploymentEvent) => {
                             //console.log(deploymentEvent);
-                            transactionlog.push(deploymentEvent);
+                            transactionlog.push(JSON.stringify(deploymentEvent));
                         },
                         error: async (error) => {
                             //Actualizamos el log de transacciones
+                            transactionlog.push(JSON.stringify(err.message));
                             await updatelog(account, transactionlog);
 
                             console.log("Error...");
