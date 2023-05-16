@@ -21,9 +21,16 @@
 
     // Obtenemos las transacciones
     let tran = await downloadlog(account);
+    let text;
     for (let i=0; i<tran.length; i++){
       //Get the text
-      let text = JSON.parse(tran[i]);
+      try{
+        text = JSON.parse(tran[i]);
+      }
+      catch(ex){
+        text = tran[i];
+      }
+      
       transactions.value.push({
         number: i+1,
         type: text.type,

@@ -156,11 +156,11 @@
               <span class="username"  v-for="(item, index) in profileData.tags" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
             </div>
 
-            <br/>
+            <!-- <br/>
             <span><strong>Links: </strong></span><br/>
             <div v-if="profileData.links">
               <span class="username"  v-for="(item, index) in profileData.links" v-bind:key="index"> "{{ item }}"&nbsp;&nbsp;&nbsp;&nbsp;</span><br/>
-            </div>
+            </div> -->
                       
             <br/>
             <span><strong>Descripción: </strong></span><br/>
