@@ -92,9 +92,7 @@
       <h1 class="title"><strong>Bienvenido</strong></h1>
       
       <br/>
-      <p>Espacio para dar forma a nuestro futuro estilo de vida digital, y realmente lo que creamos. Un espacio para innovar, inventar e
-         interactuar de una manera realmente nueva. Una fundación para la confianza, el valor y el compromiso - construido en la
-         universalización de los Perfiles. </p>
+      <p>Tokenización de la propiedad intelectual en un IP-NFT.</p>
       <br/><br/>
 
       <button @click="login">Login</button>
@@ -103,7 +101,9 @@
     <!-- Nota de extensiones registradas -->
     <br/><br/><br/>
     <p class="note" v-if="useOnlyOneExtension">
-      Si tiene instalado MetaMask y Universal Profile Browser Extension, por favor deshabilite uno de ellos, preferiblemente Metamask! Si necesita ayuda, consulte estás guías, para
+      Si no tiene instalado Metamask, por favor hagalo desde  
+      <a href="https://metamask.io/" target="_blank">aquí</a>.
+      Si necesita ayuda, consulte estás guías, para
       <a href="https://support.google.com/chrome_webstore/answer/2664769?hl=en" target="_blank">Chrome</a>
       y para
       <a href="https://support.mozilla.org/en-US/kb/disable-or-remove-add-ons#w_disabling-and-removing-extensions" target="_blank">Firefox</a>.
