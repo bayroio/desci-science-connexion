@@ -10,7 +10,7 @@
   import LSP3UniversalProfileMetaDataSchema from '@erc725/erc725.js/schemas/LSP3UniversalProfileMetadata.json';
   import ERC725js from '@erc725/erc725.js';
   import { defineProps, onMounted, ref } from 'vue';
-  import { getprofile, validatewallet } from '../../services.js';
+  import { getprofile, validatewallet, validateasset, indexissuedasset, getwallet } from '../../services.js';
 
   const props = defineProps({ textSearch: String });              //Variable que recibe el texto de búsqueda //
   const ProfileName = ref('');                                    //Variable que guarda el Nombre del perfil//
@@ -19,6 +19,7 @@
   const ProfileAddress = ref('');                                 //Variable que guarda la direccion del perfil//
   const ProfileImage = ref('');                                   //Variable que guarda la ubicacion de las imagenes del perfil//
   const Profile = ref(false);                                     //Variable que determina si se muestra el perfil//
+  const ProfileNoFound = ref(false);                              //Variable que determina si se muestra el mensaje de no Encontrado//
 
   //Acciones que se realizan al cargar la página//
   onMounted(async () => {
@@ -84,7 +85,74 @@
         }
 
         Profile.value = true;
+      }
+      else{
+        // No es un wallet, buscamos en los assets
+        let flagasset= await validateasset(props.textSearch);
+        console.log(flagasset);
+        if(flagasset){
 
+          //Obtenemos el address del wallet
+          let address_wallet = await getwallet(props.textSearch);
+
+          //Obtenemos los datos del wallet
+          let account = await getprofile(address_wallet);
+          if ((account != null) && (account != "")) {
+
+            //Obtenemos los datos del perfil, los parámetros son el esquema, la cuenta, el provider de la extensión y la ruta de IPFS definida
+            //en el archivo de constants
+            const profile = new ERC725js(LSP3UniversalProfileMetaDataSchema, account, window.web3.currentProvider, {
+              ipfsGateway: IPFS_GATEWAY_BASE_URL,
+            });
+
+            //Una vez que se ha cargado el perfil, filtramos solo la sección del perfil (LSP3Profile)
+            let metaData;
+            try {
+              metaData = await profile.fetchData('LSP3Profile');
+            }
+            catch (e) {
+              console.log(e);
+              let profile_empty = false;
+              return;
+            }
+
+            //Obtenemos la informacion del perfil
+            ProfileName.value = metaData.value.LSP3Profile.name.substring(0,15);
+            ProfileDescription.value = metaData.value.LSP3Profile.description.substring(0,16) + "...";
+            ProfileAddressLink.value = URL_PROFILE_ASSETS + props.textSearch;
+            ProfileAddress.value = "#" + props.textSearch.substring(2,6);
+
+            //Obtenemos la imagen del perfil
+            let height = 10000;
+            let path = URL_PROFILE_NO_IMAGE;
+            for(let i=0; i < metaData.value.LSP3Profile.profileImage.length; i++){
+              if ((height > metaData.value.LSP3Profile.profileImage[i].height) && (metaData.value.LSP3Profile.profileImage[i].height > 200)){
+                if (metaData.value.LSP3Profile.profileImage[i].url != ""){
+                  path = metaData.value.LSP3Profile.profileImage[i].url;
+                  height = metaData.value.LSP3Profile.profileImage[i].height;
+                }
+              }
+            }
+            ProfileImage.value = path.replace('ipfs://', IPFS_GATEWAY_BASE_URL);
+          }
+          else{
+            //Colocamos valores vacios
+            ProfileName.value = "";
+            ProfileDescription.value = "";
+            ProfileAddressLink.value = URL_PROFILE_ASSETS + props.textSearch;
+            ProfileAddress.value = "#" + props.textSearch.substring(2,6);
+
+            //Obtenemos la imagen del perfil
+            let height = 10000;
+            let path = URL_PROFILE_NO_IMAGE;
+            ProfileImage.value = path.replace('ipfs://', IPFS_GATEWAY_BASE_URL);
+          }
+
+          Profile.value = true;
+        }
+        else{
+          ProfileNoFound.value = true;
+        }
       }
     }
   });
@@ -116,6 +184,10 @@
         </div>
       </div>
     </div>    
+  </div>
+
+  <div v-if=(ProfileNoFound)>
+    <h4 class="center"><strong>No se encontraron datos</strong></h4>
   </div>
 </template>
 

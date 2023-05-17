@@ -11,8 +11,9 @@
   import { defineProps, onMounted, ref } from 'vue';
   import LSP12IssuedAssetsSchema from '@erc725/erc725.js/schemas/LSP12IssuedAssets.json';
   import ERC725js from '@erc725/erc725.js';
-  import { getissuedassets, validatewallet } from '../../services.js';
+  import { getissuedassets, validatewallet, validateasset } from '../../services.js';
   import PapersLoadComponent from './PapersLoadComponent.vue'
+import { compose } from 'underscore';
   
   const props = defineProps({ textSearch: String });                //Variable que recibe el texto de búsqueda //
   const addresses = ref([]);                                        //Variable para guardar la dirección del NFT creados//
@@ -37,13 +38,26 @@
 
         //Get the address
         addresses.value = await getissuedassets(props.textSearch);  
-
+        
         //set empty value
         if (addresses.value.length == 0){
           flagempty.value = true;
         }
 
         Assets.value = true;
+      }
+      else{
+        // No es un wallet, buscamos en los assets
+        let flagasset= await validateasset(props.textSearch);
+        if(flagasset){
+            
+            //Set the address
+            let obj = [];
+            obj.push(props.textSearch);
+            addresses.value = obj; 
+
+            Assets.value = true;
+        }
       }
     }
   });

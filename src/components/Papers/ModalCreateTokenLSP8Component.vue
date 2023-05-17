@@ -14,7 +14,7 @@
     import LSP8Mintable_0_5_0 from '../../contracts/LSP8Mintable_0_5_0.json';
     import { IPFS_GATEWAY_API_BASE_URL, IPFS_GATEWAY_BASE_URL, BLOCKCHAIN_EXPLORER_BASE_URL, CHAIN_IDS } from '../../constants';
     import { addLuksoL14Testnet, addLuksoL16Testnet, isLuksoNetwork } from '../../../network';
-    import { addissuedassets, getissuedassets } from '../../services.js';
+    import { addissuedassets, getissuedassets, indexissuedasset } from '../../services.js';
 
     //Funciones utilizadas para el cierre del modal
     const emit = defineEmits(['close', 'tokens-sent']);
@@ -202,6 +202,7 @@
             
             //Guardamos los assets de la cuenta
             await addissuedassets(accounts[0], LSP12IssuedAssets.value);  
+            await indexissuedasset(accounts[0], deployedLSP8IdentifiableDigitalAssetContract.address);  
 
             isEOA.value = true;
         }

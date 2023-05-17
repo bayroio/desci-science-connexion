@@ -4,12 +4,13 @@ import * as CryptoJS from 'crypto-js';
 let containerClient;
 
 
-export async function startcontainer() {
+export async function startcontainer(cont = 1) {
     try 
     {   
         const storageaccount = process.env.VUE_APP_storageaccount;
         const accountKey = process.env.VUE_APP_accountKey;
-        const containerName = process.env.VUE_APP_containerName;
+        const containerNameWallet = process.env.VUE_APP_containerNameWallet;
+        const containerNameAssets = process.env.VUE_APP_containerNameAssets;
 
         //Creamos las variables para crear el sas
         const end = new Date(new Date().getTime() + (30 * 1000));
@@ -38,9 +39,14 @@ export async function startcontainer() {
         
         // Creamos la conexion con azure
         const blobServiceClient = new BlobServiceClient(`https://${storageaccount}.blob.core.windows.net${sasToken}`);    
-  
+        
         //Definimos el container
-        containerClient = blobServiceClient.getContainerClient(containerName);
+        if (cont == 1){
+            containerClient = blobServiceClient.getContainerClient(containerNameWallet);  
+        }
+        else{
+            containerClient = blobServiceClient.getContainerClient(containerNameAssets);  
+        }
      
         //Validar si el container existe
         let flagcontainer = await containerClient.exists();
@@ -64,6 +70,25 @@ export async function validatewallet(wallet) {
 
         //Definimos el archivo a leer
         const blobName = `${wallet}.txt`;
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+        //Validamos si hay un registro para el usuario
+        let flagblockBlobClient = await blockBlobClient.exists()
+
+        return flagblockBlobClient;
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
+
+export async function validateasset(asset_address) {
+    try 
+    {
+        await startcontainer(2);
+
+        //Definimos el archivo a leer
+        const blobName = `${asset_address}.txt`;
         const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
         //Validamos si hay un registro para el usuario
@@ -123,8 +148,6 @@ export async function addprofile(wallet) {
             //Se ha creado el registro
             //console.log("Registro Creado");
         }
-
-
         
         //Definimos el archivo del log para el usuario registrado
         const blobNamelog = `${wallet}_log.txt`;
@@ -256,6 +279,51 @@ export async function mintissuedassets(wallet, address_assets) {
     }
 }
 
+export async function indexissuedasset(wallet, address_Assets){
+    
+    await startcontainer(2);
+
+    console.log(wallet);
+    console.log(address_Assets);
+    
+    //Insertamos el archivo de assets, definimos el archivo para el usuario registrado
+    const blobName = `${address_Assets}.txt`;
+    const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+    //Validamos si ya existe un indice
+    let flagblockBlobClient = await blockBlobClient.exists()
+    if (!flagblockBlobClient){
+        //No existe registro, creamos el objeto
+        let metadata = {}
+        metadata.wallet = wallet;
+
+        //Guardamos los valores en el storage
+        const uploadBlobResponse = await blockBlobClient.upload(JSON.stringify(metadata), JSON.stringify(metadata).length);        
+    }
+}
+
+export async function getwallet(address_wallet) {
+    try 
+    {
+        await startcontainer(2);
+
+        //Definimos el archivo a leer
+        const blobName = `${address_wallet}.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+
+        //Regresamos el valor de la direccion
+        return metadata.wallet;
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
 
 export async function getreceivedassets(wallet) {
     try 
