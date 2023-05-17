@@ -57,6 +57,24 @@ export async function startcontainer() {
     }
 }
 
+export async function validatewallet(wallet) {
+    try 
+    {
+        await startcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}.txt`;
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+        //Validamos si hay un registro para el usuario
+        let flagblockBlobClient = await blockBlobClient.exists()
+
+        return flagblockBlobClient;
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
 
 export async function getprofile(wallet) {
     try 
