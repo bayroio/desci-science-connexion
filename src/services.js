@@ -109,7 +109,6 @@ export async function getprofile(wallet) {
         //Definimos el archivo a leer
         const blobName = `${wallet}.txt`;
         const blobClient = containerClient.getBlobClient(blobName);
-        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
       
         //Leemos el archivo
         const downloadBlockBlobResponse = await blobClient.download();
