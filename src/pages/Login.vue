@@ -5,7 +5,7 @@
  -->
 
 <script>
-  import { getprofile } from '../services.js';
+  import { getprofile, getpermissions, updatepermissions } from '../services.js';
   import UniversalProfileContract from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json';
   const { utils } = require('ethers');
 
@@ -56,56 +56,78 @@
       async login() {
         //Obtenemos la cuenta con la que se está tratando de acceder 
         const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-
-        //Get the universal profile info
-        let address = await getprofile(utils.getAddress(accounts[0]));  
-        if (address == ""){
-          this.$router.push('/');
-          return;
-        }
-
-        const domain = window.location.host;
-        const origin = window.location.origin;
-        const LUKSO_L14_CHAIN_ID = '22';
-        const nonce = 'm97bdsjo'; // a randomized token, at least 8 alphanumeric characters
-        const date = new Date();
-        const issuedAt = date.toISOString();
-
-        const siweMessage = `${domain} wants you to sign in with your Ethereum account:
-                            ${accounts[0]}
-                            By logging in you agree to the terms and conditions.
-                            URI: ${origin}
-                            Version: 1
-                            Chain ID: ${LUKSO_L14_CHAIN_ID}
-                            Nonce: ${nonce}
-                            Issued At: ${issuedAt}
-                            Resources: ['https://terms.website.com']`;
-
-        //Si hay respuesta vamos a la pantalla de Logout
         if (accounts.length) {
-            //const signature = await window.web3.eth.sign(window.web3.utils.sha3(siweMessage), accounts[0]);
-            const msg = `0x${Buffer.from(siweMessage, 'utf8').toString('hex')}`;
-            const signature = await ethereum.request({
-                method: 'personal_sign',
-                params: [msg, accounts[0], 'Example password'],
-            });
 
-            const myUniversalProfileContract = new web3.eth.Contract(UniversalProfileContract.abi, address);
+          //Obtenemos la direccion del Perfil Universal
+          let address = await getprofile(utils.getAddress(accounts[0]));  
+          if (address == ""){
+            //No hay perfil universal mostramos la pantalla inicial
+            this.$router.push('/');
+            return;
+          }
 
-            const hashedMessage = web3.eth.accounts.hashMessage(siweMessage);
-            const MAGIC_VALUE = '0x1626ba7e'; // https://eips.ethereum.org/EIPS/eip-1271
+          //Si hay perfil universal, validamos si el usuario ya autorizo los permisos
+          let flagpermissions = await getpermissions(utils.getAddress(accounts[0]));  
+          if (flagpermissions == true){
+            //Ya se autorizaron los permisos, mostramos la pantalla inicial
+            this.$router.push('/');
+            return;
+          }
 
-            // if the signature is valid it should return the magic value 0x1626ba7e
-            const isValidSignature = await myUniversalProfileContract.methods.isValidSignature(hashedMessage, signature).call();        
-            if (isValidSignature === MAGIC_VALUE) {
-                this.$router.push('/');
-            } 
-            else {
-                // The EOA which signed the message has no SIGN permission over this UP.
-                console.log('😭 Log In failed');
-            }
+          console.log(flagpermissions);
+          //No se han autorizado los permisos, definimos las variables
+          const domain = window.location.host;
+          const origin = window.location.origin;
+          const LUKSO_L14_CHAIN_ID = '22';
+          const nonce = 'm97bdsjo'; // a randomized token, at least 8 alphanumeric characters
+          const date = new Date();
+          const issuedAt = date.toISOString();
+
+          //Procedemos a crear el mensaje
+          const siweMessage = `${domain} wants you to sign in with your Ethereum account:  ${accounts[0]}
+By logging in you agree to the terms and conditions.
+URI: ${origin}
+Version: 1
+Chain ID: ${LUKSO_L14_CHAIN_ID}
+Nonce: ${nonce}
+Issued At: ${issuedAt}
+Resources: ['https://terms.website.com']`;
+
+          try
+          {
+              //Mostramos el mensaje de permisos
+              const msg = `0x${Buffer.from(siweMessage, 'utf8').toString('hex')}`;
+              const signature = await ethereum.request({
+                  method: 'personal_sign',
+                  params: [msg, accounts[0], 'Example password'],
+              });
+
+              const myUniversalProfileContract = new web3.eth.Contract(UniversalProfileContract.abi, address);
+              const hashedMessage = web3.eth.accounts.hashMessage(siweMessage);
+              const MAGIC_VALUE = '0x1626ba7e'; // https://eips.ethereum.org/EIPS/eip-1271
+
+              //Validamos que el usuario que firma sea elmismo
+              const isValidSignature = await myUniversalProfileContract.methods.isValidSignature(hashedMessage, signature).call();        
+              if (isValidSignature === MAGIC_VALUE) {
+                  //El usuario acepto los terminos, guardamos que ha autorizado los cambios
+                  await updatepermissions(utils.getAddress(accounts[0]));
+              } 
+              else {
+                  // The EOA which signed the message has no SIGN permission over this UP.
+                  console.log('😭 Log In failed');
+              }
+          }
+          catch(ex)
+          {
+            //El usuario rechazo los permisos
+          }
+
+          //Enviamos a la pantalla principal 
+          this.$router.push('/');
         }
-        else this.error = 'No fue seleccionada ninguna cuenta!';
+        else {
+          this.error = 'No fue seleccionada ninguna cuenta!';
+        }
       },
     },
   };
