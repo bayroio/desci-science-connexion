@@ -101,6 +101,59 @@ export async function validateasset(asset_address) {
     }
 }
 
+export async function getpermissions(wallet) {
+    try 
+    {
+        await startcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+      
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+
+        if (metadata.permissions == null)
+            return false;
+
+        //Regresamos el valor
+        return metadata.permissions;
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
+
+export async function updatepermissions(wallet) {
+    try 
+    {
+        await startcontainer();
+
+        //Definimos el archivo a leer
+        const blobName = `${wallet}.txt`;
+        const blobClient = containerClient.getBlobClient(blobName);
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+      
+        //Leemos el archivo
+        const downloadBlockBlobResponse = await blobClient.download();
+        const downloaded = await blobToString(await downloadBlockBlobResponse.blobBody);
+        const metadata = JSON.parse(downloaded);
+
+        //Actualizamos los permisos
+        metadata.permissions = true;
+
+        //Guardamos el metadata
+        const uploadBlobResponse = await blockBlobClient.upload(JSON.stringify(metadata), JSON.stringify(metadata).length);
+
+    }
+    catch (err) {
+        console.log(`Error: ${err.message}`);
+    }
+}
+
+
 export async function getprofile(wallet) {
     try 
     {
@@ -137,6 +190,7 @@ export async function addprofile(wallet) {
         if (!flagblockBlobClient){
             //No existe registro, creamos el objeto
             let metadata = {}
+            metadata.permissions = false;
             metadata.profileaddress = "";
             metadata.issuedAssets = [];
             metadata.receivedAssets = [];
@@ -431,10 +485,10 @@ export async function downloadlog(wallet){
 async function blobToString(blob) {
     const fileReader = new FileReader();
     return new Promise((resolve, reject) => {
-      fileReader.onloadend = (ev) => {
+        fileReader.onloadend = (ev) => {
         resolve(ev.target.result);
-      };
-      fileReader.onerror = reject;
-      fileReader.readAsText(blob);
+        };
+        fileReader.onerror = reject;
+        fileReader.readAsText(blob);
     });
-  }
+}
