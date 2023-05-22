@@ -24,6 +24,9 @@
     const deploying = ref(false);                       //Bandera que determina si se ha comenzado con el proceso de actualización//
     const isSuccess = ref(false);                       //Bandera que determina si se ha completado el proceso de actualización//
     const deployEvents = ref([]);                       //Variable que guarda los eventos del proceso//
+    const ArrayImage = ref([]);                         //Variable que guarda los valores de las imagenes//
+    const ArrayBackground = ref([]);                    //Variable que guarda los valores de los fondos//
+
             
     export default {
         data(){
@@ -70,6 +73,23 @@
             tokenUsername.value = metaData.value.LSP3Profile.name;
             tokendescription.value = metaData.value.LSP3Profile.description;
             this.tags = metaData.value.LSP3Profile.tags;
+
+            console.log(metaData.value);
+
+            this.imagerequired = true;
+            if (metaData.value.LSP3Profile.profileImage.length > 0){
+                this.imagerequired = false;
+                for (let i=0; i<metaData.value.LSP3Profile.profileImage.length; i++){
+                    ArrayImage.value.push(metaData.value.LSP3Profile.profileImage[i]);
+                }
+            }
+
+            if (metaData.value.LSP3Profile.backgroundImage.length > 0){
+                for (let i=0; i<metaData.value.LSP3Profile.backgroundImage.length; i++){
+                    ArrayBackground.value.push(metaData.value.LSP3Profile.backgroundImage[i]);
+                }
+            }
+
         },
 
         //Declaraciones de funciones 
@@ -141,8 +161,8 @@
                     name: tokenUsername.value,
                     tags: this.tags,
                     description: tokendescription.value,
-                    profileImage: e.target.querySelector('input#profileimage').files[0],
-                    backgroundImage: e.target.querySelector('input#backgroundimage').files[0]
+                    profileImage: e.target.querySelector('input#profileimage').files[0] ?? ArrayImage.value,
+                    backgroundImage: e.target.querySelector('input#backgroundimage').files[0] ?? ArrayBackground.value
                 });
 
                 //Create the smart contract
@@ -338,7 +358,7 @@
                     <div class="formfields">
                         <div class="item-flex">
                             <span><strong>Imagen del perfil</strong></span><br/>
-                            <input type="file" id="profileimage" accept="image/*" required /><br/>
+                            <input type="file" id="profileimage" accept="image/*" :required="imagerequired ? true : false" /><br/>
                         </div>
 
                         <div class="item-flex">
