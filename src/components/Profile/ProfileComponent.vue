@@ -13,7 +13,7 @@
   import identicon from 'ethereum-blockies-base64';
   import { IPFS_GATEWAY_BASE_URL } from '../../constants';
   import ModalUpdate from './ModalProfileComponentUpdate.vue';
-  import { getprofile } from '../../services.js';
+  import { getprofile, getpermissions } from '../../services.js';
 
   //Definimos las variables que se utilizaran dentro de la página
   export default {
@@ -40,6 +40,13 @@
       let account = accounts[0]; 
       this.address = account;
       this.profileData.address = account;
+
+      //Validamos si el usuario ya autorizo los permisos
+      this.ShowButton = true;
+      let flagpermissions = await getpermissions(accounts[0]);  
+      if (flagpermissions == false){
+        this.ShowButton = false;
+      }
 
       //Obtenemos la imagen (default) de la cuenta autentificada
       this.profileData.identicon = identicon(account);
@@ -180,7 +187,7 @@
       </td>    
     </tr>
     <tr>
-      <td colspan="2" align="right">
+      <td colspan="2" align="right" v-if="ShowButton">
         <button class="button" @click="showModal=!showModal" style="width: 300px">Actualizar datos generales</button>
         <ModalUpdate @close="handleModalClose" v-if="showModal" />
       </td>

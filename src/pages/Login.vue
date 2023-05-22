@@ -5,7 +5,7 @@
  -->
 
 <script>
-  import { getprofile, getpermissions, updatepermissions } from '../services.js';
+  import { addprofile, getpermissions, updatepermissions } from '../services.js';
   import UniversalProfileContract from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json';
   const { utils } = require('ethers');
 
@@ -58,15 +58,10 @@
         const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
         if (accounts.length) {
 
-          //Obtenemos la direccion del Perfil Universal
-          let address = await getprofile(utils.getAddress(accounts[0]));  
-          if (address == ""){
-            //No hay perfil universal mostramos la pantalla inicial
-            this.$router.push('/');
-            return;
-          }
+          //Creamos el archivo de texto en caso de que no exista
+          await addprofile(utils.getAddress(accounts[0]));
 
-          //Si hay perfil universal, validamos si el usuario ya autorizo los permisos
+          //Validamos si el usuario ya autorizo los permisos
           let flagpermissions = await getpermissions(utils.getAddress(accounts[0]));  
           if (flagpermissions == true){
             //Ya se autorizaron los permisos, mostramos la pantalla inicial
@@ -74,7 +69,6 @@
             return;
           }
 
-          console.log(flagpermissions);
           //No se han autorizado los permisos, definimos las variables
           const domain = window.location.host;
           const origin = window.location.origin;
@@ -91,7 +85,7 @@ Version: 1
 Chain ID: ${LUKSO_L14_CHAIN_ID}
 Nonce: ${nonce}
 Issued At: ${issuedAt}
-Resources: ['https://terms.website.com']`;
+Resources: ['https://tec.mx/aviso-legal']`;
 
           try
           {
@@ -102,20 +96,11 @@ Resources: ['https://terms.website.com']`;
                   params: [msg, accounts[0], 'Example password'],
               });
 
-              const myUniversalProfileContract = new web3.eth.Contract(UniversalProfileContract.abi, address);
-              const hashedMessage = web3.eth.accounts.hashMessage(siweMessage);
-              const MAGIC_VALUE = '0x1626ba7e'; // https://eips.ethereum.org/EIPS/eip-1271
+              console.log(signature);
+              //El usuario acepto los terminos, guardamos que ha autorizado los cambios
+              await updatepermissions(utils.getAddress(accounts[0]));
 
-              //Validamos que el usuario que firma sea elmismo
-              const isValidSignature = await myUniversalProfileContract.methods.isValidSignature(hashedMessage, signature).call();        
-              if (isValidSignature === MAGIC_VALUE) {
-                  //El usuario acepto los terminos, guardamos que ha autorizado los cambios
-                  await updatepermissions(utils.getAddress(accounts[0]));
-              } 
-              else {
-                  // The EOA which signed the message has no SIGN permission over this UP.
-                  console.log('😭 Log In failed');
-              }
+              console.log('complete');
           }
           catch(ex)
           {
@@ -168,7 +153,8 @@ Resources: ['https://terms.website.com']`;
       <p>Tokenización de la propiedad intelectual en un IP-NFT.</p>
       <br/><br/>
 
-      <button @click="login">Login</button>
+      <button @click="login">Iniciar Sesión</button>
+      <p>Al iniciar la sesión, el usuario acepta los <a href="https://tec.mx/aviso-legal" target="_blank">términos y condiciones</a>.</p>
     </div>
 
     <!-- Nota de extensiones registradas -->
